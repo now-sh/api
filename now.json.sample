@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@now/node"
+    }
+  ],
+  "routes": [
+    {
+      "methods": [
+        "POST",
+        "OPTIONS",
+        "GET",
+        "PUT"
+      ],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "src": "^/(.*)$",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "^/images",
+      "dest": "/api/public"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "1919",
+    "HEADER_AGENT": "Awesome-Octocat-App",
+    "GITHUB_API_KEY": "myverylonggithubapikey",
+    "VERSION": "1.8.9",
+    "MONGO_URI": "",
+    "JWT_SECRET": ""
+  }
+}

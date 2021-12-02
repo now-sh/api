@@ -1,0 +1,13 @@
+const fetch = require("node-fetch");
+
+// const api = (resource) => {
+//   return fetch(`${endpoint}${resource}`, options)
+//     .then(
+//     response => response.json(),
+//     err => console.error('Error fetching', err)
+//  )
+//   .then(
+//   json => console.log('JSON', json),
+//   err => console.error('Error parsing', err)
+//   );
+//  }
