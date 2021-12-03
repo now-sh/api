@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 
 const app = express();
+app.set('view engine', 'ejs');
 
 const middlewares = require('./middleware/errorHandler');
 const handlers = require('./middleware/defaultHandler');
@@ -14,6 +15,7 @@ app.use(handlers.handlerRoute);
 
 app.use('/', require('./routes/defaultRoute'));
 app.use('/api', require('./routes/apiRoute'));
+app.use('/api/health', require('./routes/healthRoute'));
 app.use('/api/v1/auth', require('./routes/authRoute'));
 app.use('/api/v1/disease', require('./routes/diseaseRoute'));
 app.use('/api/v1/arcgis', require('./routes/arcgisRoute'));
