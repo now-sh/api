@@ -32,8 +32,9 @@
     "PORT": "1919",
     "HEADER_AGENT": "Awesome-Octocat-App",
     "GITHUB_API_KEY": "myverylonggithubapikey",
-    "VERSION": "1.8.9",
-    "MONGO_URI": "",
-    "JWT_SECRET": ""
+    "VERSION": "1.9.0",
+    "MONGO_URI": "mongodb://localhost/api",
+    "MONGO_URI_NOTES": "mongodb://localhost/api-notes",
+    "JWT_SECRET": "some-very-long-string"
   }
 }
