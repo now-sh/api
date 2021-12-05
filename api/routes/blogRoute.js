@@ -19,8 +19,8 @@ blogRoute.get('/', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        Jason: `https://${req.headers.host}/api/v1/blogs/jason`,
-        Users: `https://${req.headers.host}/api/v1/blogs/:user/:repo`,
+        Jason: `${req.protocol}://${req.headers.host}/api/v1/blogs/jason`,
+        Users: `${req.protocol}://${req.headers.host}/api/v1/blogs/:user/:repo`,
       })
     );
   } catch (error) {

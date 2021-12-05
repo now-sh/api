@@ -25,7 +25,7 @@ apiRoute.get('', cors(), (req, res) => {
     res.send(
       JSON.stringify({
         Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Message: `The current api endpoint is https://${req.headers.host}/api/v1`,
+        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
         Version: version,
         TimeZone: timeZone,
         Time: curtime,
@@ -43,21 +43,20 @@ apiRoute.get('/v1', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        Version: `https://${req.headers.host}/api/v1/version`,
-        commit: `https://${req.headers.host}/api/v1/commit`,
-        Covid: `https://${req.headers.host}/api/v1/disease`,
-        Arcgis: `https://${req.headers.host}/api/v1/arcgis`,
-        Global: `https://${req.headers.host}/api/v1/global`,
-        USA: `https://${req.headers.host}/api/v1/usa`,
-        NYS: `https://${req.headers.host}/api/v1/nys`,
-        Closings: `https://${req.headers.host}/api/v1/closings`,
-        Git: `https://${req.headers.host}/api/v1/git`,
-        Reddit: `https://${req.headers.host}/api/v1/reddit`,
-        closings: `https://${req.headers.host}/api/v1/closings`,
-        Traffic: `https://${req.headers.host}/api/v1/traffic`,
-        closings: `https://${req.headers.host}/api/v1/closings`,
-        Profile: `https://${req.headers.host}/api/v1/profile`,
-        Blog: `https://${req.headers.host}/api/v1/blogs`,
+        Version: `${req.protocol}://${req.headers.host}/api/v1/version`,
+        Domains: `${req.protocol}://${req.headers.host}/api/v1/domains`,
+        Commit: `${req.protocol}://${req.headers.host}/api/v1/commit`,
+        Covid: `${req.protocol}://${req.headers.host}/api/v1/disease`,
+        Arcgis: `${req.protocol}://${req.headers.host}/api/v1/arcgis`,
+        Global: `${req.protocol}://${req.headers.host}/api/v1/global`,
+        USA: `${req.protocol}://${req.headers.host}/api/v1/usa`,
+        NYS: `${req.protocol}://${req.headers.host}/api/v1/nys`,
+        Closings: `${req.protocol}://${req.headers.host}/api/v1/closings`,
+        Git: `${req.protocol}://${req.headers.host}/api/v1/git`,
+        Reddit: `${req.protocol}://${req.headers.host}/api/v1/reddit`,
+        Traffic: `${req.protocol}://${req.headers.host}/api/v1/traffic`,
+        Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
+        Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
       })
     );
   } catch (error) {

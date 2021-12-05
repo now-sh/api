@@ -12,7 +12,7 @@ trafficRoute.get('/', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        NYS: `https://${req.headers.host}/api/v1/traffic/nys`,
+        NYS: `${req.protocol}://${req.headers.host}/api/v1/traffic/nys`,
       })
     );
   } catch (err) {

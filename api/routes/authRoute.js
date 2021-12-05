@@ -37,11 +37,11 @@ authRoute.get('/*', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        Message: `The current api endpoint is https://${req.headers.host}/api/v1/auth`,
-        info: `https://${req.headers.host}/api/v1/auth/me`,
-        login: `https://${req.headers.host}/api/v1/auth/login`,
+        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1/auth`,
+        info: `${req.protocol}://${req.headers.host}/api/v1/auth/me`,
+        login: `${req.protocol}://${req.headers.host}/api/v1/auth/login`,
         login_body: '{ "email": "yourEmail", "password": "yourPassword" }',
-        signup: `https://${req.headers.host}/api/v1/auth/signup`,
+        signup: `${req.protocol}://${req.headers.host}/api/v1/auth/signup`,
         signup_body:
           '{ "name": "yourName", "email": "yourEmail", "password": "yourPassword" }',
       })

@@ -18,11 +18,11 @@ githubRoute.get('/', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        jason: `My github repo:                    https://${req.headers.host}/api/v1/git/jason`,
-        org: `Get repos from a github org:       https://${req.headers.host}/api/v1/git/org/:id`,
-        orgs: `Get orgs owned by a github user:   https://${req.headers.host}/api/v1/git/orgs/:id`,
-        users: `Get user info from github:         https://${req.headers.host}/api/v1/git/user/:id`,
-        repo: `List repos owned by a github user: https://${req.headers.host}/api/v1/git/repos/:id`,
+        jason: `My github repo:                    ${req.protocol}://${req.headers.host}/api/v1/git/jason`,
+        org: `Get repos from a github org:       ${req.protocol}://${req.headers.host}/api/v1/git/org/:id`,
+        orgs: `Get orgs owned by a github user:   ${req.protocol}://${req.headers.host}/api/v1/git/orgs/:id`,
+        users: `Get user info from github:         ${req.protocol}://${req.headers.host}/api/v1/git/user/:id`,
+        repo: `List repos owned by a github user: ${req.protocol}://${req.headers.host}/api/v1/git/repos/:id`,
       })
     );
   } catch (error) {

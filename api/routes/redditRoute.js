@@ -10,9 +10,9 @@ redditRoute.get('/', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        Jason: `https://${req.headers.host}/api/v1/reddit/jason`,
-        Users: `https://${req.headers.host}/api/v1/reddit/:user`,
-        Reddits: `https://${req.headers.host}/api/v1/reddit/:subreddit`,
+        Jason: `${req.protocol}://${req.headers.host}/api/v1/reddit/jason`,
+        Users: `${req.protocol}://${req.headers.host}/api/v1/reddit/:user`,
+        Reddits: `${req.protocol}://${req.headers.host}/api/v1/reddit/:subreddit`,
       })
     );
   } catch (err) {
