@@ -44,6 +44,7 @@ apiRoute.get('/v1', cors(), async (req, res) => {
     res.send(
       JSON.stringify({
         Version: `https://${req.headers.host}/api/v1/version`,
+        commit: `https://${req.headers.host}/api/v1/commit`,
         Covid: `https://${req.headers.host}/api/v1/disease`,
         Arcgis: `https://${req.headers.host}/api/v1/arcgis`,
         Global: `https://${req.headers.host}/api/v1/global`,

@@ -18,6 +18,7 @@ app.use('/api', require('./routes/apiRoute'));
 app.use('/api/health', require('./routes/healthRoute'));
 app.use('/api/v1/auth', require('./routes/authRoute'));
 app.use('/api/v1/disease', require('./routes/diseaseRoute'));
+app.use('/api/v1/commit', require('./routes/commitRoute'));
 app.use('/api/v1/arcgis', require('./routes/arcgisRoute'));
 app.use('/api/v1/global', require('./routes/covidRoute'));
 app.use('/api/v1/usa', require('./routes/usaRoute'));
