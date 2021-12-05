@@ -9,6 +9,8 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 diseaseRoute.use(
   '/',
   createProxyMiddleware({
+    target: 'https://disease.sh',
+    changeOrigin: true,
     pathRewrite: {
       [`^/api/v1/disease`]: 'https://disease.sh/v3/covid-19/all',
     },
@@ -24,8 +26,6 @@ diseaseRoute.use(
     },
     // subscribe to http-proxy's proxyReq event
     onProxyReq: function (proxyReq, req, res) {},
-    target: 'https://disease.sh',
-    changeOrigin: true,
   })
 );
 

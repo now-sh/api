@@ -9,13 +9,15 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 commitRoute.use(
   '/',
   createProxyMiddleware({
+    target: 'https://commitment.herokuapp.com/',
+    changeOrigin: true,
     pathRewrite: {
-      [`^/api/v1/commit`]: 'https://commitment.herokuapp.com/json',
-      [`^/api/v1/commit/txt`]: 'https://commitment.herokuapp.com/txt',
-      [`^/api/v1/commit/json`]: 'https://commitment.herokuapp.com/json',
+      '^/api/v1/commit/txt/': '/txt',
+      '^/api/v1/commit/text/': '/txt',
+      '^/api/v1/commit/json/': '/json',
+      '^/api/v1/commit': '/txt',
+      '^/api/v1/commit/': '/txt',
     },
-
-    // subscribe to http-proxy's proxyRes event
     onProxyRes: function (proxyRes, req, res) {
       if (proxyRes.statusCode === 404) {
         return res.json({ Error: 'Page not found.' });
@@ -24,10 +26,6 @@ commitRoute.use(
         return res.json({ Error: 'Something went horribly wrong.' });
       }
     },
-    // subscribe to http-proxy's proxyReq event
-    onProxyReq: function (proxyReq, req, res) {},
-    target: 'https://commitment.herokuapp.com',
-    changeOrigin: true,
   })
 );
 
