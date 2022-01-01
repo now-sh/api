@@ -7,7 +7,7 @@ const cors = require('cors');
 
 const dataDir = path.join(__dirname + '/../public/data');
 
-tzRoute.get('', cors(), async (req, res) => {
+tzRoute.get('/', cors(), async (req, res) => {
   const auth =
     req.header('auth-token') ||
     req.header('Bearer') ||
@@ -44,7 +44,7 @@ tzRoute.get('/:help', cors(), async (req, res) => {
           `${req.protocol}://${req.headers.host}/api/v1/timezones`,
           `${req.protocol}://${req.headers.host}/api/v1/timezones/countries`,
         ],
-        Usage: `curl -q -LSs ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep Melbourne|jq -r '{abbr:.abbr,offset:.offset,tz:.utc}'`,
+        Usage: `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep 'Search term' | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}'`,
       })
     );
   } catch (error) {
