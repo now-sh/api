@@ -7,6 +7,11 @@ const cors = require('cors');
 
 const dataDir = path.join(__dirname + '/../public/data');
 
+const countryData = fs.readFileSync(dataDir + '/countries.json');
+const timezoneData = fs.readFileSync(dataDir + '/timezones.json');
+const countryDataJSON = JSON.parse(countryData);
+const timezoneDataJSON = JSON.parse(timezoneData);
+
 tzRoute.get('/', cors(), async (req, res) => {
   const auth =
     req.header('auth-token') ||
@@ -15,7 +20,7 @@ tzRoute.get('/', cors(), async (req, res) => {
     req.header('authorization') ||
     'null';
   res.setHeader('Content-Type', 'application/json');
-  res.sendFile(`${dataDir}/timezones.json`);
+  res.send(timezoneDataJSON);
 });
 
 tzRoute.get('/countries', cors(), async (req, res) => {
@@ -26,7 +31,7 @@ tzRoute.get('/countries', cors(), async (req, res) => {
     req.header('authorization') ||
     'null';
   res.setHeader('Content-Type', 'application/json');
-  res.sendFile(`${dataDir}/countries.json`);
+  res.send(countryDataJSON);
 });
 
 tzRoute.get('/:help', cors(), async (req, res) => {
@@ -42,11 +47,11 @@ tzRoute.get('/:help', cors(), async (req, res) => {
       JSON.stringify({
         getTimezone: [
           `${req.protocol}://${req.headers.host}/api/v1/timezones`,
-          `tz_search() {curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep "$1" | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}';}`,
+          `tz_search() { curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep "$1" | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}' ;}`,
         ],
         getCountry: [
           `${req.protocol}://${req.headers.host}/api/v1/timezones/countries`,
-          `tz_country_search() {curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones/countries | jq -rc '.[]' | grep "$1" | jq -r '{name:.name,capital:.capital,countryCode:.country_code,timeZones:.timezones}';}`,
+          `tz_country_search() { curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones/countries | jq -rc '.[]' | grep "$1" | jq -r '{name:.name,capital:.capital,countryCode:.country_code,timeZones:.timezones}' ;}`,
         ],
       })
     );
