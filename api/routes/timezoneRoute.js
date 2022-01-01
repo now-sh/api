@@ -42,11 +42,11 @@ tzRoute.get('/:help', cors(), async (req, res) => {
       JSON.stringify({
         getTimezone: [
           `${req.protocol}://${req.headers.host}/api/v1/timezones`,
-          `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep 'Search term' | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}'`,
+          `tz_search() {curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep "$1" | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}';}`,
         ],
         getCountry: [
           `${req.protocol}://${req.headers.host}/api/v1/timezones/countries`,
-          `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones/countries | jq -rc '.[]' | grep 'Search term' | jq -r '{name:.name,capital:.capital,countryCode:.country_code,timeZones:.timezones}'`,
+          `tz_country_search() {curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones/countries | jq -rc '.[]' | grep "$1" | jq -r '{name:.name,capital:.capital,countryCode:.country_code,timeZones:.timezones}';}`,
         ],
       })
     );
