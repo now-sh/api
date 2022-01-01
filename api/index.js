@@ -5,11 +5,11 @@ const express = require('express');
 const app = express();
 app.set('view engine', 'ejs');
 
-const middlewares = require('./middleware/errorHandler');
-const handlers = require('./middleware/defaultHandler');
-
 const startdb = require('./controllers/mongodb');
 startdb();
+
+const middlewares = require('./middleware/errorHandler');
+const handlers = require('./middleware/defaultHandler');
 
 app.use(handlers.handlerRoute);
 
@@ -30,6 +30,7 @@ app.use('/api/v1/reddit', require('./routes/redditRoute'));
 app.use('/api/v1/traffic', require('./routes/TrafficRoutes'));
 app.use('/api/v1/profile', require('./routes/profileRoute'));
 app.use('/api/v1/blogs', require('./routes/blogRoute'));
+app.use('/api/v1/timezones', require('./routes/timezoneRoute'));
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
