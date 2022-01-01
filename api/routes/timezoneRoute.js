@@ -40,11 +40,14 @@ tzRoute.get('/:help', cors(), async (req, res) => {
   try {
     res.send(
       JSON.stringify({
-        endPoints: [
+        getTimezone: [
           `${req.protocol}://${req.headers.host}/api/v1/timezones`,
-          `${req.protocol}://${req.headers.host}/api/v1/timezones/countries`,
+          `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep 'Search term' | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}'`,
         ],
-        Usage: `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones | jq -rc '.[]' | grep 'Search term' | jq -r '{abbr:.abbr,offset:.offset,tz:.utc}'`,
+        getCountry: [
+          `${req.protocol}://${req.headers.host}/api/v1/timezones/countries`,
+          `curl -q -LSsf ${req.protocol}://${req.headers.host}/api/v1/timezones/countries | jq -rc '.[]' | grep 'Search term' | jq -r '{name:.name,capital:.capital,countryCode:.country_code,timeZones:.timezones}'`,
+        ],
       })
     );
   } catch (error) {

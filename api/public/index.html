@@ -43,12 +43,14 @@
     <title>Backend API</title>
   </head>
   <body>
-    <div class="container text-center align-content-center mt-5">
+    <div class="container text-center mt-5">
       <h1 class="text-danger">Welcome to my api!</h1>
       <br />
       <h2 class="text-success">Here are the current endpoints:</h2>
 
-      <div class="row align-center h-100">
+      <div
+        class="row align-center h-100 justify-content-center align-items-center"
+      >
         <div class="col-4">
           <div class="card border border-danger">
             <div class="card-body">
@@ -56,6 +58,20 @@
               <p class="card-text">api version</p>
               <a href="/api/v1/version" class="btn btn-danger">go to backend</a>
               <a href="/api/v1/version" class="btn btn-success"
+                >go to frontend</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <div class="card border border-danger">
+            <div class="card-body">
+              <h5 class="card-title">
+                endpoints: <br />/api/v1/timezones/:help
+              </h5>
+              <p class="card-text">timeZone help</p>
+              <a href="/api/v1/timezones/:help" class="btn btn-success"
                 >go to frontend</a
               >
             </div>

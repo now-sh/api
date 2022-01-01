@@ -57,7 +57,7 @@ apiRoute.get('/v1', cors(), async (req, res) => {
         Traffic: `${req.protocol}://${req.headers.host}/api/v1/traffic`,
         Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
         Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
-        TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones`,
+        TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/:help`,
       })
     );
   } catch (error) {
