@@ -112,3 +112,5 @@ dist
 .now
 .vercel
 now.json
+# ignore commit message
+.gitcommit
