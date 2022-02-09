@@ -31,6 +31,7 @@ app.use('/api/v1/traffic', require('./routes/TrafficRoutes'));
 app.use('/api/v1/profile', require('./routes/profileRoute'));
 app.use('/api/v1/blogs', require('./routes/blogRoute'));
 app.use('/api/v1/timezones', require('./routes/timezoneRoute'));
+app.use('/api/v1/passwd', require('./routes/genpasswdRoute'));
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
