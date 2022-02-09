@@ -1,7 +1,5 @@
-require('dotenv').config();
 const express = require('express');
 const healthRoute = express.Router();
-const cors = require('cors');
 
 healthRoute.get('/', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
