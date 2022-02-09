@@ -20,7 +20,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-# Diagnostic reports (https://nodejs.org/api/report.html)
+# Diagnostic reports (${req.protocol}://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Runtime data
 pids
@@ -34,18 +34,18 @@ coverage
 *.lcov
 # nyc test coverage
 .nyc_output
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+# Grunt intermediate storage (${req.protocol}://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
-# Bower dependency directory (https://bower.io/)
+# Bower dependency directory (${req.protocol}://bower.io/)
 bower_components
 # node-waf configuration
 .lock-wscript
-# Compiled binary addons (https://nodejs.org/api/addons.html)
+# Compiled binary addons (${req.protocol}://nodejs.org/api/addons.html)
 build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-# Snowpack dependency directory (https://snowpack.dev/)
+# Snowpack dependency directory (${req.protocol}://snowpack.dev/)
 web_modules/
 # TypeScript cache
 *.tsbuildinfo
@@ -68,7 +68,7 @@ web_modules/
 .env
 .env.test
 .env.production
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache (${req.protocol}://parceljs.org/)
 .cache
 .parcel-cache
 # Next.js build output
@@ -80,7 +80,7 @@ dist
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
+# ${req.protocol}://nextjs.org/blog/next-9-1#public-directory-support
 # public
 # vuepress build output
 .vuepress/dist
