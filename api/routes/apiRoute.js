@@ -58,6 +58,7 @@ apiRoute.get('/v1', cors(), async (req, res) => {
         Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
         Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
         TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/:help`,
+        PassGen: `${req.protocol}://${req.headers.host}/api/v1/passwd`,
       })
     );
   } catch (error) {
