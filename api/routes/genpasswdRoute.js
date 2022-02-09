@@ -1,8 +1,8 @@
 const express = require('express');
 const genpasswdRoute = express.Router();
-let totalPasswordsGenerated = 0;
 
 const title = 'Generate Passwords';
+let totalPasswordsGenerated = 0;
 
 const generatePassword = (length) => {
   const charset =
@@ -21,6 +21,7 @@ genpasswdRoute.get('/', (req, res) => {
   totalPasswordsGenerated++;
   res.json({
     title: title,
+    password: generatePassword(length),
     Usage_Get: `curl -q -LSsf -X GET ${req.protocol}://${req.headers.host}/api/v1/passwd/10 | jq -r '.password'`,
     Usage_Post: `curl -q -LSsf -X POST ${req.protocol}://${req.headers.host}/api/v1/passwd`,
   });
