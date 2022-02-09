@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const healthRoute = express.Router();
 
 healthRoute.get('/', cors(), async (req, res) => {
