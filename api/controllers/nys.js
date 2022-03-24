@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const datetime = require('node-datetime');
 
 const dtyester = datetime.create();
-dtyester.offsetInHours(-26);
+dtyester.offsetInHours(-48);
 const yesterday = dtyester.format('Y-m-d');
 
 const nysurl = `https://health.data.ny.gov/resource/xdss-u53e.json?test_date=${yesterday}T00:00:00.000`;
