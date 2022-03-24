@@ -6,8 +6,7 @@ const dtyester = datetime.create();
 dtyester.offsetInHours(-48);
 const yesterday = dtyester.format('Y-m-d');
 
-// const nysurl = `https://health.data.ny.gov/resource/xdss-u53e.json?test_date=${yesterday}T00:00:00.000`;
-const nysurl = 'https://health.data.ny.gov/resource/xdss-u53e.json';
+const nysurl = `https://health.data.ny.gov/resource/xdss-u53e.json?test_date=${yesterday}T00:00:00.000`;
 const cache = null;
 const lastCacheTime = null;
 
@@ -17,7 +16,9 @@ async function nys() {
   }
   return fetch(nysurl)
     .then((response) => response.json())
-    .catch((error) => response.status(500).send(error));
+    .catch((error) =>
+      response.status(500).send(error + `error accessing ${nysurl} `)
+    );
 }
 
 module.exports = nys;
