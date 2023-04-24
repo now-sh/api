@@ -17,6 +17,7 @@ app.use('/', require('./routes/defaultRoute'));
 app.use('/api', require('./routes/apiRoute'));
 app.use('/api/health', require('./routes/healthRoute'));
 app.use('/api/v1/auth', require('./routes/authRoute'));
+app.use('/api/v1/notes', require('./routes/notesRoute'));
 app.use('/api/v1/disease', require('./routes/diseaseRoute'));
 app.use('/api/v1/domains', require('./routes/domainRoute'));
 app.use('/api/v1/commit', require('./routes/commitRoute'));
@@ -39,6 +40,4 @@ app.use(middlewares.errorHandler);
 const port = process.env.PORT || 2000;
 const hostname = process.env.HOSTNAME;
 
-app.listen(port, () =>
-  console.log(`Starting server: http://${hostname}:${port}`)
-);
+app.listen(port, () => console.log(`Starting server: http://${hostname}:${port}`));
