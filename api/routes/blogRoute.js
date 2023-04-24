@@ -30,6 +30,23 @@ blogRoute.get('/', cors(), async (req, res) => {
   }
 });
 
+blogRoute.get('/help', cors(), async (req, res) => {
+  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+    return cache;
+  }
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.send(
+      JSON.stringify({
+        Jason: `${req.protocol}://${req.headers.host}/api/v1/blogs/jason`,
+        Users: `${req.protocol}://${req.headers.host}/api/v1/blogs/:user/:repo`,
+      })
+    );
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 blogRoute.get('/jason', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
