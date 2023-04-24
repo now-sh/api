@@ -26,8 +26,8 @@ genpasswdRoute.get('/', (req, res) => {
   });
 });
 
-genpasswdRoute.get('/:length', (req, res) => {
-  const length = req.params.length || 16;
+genpasswdRoute.post('/', (req, res) => {
+  const length = req.body.length || 16;
   const current = new Date();
   const time = current.toLocaleTimeString('en-US');
   totalPasswordsGenerated++;
@@ -40,8 +40,8 @@ genpasswdRoute.get('/:length', (req, res) => {
   });
 });
 
-genpasswdRoute.post('/', (req, res) => {
-  const length = req.body.length || 16;
+genpasswdRoute.get('/:length', (req, res) => {
+  const length = req.params.length || 16;
   const current = new Date();
   const time = current.toLocaleTimeString('en-US');
   totalPasswordsGenerated++;
