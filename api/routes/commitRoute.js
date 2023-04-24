@@ -14,11 +14,11 @@ commitRoute.use(
     target: commitment_url,
     changeOrigin: true,
     pathRewrite: {
+      '^/api/v1/commit': '/',
+      '^/api/v1/commit/': '/',
       '^/api/v1/commit/txt/': '/txt',
       '^/api/v1/commit/text/': '/txt',
       '^/api/v1/commit/json/': '/json',
-      '^/api/v1/commit': '/txt',
-      '^/api/v1/commit/': '/txt',
     },
     onProxyRes: function (proxyRes, req, res) {
       if (proxyRes.statusCode === 404) {
@@ -30,5 +30,23 @@ commitRoute.use(
     },
   })
 );
+
+commitRoute.get('/help', cors(), async (req, res) => {
+  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+    return cache;
+  }
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.send(
+      JSON.stringify({
+        default: `${req.protocol}://${req.headers.host}/api/v1/commit/`,
+        txt: `${req.protocol}://${req.headers.host}/api/v1/commit/txt/`,
+        json: `${req.protocol}://${req.headers.host}/api/v1/commit/json/`,
+      })
+    );
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
 
 module.exports = commitRoute;
