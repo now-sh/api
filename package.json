@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.8.9",
+  "version": "1.9.2",
   "description": "API server powered by express-js",
   "main": "api/index.js",
   "type": "commonjs",
