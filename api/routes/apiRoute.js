@@ -2,10 +2,10 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const apiRoute = express.Router();
 const datetime = require('node-datetime');
 const cors = require('cors');
 
+const apiRoute = express.Router();
 const dttoday = datetime.create();
 const dtyester = datetime.create();
 dtyester.offsetInHours(-24);
@@ -38,7 +38,27 @@ apiRoute.get('', cors(), (req, res) => {
   }
 });
 
-apiRoute.get('/v1', cors(), async (req, res) => {
+apiRoute.get('/v1', cors(), (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.send(
+      JSON.stringify({
+        Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
+        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
+        Help: `${req.protocol}://${req.headers.host}/api/help`,
+        Version: version,
+        TimeZone: timeZone,
+        Time: curtime,
+        Today: today,
+        Yesterday: yesterday,
+      })
+    );
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
+apiRoute.get('/help', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   try {
     res.send(
@@ -57,7 +77,7 @@ apiRoute.get('/v1', cors(), async (req, res) => {
         Traffic: `${req.protocol}://${req.headers.host}/api/v1/traffic`,
         Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
         Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
-        TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/:help`,
+        TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/help`,
         PassGen: `${req.protocol}://${req.headers.host}/api/v1/passwd`,
       })
     );
@@ -94,8 +114,8 @@ apiRoute.post('/v1/version', cors(), async (req, res) => {
     res.send(
       JSON.stringify({
         Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Version: VERSION,
-        TimeZone: TimeZone,
+        Version: version,
+        TimeZone: timeZone,
         Yesterday: yesterday,
         Today: today,
         Time: curtime,
