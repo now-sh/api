@@ -32,9 +32,12 @@
     "PORT": "1919",
     "HEADER_AGENT": "Awesome-Octocat-App",
     "GITHUB_API_KEY": "myverylonggithubapikey",
-    "VERSION": "1.9.0",
+    "VERSION": "1.9.2",
     "MONGO_URI": "mongodb://localhost/api",
     "MONGO_URI_NOTES": "mongodb://localhost/api-notes",
-    "JWT_SECRET": "some-very-long-string"
+    "JWT_SECRET": "some-very-long-string",
+    "GIT_MESSAGE_URL": "https://commitment-6jyr.onrender.com",
+    "BLOG_URL": "https://api.github.com/repos/malaks-us/jason/contents/_posts",
+    "DOMAIN_LIST": "https://raw.githubusercontent.com/casjay/casjay/main/domains.json"
   }
 }
