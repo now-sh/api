@@ -1,8 +1,7 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-const url =
-  'https://511ny.org/list/events/traffic?start=0&length=100&order%5Bi%5D=1&order%5Bdir%5D=asc';
+const url = 'https://511ny.org/list/events/traffic?start=0&length=100&order%5Bi%5D=1&order%5Bdir%5D=asc';
 let cache = null;
 let lastCacheTime = null;
 

@@ -34,13 +34,10 @@ githubRoute.get('/jason', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const response = await fetch(
-    'https://api.github.com/users/casjay?per_page=1000&sort=name',
-    {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
-    }
-  );
+  const response = await fetch('https://api.github.com/users/casjay?per_page=1000&sort=name', {
+    method: 'GET',
+    headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
@@ -54,13 +51,10 @@ githubRoute.get('/user/:id', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const response = await fetch(
-    `https://api.github.com/users/${req.params.id}?per_page=1000&sort=name`,
-    {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
-    }
-  );
+  const response = await fetch(`https://api.github.com/users/${req.params.id}?per_page=1000&sort=name`, {
+    method: 'GET',
+    headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
@@ -74,13 +68,10 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const response = await fetch(
-    `https://api.github.com/users/${req.params.id}/repos?per_page=1000&sort=name`,
-    {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
-    }
-  );
+  const response = await fetch(`https://api.github.com/users/${req.params.id}/repos?per_page=1000&sort=name`, {
+    method: 'GET',
+    headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
@@ -94,13 +85,10 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const response = await fetch(
-    `https://api.github.com/users/${req.params.id}/orgs?per_page=1000&sort=name`,
-    {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
-    }
-  );
+  const response = await fetch(`https://api.github.com/users/${req.params.id}/orgs?per_page=1000&sort=name`, {
+    method: 'GET',
+    headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
@@ -114,13 +102,10 @@ githubRoute.get('/org/:id', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const response = await fetch(
-    `https://api.github.com/orgs/${req.params.id}?per_page=1000&sort=name`,
-    {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
-    }
-  );
+  const response = await fetch(`https://api.github.com/orgs/${req.params.id}?per_page=1000&sort=name`, {
+    method: 'GET',
+    headers: { Authorization: 'Bearer ' + githubToken, myHeaders },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');

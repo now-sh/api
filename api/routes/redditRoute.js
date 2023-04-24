@@ -11,7 +11,21 @@ redditRoute.get('/', cors(), async (req, res) => {
     res.send(
       JSON.stringify({
         Jason: `${req.protocol}://${req.headers.host}/api/v1/reddit/jason`,
-        Users: `${req.protocol}://${req.headers.host}/api/v1/reddit/:user`,
+        Users: `${req.protocol}://${req.headers.host}/api/v1/reddit/u/:user`,
+        Reddits: `${req.protocol}://${req.headers.host}/api/v1/reddit/:subreddit`,
+      })
+    );
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
+redditRoute.get('/:help', cors(), async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.send(
+      JSON.stringify({
+        Users: `${req.protocol}://${req.headers.host}/api/v1/reddit/u/:user`,
         Reddits: `${req.protocol}://${req.headers.host}/api/v1/reddit/:subreddit`,
       })
     );
@@ -21,9 +35,7 @@ redditRoute.get('/', cors(), async (req, res) => {
 });
 
 redditRoute.get('/jason', cors(), async (req, res) => {
-  const response = await fetch(
-    `https://www.reddit.com/u/casjay/.json?sort=new&limit=500`
-  );
+  const response = await fetch(`https://www.reddit.com/u/casjay/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();
@@ -42,9 +54,7 @@ redditRoute.get('/jason', cors(), async (req, res) => {
 });
 
 redditRoute.get('/u/:id', cors(), async (req, res) => {
-  const response = await fetch(
-    `https://www.reddit.com/u/${req.params.id}/.json?sort=new&limit=500`
-  );
+  const response = await fetch(`https://www.reddit.com/u/${req.params.id}/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();
@@ -63,9 +73,7 @@ redditRoute.get('/u/:id', cors(), async (req, res) => {
 });
 
 redditRoute.get('/:id', cors(), async (req, res) => {
-  const response = await fetch(
-    `https://www.reddit.com/r/${req.params.id}/.json?sort=new&limit=500`
-  );
+  const response = await fetch(`https://www.reddit.com/r/${req.params.id}/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();

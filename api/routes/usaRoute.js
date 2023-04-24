@@ -90,14 +90,11 @@ usaRoute.get('/nys', cors(), async (req, res) => {
 });
 
 usaRoute.get('/:id', cors(), async (req, res) => {
-  const response = await fetch(
-    `https://disease.sh/v3/covid-19/states/${req.params.id}`,
-    {
-      headers: {
-        myHeaders,
-      },
-    }
-  );
+  const response = await fetch(`https://disease.sh/v3/covid-19/states/${req.params.id}`, {
+    headers: {
+      myHeaders,
+    },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');

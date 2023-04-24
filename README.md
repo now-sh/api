@@ -2,6 +2,16 @@
 
   A simple API powered by expressjs
 
+## Preresquites
+
+- mongodb
+- nodejs
+- npm
+
+```shell
+docker run -p 0.0.0.0:27017:27017 --name mongo-dev -d mongo:latest
+```
+
 ## Run production  
 
 ```shell

@@ -6,10 +6,12 @@ const commitRoute = express.Router();
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
+const commitment_url = process.env.GIT_MESSAGE_URL || 'https://commitment-6jyr.onrender.com';
+
 commitRoute.use(
   '/',
   createProxyMiddleware({
-    target: 'https://commitment.herokuapp.com/',
+    target: commitment_url,
     changeOrigin: true,
     pathRewrite: {
       '^/api/v1/commit/txt/': '/txt',

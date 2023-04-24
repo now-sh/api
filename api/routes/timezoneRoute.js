@@ -13,34 +13,19 @@ const countryDataJSON = JSON.parse(countryData);
 const timezoneDataJSON = JSON.parse(timezoneData);
 
 tzRoute.get('/', cors(), async (req, res) => {
-  const auth =
-    req.header('auth-token') ||
-    req.header('Bearer') ||
-    req.header('token') ||
-    req.header('authorization') ||
-    'null';
+  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'null';
   res.setHeader('Content-Type', 'application/json');
   res.send(timezoneDataJSON);
 });
 
 tzRoute.get('/countries', cors(), async (req, res) => {
-  const auth =
-    req.header('auth-token') ||
-    req.header('Bearer') ||
-    req.header('token') ||
-    req.header('authorization') ||
-    'null';
+  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'null';
   res.setHeader('Content-Type', 'application/json');
   res.send(countryDataJSON);
 });
 
 tzRoute.get('/:help', cors(), async (req, res) => {
-  const auth =
-    req.header('auth-token') ||
-    req.header('Bearer') ||
-    req.header('token') ||
-    req.header('authorization') ||
-    'null';
+  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'null';
   res.setHeader('Content-Type', 'application/json');
   try {
     res.send(

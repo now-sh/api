@@ -16,9 +16,7 @@ async function nys() {
   }
   return fetch(nysurl)
     .then((response) => response.json())
-    .catch((error) =>
-      response.status(500).send(error + `error accessing ${nysurl} `)
-    );
+    .catch((error) => response.status(500).send(error + `error accessing ${nysurl} `));
 }
 
 module.exports = nys;

@@ -43,8 +43,7 @@ authRoute.get('/*', cors(), async (req, res) => {
         login: `${req.protocol}://${req.headers.host}/api/v1/auth/login`,
         login_body: '{ "email": "yourEmail", "password": "yourPassword" }',
         signup: `${req.protocol}://${req.headers.host}/api/v1/auth/signup`,
-        signup_body:
-          '{ "name": "yourName", "email": "yourEmail", "password": "yourPassword" }',
+        signup_body: '{ "name": "yourName", "email": "yourEmail", "password": "yourPassword" }',
       })
     );
   } catch (err) {
@@ -90,13 +89,9 @@ authRoute.post(
       name,
     });
 
-    const token = await JWT.sign(
-      { email: newUser.email },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: 360000,
-      }
-    );
+    const token = await JWT.sign({ email: newUser.email }, process.env.JWT_SECRET, {
+      expiresIn: 360000,
+    });
 
     res.json({
       errors: [],

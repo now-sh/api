@@ -7,9 +7,11 @@ const fetch = require('node-fetch');
 
 const myHeaders = require('../middleware/headers');
 const githubToken = process.env.GITHUB_API_KEY;
+const api = 'https://api.github.com/repos/malaks-us/jason/contents/_posts';
 
 const cache = null;
 const lastCacheTime = null;
+const blog = process.env.BLOG_URL || api;
 
 blogRoute.get('/', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
@@ -33,15 +35,12 @@ blogRoute.get('/jason', cors(), async (req, res) => {
     return cache;
   }
   const repo = req.params.id;
-  const response = await fetch(
-    'https://api.github.com/repos/malaks-us/jason/contents/_posts',
-    {
-      Headers: {
-        Authorization: `token ${githubToken}`,
-        myHeaders,
-      },
-    }
-  );
+  const response = await fetch(blog, {
+    Headers: {
+      Authorization: `token ${githubToken}`,
+      myHeaders,
+    },
+  });
   try {
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');

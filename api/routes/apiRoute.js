@@ -67,12 +67,7 @@ apiRoute.get('/v1', cors(), async (req, res) => {
 });
 
 apiRoute.get('/v1/version', cors(), async (req, res) => {
-  const auth =
-    req.header('auth-token') ||
-    req.header('Bearer') ||
-    req.header('token') ||
-    req.header('authorization') ||
-    'null';
+  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
   res.setHeader('Content-Type', 'application/json');
   try {
     res.send(
@@ -93,12 +88,7 @@ apiRoute.get('/v1/version', cors(), async (req, res) => {
 });
 
 apiRoute.post('/v1/version', cors(), async (req, res) => {
-  const auth =
-    req.header('auth-token') ||
-    req.header('Bearer') ||
-    req.header('token') ||
-    req.header('authorization') ||
-    'null';
+  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
   res.setHeader('Content-Type', 'application/json');
   try {
     res.send(
