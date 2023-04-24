@@ -11,26 +11,7 @@ const authRoute = express.Router();
 const cache = null;
 const lastCacheTime = null;
 
-authRoute.get('/me', cors(), checkAuth, async (req, res, next) => {
-  const user = await User.findOne({ email: req.user });
-  console.log(user);
-  try {
-    return res.json({
-      errors: [],
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-        },
-      },
-    });
-  } catch (err) {
-    res.json({ error: error.message });
-  }
-});
-
-authRoute.get('/*', cors(), async (req, res) => {
+authRoute.get('/', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
@@ -48,6 +29,46 @@ authRoute.get('/*', cors(), async (req, res) => {
     );
   } catch (err) {
     res.json({ error: err.message });
+  }
+});
+
+authRoute.get('/help', cors(), async (req, res) => {
+  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+    return cache;
+  }
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.send(
+      JSON.stringify({
+        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1/auth`,
+        info: `${req.protocol}://${req.headers.host}/api/v1/auth/me`,
+        login: `${req.protocol}://${req.headers.host}/api/v1/auth/login`,
+        login_body: '{ "email": "yourEmail", "password": "yourPassword" }',
+        signup: `${req.protocol}://${req.headers.host}/api/v1/auth/signup`,
+        signup_body: '{ "name": "yourName", "email": "yourEmail", "password": "yourPassword" }',
+      })
+    );
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
+authRoute.get('/me', cors(), checkAuth, async (req, res, next) => {
+  const user = await User.findOne({ email: req.user });
+  console.log(user);
+  try {
+    return res.json({
+      errors: [],
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+        },
+      },
+    });
+  } catch (err) {
+    res.json({ error: error.message });
   }
 });
 
