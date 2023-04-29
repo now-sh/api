@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
-    "deploy": "gitcommit modified; vercel && vercel --prod",
-    "commit": "gitcommit modified",
+    "deploy": "gitcommit all 'Deployed'; vercel && vercel --prod",
+    "commit": "gitcommit all",
     "lint": "eslint --color api/"
   },
   "keywords": [
