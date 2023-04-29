@@ -6,6 +6,8 @@ const commitRoute = express.Router();
 const cors = require('cors');
 const messages = require('../public/data/gitmessages.json');
 
+const url = process.env.GIT_MESSAGE_URL || 'https://github.com/apimgr/gitmessages/raw/main/api/messages.json';
+
 commitRoute.get('/', cors(), async (req, res) => {
   const index = Math.floor(Math.random() * (messages.length + 1));
   const commitMessage = `${messages[index]} `;
