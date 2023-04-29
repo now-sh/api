@@ -4,9 +4,7 @@ const path = require('path');
 const express = require('express');
 const commitRoute = express.Router();
 const cors = require('cors');
-const messages = require('../lib/gitMessages');
-
-const url = process.env.GIT_MESSAGE_URL || 'https://commitment-6jyr.onrender.com';
+const messages = require('../public/data/gitmessages.json');
 
 commitRoute.get('/', cors(), async (req, res) => {
   const index = Math.floor(Math.random() * (messages.length + 1));
