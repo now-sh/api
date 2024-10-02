@@ -6,7 +6,7 @@ const dtyester = datetime.create();
 dtyester.offsetInHours(-48);
 const yesterday = dtyester.format('Y-m-d');
 
-const nysurl = `https://health.data.ny.gov/resource/xdss-u53e.json?test_date=${yesterday}T00:00:00.000`;
+const nysurl = `https://disease.sh/v3/covid-19/states/New%20York`;
 const cache = null;
 const lastCacheTime = null;
 
