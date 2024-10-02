@@ -22,7 +22,7 @@ redditRoute.get(default_route, cors(), async (req, res) => {
 });
 
 redditRoute.get('/jason', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/u/casjay/.json?sort=new&limit=500`);
+  const response = await fetch(`https://www.reddit.com/user/casjay.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();
@@ -41,7 +41,7 @@ redditRoute.get('/jason', cors(), async (req, res) => {
 });
 
 redditRoute.get('/u/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/u/${req.params.id}/.json?sort=new&limit=500`);
+  const response = await fetch(`https://www.reddit.com/u/${req.params.id}.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();
@@ -60,7 +60,7 @@ redditRoute.get('/u/:id', cors(), async (req, res) => {
 });
 
 redditRoute.get('/r/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/r/${req.params.id}/.json?sort=new&limit=500`);
+  const response = await fetch(`https://www.reddit.com/r/${req.params.id}.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
     const json = await response.json();
