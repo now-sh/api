@@ -15,7 +15,7 @@
     "api",
     "express"
   ],
-  "author": "CasjaysDev <git-admin@casjaysdev.pro> (https://api.casjay.now.sh)",
+  "author": "CasjaysDev <git-admin@casjaysdev.pro> (https://api.casjay.coffee)",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.24.0",
