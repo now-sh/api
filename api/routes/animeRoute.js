@@ -20,7 +20,7 @@ animeRoute.get(default_route, cors(), async (req, res) => {
 });
 
 animeRoute.get('/quote', cors(), async (req, res) => {
-  const response = await fetch(`https://animechan.io/api/v1/quotes/random`, {
+  const response = await fetch(`https://api.animechan.io/v1/quotes/random`, {
     method: "GET",
     mode: 'no-cors'
   });
