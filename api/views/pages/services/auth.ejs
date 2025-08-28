@@ -1,0 +1,304 @@
+<div class="hero fade-in">
+    <h1>Authentication Service</h1>
+    <p class="lead">Secure user authentication with JWT tokens</p>
+</div>
+
+<div class="auth-container">
+    <!-- Login Form -->
+    <div class="card auth-card" id="loginCard">
+        <h2>Sign In</h2>
+        <form id="loginForm" class="auth-form">
+            <div class="form-group">
+                <label for="loginEmail" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    id="loginEmail" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="user@example.com"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    id="loginPassword" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="••••••••"
+                    required
+                />
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+        
+        <p class="text-center mt-4 text-secondary">
+            Don't have an account? 
+            <a href="#" data-toggle-form="register" class="text-purple">Sign up</a>
+        </p>
+    </div>
+    
+    <!-- Register Form -->
+    <div class="card auth-card" id="registerCard" style="display: none;">
+        <h2>Create Account</h2>
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="registerName" class="form-label">Name</label>
+                <input 
+                    type="text" 
+                    id="registerName" 
+                    name="name" 
+                    class="form-control" 
+                    placeholder="John Doe"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="registerEmail" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    id="registerEmail" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="user@example.com"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="registerPassword" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    id="registerPassword" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="••••••••"
+                    minlength="8"
+                    required
+                />
+                <small class="text-secondary">Minimum 8 characters</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </form>
+        
+        <p class="text-center mt-4 text-secondary">
+            Already have an account? 
+            <a href="#" data-toggle-form="login" class="text-purple">Sign in</a>
+        </p>
+    </div>
+    
+    <!-- Profile Card (shown when logged in) -->
+    <div class="card auth-card" id="profileCard" style="display: none;">
+        <h2>Your Profile</h2>
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">Name:</span>
+                <span id="profileName" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span id="profileEmail" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">User ID:</span>
+                <span id="profileId" class="info-value">-</span>
+            </div>
+        </div>
+        
+        <button data-action="logout" class="btn btn-secondary btn-block mt-4">Sign Out</button>
+    </div>
+</div>
+
+<!-- JWT Token Display -->
+<div class="card mt-6" id="tokenCard" style="display: none;">
+    <h3>Your JWT Token</h3>
+    <p class="text-secondary mb-4">Use this token to authenticate API requests</p>
+    
+    <div class="token-display">
+        <textarea id="tokenValue" class="form-control token-textarea" readonly rows="4"></textarea>
+        <button data-action="copy-token" class="btn btn-sm copy-token-btn">Copy Token</button>
+    </div>
+    
+    <div class="token-info mt-4">
+        <h4>Token Details</h4>
+        <div id="tokenDetails" class="details-grid">
+            <!-- Token details will be populated here -->
+        </div>
+    </div>
+    
+    <div class="usage-example mt-4">
+        <h4>Usage Example</h4>
+        <pre><code>// Include in request headers
+Authorization: Bearer YOUR_JWT_TOKEN
+
+// Example with fetch
+fetch('/api/v1/protected-endpoint', {
+    headers: {
+        'Authorization': 'Bearer ' + token
+    }
+})</code></pre>
+    </div>
+</div>
+
+<style>
+.auth-container {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.auth-card {
+    padding: var(--space-6);
+}
+
+.auth-form {
+    margin-top: var(--space-4);
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+.profile-info {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-4);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.token-display {
+    position: relative;
+}
+
+.token-textarea {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--text-sm);
+    resize: none;
+    word-break: break-all;
+    background-color: var(--bg-secondary);
+}
+
+.copy-token-btn {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    background-color: var(--cyan);
+    color: var(--background);
+}
+
+.details-grid {
+    display: grid;
+    gap: var(--space-3);
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    color: var(--text-primary);
+}
+
+.usage-example {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+}
+
+.usage-example pre {
+    margin: 0;
+    overflow-x: auto;
+}
+
+.usage-example code {
+    color: var(--cyan);
+    font-size: var(--text-sm);
+}
+
+.error-message {
+    background-color: rgba(255, 85, 85, 0.1);
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-3);
+    display: none;
+}
+
+.success-message {
+    background-color: rgba(80, 250, 123, 0.1);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-3);
+    display: none;
+}
+</style>
+
+<%- locals.customScripts = '<script src="/js/auth.js"></script>' %>
+

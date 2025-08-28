@@ -1,0 +1,205 @@
+<div class="hero fade-in">
+    <h1>Password Generator</h1>
+    <p class="lead">Generate secure, random passwords with custom options</p>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Generate Password</h2>
+    <p class="card-text mb-4">Customize your password requirements</p>
+    
+    <form id="passwordForm" class="api-form">
+        <div class="form-group">
+            <label for="length" class="form-label">Password Length</label>
+            <input 
+                type="number" 
+                id="length" 
+                name="length" 
+                class="form-control" 
+                min="4"
+                max="128"
+                value="16"
+                required
+            />
+            <small class="text-secondary">Between 4 and 128 characters</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Character Types</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="uppercase" checked>
+                    Uppercase Letters (A-Z)
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="lowercase" checked>
+                    Lowercase Letters (a-z)
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="numbers" checked>
+                    Numbers (0-9)
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="symbols" checked>
+                    Special Characters (!@#$%^&*)
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="count" class="form-label">Number of Passwords</label>
+            <input 
+                type="number" 
+                id="count" 
+                name="count" 
+                class="form-control" 
+                min="1"
+                max="20"
+                value="1"
+            />
+        </div>
+        
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="excludeSimilar">
+                Exclude Similar Characters (0, O, l, 1, I)
+            </label>
+        </div>
+        
+        <div class="btn-group mt-4">
+            <button type="submit" class="btn btn-primary">
+                Generate Password
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Reset Options
+            </button>
+        </div>
+    </form>
+    
+    <div id="passwordResult" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Generated Password<span class="plural">s</span>:</h3>
+        <div class="password-list"></div>
+        <div class="password-strength mt-4"></div>
+    </div>
+</div>
+
+<style>
+.api-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.result-container {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.password-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    border: 1px solid var(--border-color);
+}
+
+.password-text {
+    flex: 1;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--text-lg);
+    color: var(--yellow);
+    word-break: break-all;
+    cursor: pointer;
+    user-select: all;
+}
+
+.password-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.copy-password {
+    background-color: var(--cyan);
+    color: var(--background);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+}
+
+.copy-password:hover {
+    background-color: var(--green);
+}
+
+.password-strength {
+    padding: var(--space-3);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.strength-meter {
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.strength-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak { background-color: var(--red); width: 33%; }
+.strength-medium { background-color: var(--orange); width: 66%; }
+.strength-strong { background-color: var(--green); width: 100%; }
+</style>
+

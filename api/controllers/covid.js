@@ -1,22 +1,58 @@
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
-const axios = require('axios');
+const { axiosWithTimeout } = require('../utils/axiosWithTimeout');
 
-const covidurl = 'https://www.worldometers.info/coronavirus/#countries';
 let cache = null;
 let lastCacheTime = null;
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes cache
 
 async function covid() {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (cache && lastCacheTime && (now - lastCacheTime) < CACHE_TTL) {
     return cache;
   }
-  const data = await axios.get('https://www.worldometers.info/coronavirus/').then((res) => res.data);
-
-  const $ = cheerio.load(data);
-  const cases = $('#maincounter-wrap > .maincounter-number span').html().trim();
-  const deaths = $('#maincounter-wrap + div + #maincounter-wrap > .maincounter-number span').html().trim();
-  const recovered = $('#maincounter-wrap + div + #maincounter-wrap + #maincounter-wrap > .maincounter-number span').html().trim();
-  return { cases, deaths, recovered };
+  
+  try {
+    // Use disease.sh API instead of worldometers (no bot protection)
+    const response = await axiosWithTimeout({
+      method: 'GET',
+      url: 'https://disease.sh/v3/covid-19/all',
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Node.js API Client'
+      }
+    });
+    
+    const data = response.data;
+    const result = {
+      cases: data.cases?.toLocaleString() || 'N/A',
+      deaths: data.deaths?.toLocaleString() || 'N/A',
+      recovered: data.recovered?.toLocaleString() || 'N/A',
+      active: data.active?.toLocaleString() || 'N/A',
+      todayDeaths: data.todayDeaths?.toLocaleString() || 'N/A',
+      todayCases: data.todayCases?.toLocaleString() || 'N/A'
+    };
+    
+    // Update cache
+    cache = result;
+    lastCacheTime = now;
+    
+    return result;
+  } catch (error) {
+    // Return cached data if available
+    if (cache) {
+      console.error('Failed to fetch fresh COVID data, using cache:', error.message);
+      return cache;
+    }
+    
+    // Return fallback data
+    return {
+      cases: 'Data unavailable',
+      deaths: 'Data unavailable', 
+      recovered: 'Data unavailable',
+      error: 'Unable to fetch current data'
+    };
+  }
 }
 
 module.exports = covid;

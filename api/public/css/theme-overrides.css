@@ -1,0 +1,115 @@
+/* Theme Overrides for Bootswatch Darkly */
+
+/* Light Theme */
+[data-theme="light"] body {
+  background-color: #ffffff;
+  color: #212529;
+}
+
+[data-theme="light"] .card {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+[data-theme="light"] .card.border-danger {
+  border-color: #dc3545 !important;
+}
+
+[data-theme="light"] .text-danger {
+  color: #dc3545 !important;
+}
+
+[data-theme="light"] .text-success {
+  color: #28a745 !important;
+}
+
+[data-theme="light"] .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+[data-theme="light"] .btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+[data-theme="light"] .footer {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+[data-theme="light"] a {
+  color: #007bff;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #303030;
+  border: 1px solid #495057;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 999; /* Just below the GitHub ribbon which is at 9999 */
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+[data-theme="light"] .theme-toggle {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+[data-theme="light"] .theme-toggle i {
+  color: #212529;
+}
+
+/* Fix GitHub ribbon */
+.github-fork-ribbon {
+  position: fixed !important;
+}
+
+/* Ensure footer images are visible */
+.footer img {
+  height: 30px;
+  width: auto;
+  vertical-align: middle;
+}
+
+/* Card hover effect */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix EU compliance banner positioning */
+.cc-window {
+  margin-bottom: 20px;
+}
+
+/* Offset theme toggle button to avoid GitHub ribbon on desktop */
+@media (min-width: 768px) {
+  .theme-toggle {
+    top: 80px; /* Move down to avoid the GitHub fork ribbon */
+  }
+}

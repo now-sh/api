@@ -1,0 +1,51 @@
+<div class="hero fade-in">
+    <h1>Lorem Ipsum Generator</h1>
+    <p class="lead">Generate placeholder text for your designs and mockups</p>
+</div>
+
+<%- include('../../partials/endpoint-form', {
+    title: 'Lorem Ipsum Generator',
+    description: 'Generate placeholder text in various formats',
+    formId: 'loremForm',
+    submitText: 'Generate Text',
+    formContent: `
+        <div class="form-group">
+            <label for="count" class="form-label">Number of Items</label>
+            <input 
+                type="number" 
+                id="count" 
+                name="count" 
+                class="form-control" 
+                min="1"
+                max="100"
+                value="3"
+                required
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="type" class="form-label">Type</label>
+            <select id="type" name="type" class="form-control" required>
+                <option value="paragraphs">Paragraphs</option>
+                <option value="sentences">Sentences</option>
+                <option value="words">Words</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="format" class="form-label">Output Format</label>
+            <select id="format" name="format" class="form-control">
+                <option value="plain">Plain Text</option>
+                <option value="html">HTML</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                <input type="checkbox" id="startWithLorem" name="startWithLorem" checked>
+                Start with "Lorem ipsum dolor sit amet..."
+            </label>
+        </div>
+    `
+}) %>
+

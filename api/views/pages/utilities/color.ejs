@@ -1,0 +1,172 @@
+<div class="hero fade-in">
+    <h1>Color Tools</h1>
+    <p class="lead">Convert between HEX, RGB, and HSL color formats</p>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Color Converter</h2>
+    <p class="card-text mb-4">Enter a color in any format to see all conversions</p>
+    
+    <form id="colorForm" class="api-form">
+        <div class="form-group">
+            <label for="color" class="form-label">Color Value</label>
+            <input 
+                type="text" 
+                id="color" 
+                name="color" 
+                class="form-control" 
+                placeholder="#FF5733, rgb(255, 87, 51), hsl(9, 100%, 60%)"
+                required
+            />
+            <small class="text-secondary">Supports HEX, RGB, RGBA, HSL, HSLA formats</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="colorPicker" class="form-label">Or Pick a Color</label>
+            <input 
+                type="color" 
+                id="colorPicker" 
+                class="form-control"
+                style="height: 60px; cursor: pointer;"
+            />
+        </div>
+        
+        <div class="btn-group mt-4">
+            <button type="submit" class="btn btn-primary">
+                Convert Color
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Clear
+            </button>
+        </div>
+    </form>
+    
+    <div id="colorResult" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Color Information:</h3>
+        
+        <div class="color-preview mb-4" style="height: 100px; border-radius: var(--radius-md); border: 2px solid var(--border-color);"></div>
+        
+        <div class="color-formats">
+            <div class="format-row">
+                <strong>HEX:</strong>
+                <code class="color-value" data-format="hex">#000000</code>
+                <button class="btn btn-sm copy-format" data-format="hex">Copy</button>
+            </div>
+            <div class="format-row">
+                <strong>RGB:</strong>
+                <code class="color-value" data-format="rgb">rgb(0, 0, 0)</code>
+                <button class="btn btn-sm copy-format" data-format="rgb">Copy</button>
+            </div>
+            <div class="format-row">
+                <strong>RGBA:</strong>
+                <code class="color-value" data-format="rgba">rgba(0, 0, 0, 1)</code>
+                <button class="btn btn-sm copy-format" data-format="rgba">Copy</button>
+            </div>
+            <div class="format-row">
+                <strong>HSL:</strong>
+                <code class="color-value" data-format="hsl">hsl(0, 0%, 0%)</code>
+                <button class="btn btn-sm copy-format" data-format="hsl">Copy</button>
+            </div>
+            <div class="format-row">
+                <strong>HSLA:</strong>
+                <code class="color-value" data-format="hsla">hsla(0, 0%, 0%, 1)</code>
+                <button class="btn btn-sm copy-format" data-format="hsla">Copy</button>
+            </div>
+        </div>
+        
+        <div class="color-info mt-4">
+            <h4>Additional Information:</h4>
+            <div id="additionalInfo"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.api-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.result-container {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.format-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.format-row:last-child {
+    border-bottom: none;
+}
+
+.format-row strong {
+    width: 80px;
+    color: var(--text-secondary);
+}
+
+.format-row code {
+    flex: 1;
+    background-color: var(--bg-primary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--yellow);
+}
+
+.copy-format {
+    background-color: var(--cyan);
+    color: var(--background);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+}
+
+.copy-format:hover {
+    background-color: var(--green);
+}
+
+.color-info {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-color);
+}
+
+#additionalInfo {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+</style>
+

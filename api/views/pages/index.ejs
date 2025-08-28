@@ -1,0 +1,344 @@
+<div class="v-100">
+  <h1 class="text-danger text-center mb-4">Welcome to my API!</h1>
+  <h2 class="text-success text-center mb-5">Available Endpoints & Services</h2>
+
+  <!-- API Endpoints -->
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+    <!-- Version -->
+    <div class="col">
+      <div class="card h-100 border-danger">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-danger">📋 API Version</h5>
+          <p class="card-text flex-grow-1">Get current API version information</p>
+          <div class="mt-auto">
+            <a href="/api/v1/version" class="btn btn-danger btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timezones -->
+    <div class="col">
+      <div class="card h-100 border-info">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-info">🕐 Timezones</h5>
+          <p class="card-text flex-grow-1">Timezone help and conversion tools</p>
+          <div class="mt-auto">
+            <a href="/data/timezones" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/timezones/help" class="btn btn-info btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">💻 GitHub Data</h5>
+          <p class="card-text flex-grow-1">User profiles, repositories, and organizations</p>
+          <div class="mt-auto">
+            <a href="/data/git" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/git/jason" class="btn btn-warning btn-sm me-2" target="_blank">Backend</a>
+            <a href="https://github.com" class="btn btn-secondary btn-sm" target="_blank">Official Site</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reddit -->
+    <div class="col">
+      <div class="card h-100 border-primary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary">🤖 Reddit Data</h5>
+          <p class="card-text flex-grow-1">User posts and subreddit content</p>
+          <div class="mt-auto">
+            <a href="/data/reddit" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/reddit/jason" class="btn btn-primary btn-sm me-2" target="_blank">Backend</a>
+            <a href="https://reddit.com" class="btn btn-secondary btn-sm" target="_blank">Official Site</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anime -->
+    <div class="col">
+      <div class="card h-100 border-secondary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-secondary">🎌 Anime Quotes</h5>
+          <p class="card-text flex-grow-1">Random anime quotes and inspiration</p>
+          <div class="mt-auto">
+            <a href="/data/anime" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/anime/quote" class="btn btn-secondary btn-sm me-2" target="_blank">Backend</a>
+            <a href="http://quotes.casjay.coffee" class="btn btn-secondary btn-sm" target="_blank">Official Site</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COVID Global -->
+    <div class="col">
+      <div class="card h-100 border-danger">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-danger">🦠 COVID-19 Global</h5>
+          <p class="card-text flex-grow-1">Global COVID-19 statistics and data</p>
+          <div class="mt-auto">
+            <a href="/data/covid" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/global" class="btn btn-danger btn-sm me-2" target="_blank">Backend</a>
+            <a href="https://disease.sh" class="btn btn-secondary btn-sm" target="_blank">Official Site</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COVID NY State -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">🗽 COVID-19 NY State</h5>
+          <p class="card-text flex-grow-1">New York State COVID-19 statistics</p>
+          <div class="mt-auto">
+            <a href="/data/covid" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/usa/nys" class="btn btn-warning btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ArcGIS -->
+    <div class="col">
+      <div class="card h-100 border-info">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-info">🗺️ ArcGIS Data</h5>
+          <p class="card-text flex-grow-1">Johns Hopkins CSSE COVID-19 data</p>
+          <div class="mt-auto">
+            <a href="/data/covid" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/arcgis" class="btn btn-info btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Utilities Section -->
+<div class="mt-5">
+  <h2 class="text-center text-warning mb-4">🔧 Available Utilities</h2>
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+    <!-- Base64 -->
+    <div class="col">
+      <div class="card h-100 border-primary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary">📋 Base64</h5>
+          <p class="card-text flex-grow-1">Encode and decode Base64 strings</p>
+          <div class="mt-auto">
+            <a href="/utilities/base64" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/base64" class="btn btn-primary btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hash Generator -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">🔐 Hash Generator</h5>
+          <p class="card-text flex-grow-1">Generate MD5, SHA1, SHA256 hashes</p>
+          <div class="mt-auto">
+            <a href="/utilities/hash" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/hash" class="btn btn-warning btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UUID Generator -->
+    <div class="col">
+      <div class="card h-100 border-info">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-info">🎲 UUID Generator</h5>
+          <p class="card-text flex-grow-1">Generate unique identifiers (UUIDs)</p>
+          <div class="mt-auto">
+            <a href="/utilities/uuid" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/uuid" class="btn btn-info btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JWT Decoder -->
+    <div class="col">
+      <div class="card h-100 border-secondary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-secondary">🔑 JWT Decoder</h5>
+          <p class="card-text flex-grow-1">Decode JSON Web Tokens</p>
+          <div class="mt-auto">
+            <a href="/utilities/jwt" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/jwt" class="btn btn-secondary btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="col">
+      <div class="card h-100 border-danger">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-danger">📱 QR Code</h5>
+          <p class="card-text flex-grow-1">Generate QR codes from text</p>
+          <div class="mt-auto">
+            <a href="/utilities/qr" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/qr" class="btn btn-danger btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Tools -->
+    <div class="col">
+      <div class="card h-100 border-success">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-success">🎨 Color Tools</h5>
+          <p class="card-text flex-grow-1">Color conversion and palette tools</p>
+          <div class="mt-auto">
+            <a href="/utilities/color" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/color" class="btn btn-success btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lorem Ipsum -->
+    <div class="col">
+      <div class="card h-100 border-primary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary">📝 Lorem Ipsum</h5>
+          <p class="card-text flex-grow-1">Generate placeholder text</p>
+          <div class="mt-auto">
+            <a href="/utilities/lorem" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/lorem" class="btn btn-primary btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Generator -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">🛡️ Password Generator</h5>
+          <p class="card-text flex-grow-1">Generate secure passwords</p>
+          <div class="mt-auto">
+            <a href="/utilities/passwd" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/utilities/passwd" class="btn btn-warning btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data & Tools Section -->
+<div class="mt-4">
+  <h2 class="text-center text-info mb-4">📊 Data & Tools</h2>
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+    <!-- Git Commit Generator -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">📝 Git Commit Generator</h5>
+          <p class="card-text flex-grow-1">Generate conventional commit messages</p>
+          <div class="mt-auto">
+            <a href="/tools/commit" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/tools/commit" class="btn btn-warning btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domain Checker -->
+    <div class="col">
+      <div class="card h-100 border-info">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-info">🌐 Domain Checker</h5>
+          <p class="card-text flex-grow-1">Check domain availability and info</p>
+          <div class="mt-auto">
+            <a href="/data/domains" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/data/domains" class="btn btn-info btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- School Closings -->
+    <div class="col">
+      <div class="card h-100 border-primary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary">🏫 School Closings</h5>
+          <p class="card-text flex-grow-1">Check local school closure information</p>
+          <div class="mt-auto">
+            <a href="/data/closings" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/data/closings" class="btn btn-primary btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Todo Manager -->
+    <div class="col">
+      <div class="card h-100 border-success">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-success">✅ Todo Manager</h5>
+          <p class="card-text flex-grow-1">Manage your personal todo lists</p>
+          <div class="mt-auto">
+            <a href="/personal/todos" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/personal/todos" class="btn btn-success btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Manager -->
+    <div class="col">
+      <div class="card h-100 border-secondary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-secondary">📋 Notes Manager</h5>
+          <p class="card-text flex-grow-1">Create and manage personal notes</p>
+          <div class="mt-auto">
+            <a href="/personal/notes" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/personal/notes" class="btn btn-secondary btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- URL Shortener -->
+    <div class="col">
+      <div class="card h-100 border-warning">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-warning">🔗 URL Shortener</h5>
+          <p class="card-text flex-grow-1">Create shortened URLs and manage links</p>
+          <div class="mt-auto">
+            <a href="/services/url" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/services/url" class="btn btn-warning btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Authentication -->
+    <div class="col">
+      <div class="card h-100 border-danger">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-danger">🔐 Authentication</h5>
+          <p class="card-text flex-grow-1">User authentication and token management</p>
+          <div class="mt-auto">
+            <a href="/auth" class="btn btn-success btn-sm me-2">Frontend</a>
+            <a href="/api/v1/auth" class="btn btn-danger btn-sm" target="_blank">Backend</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

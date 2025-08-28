@@ -1,0 +1,98 @@
+<div class="hero fade-in">
+    <h1>UUID Generator</h1>
+    <p class="lead">Generate universally unique identifiers (UUIDs)</p>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Generate UUID</h2>
+    <p class="card-text mb-4">Click the button to generate a new UUID v4</p>
+    
+    <div class="text-center">
+        <div id="uuid-display" class="mb-4">
+            <code class="uuid-result" style="font-size: var(--text-xl); padding: var(--space-4);">
+                Click generate to create a UUID
+            </code>
+        </div>
+        
+        <div class="btn-group">
+            <button id="generateBtn" class="btn btn-primary">
+                Generate New UUID
+            </button>
+            <button id="copyBtn" class="btn btn-secondary" disabled>
+                Copy to Clipboard
+            </button>
+        </div>
+        
+        <div class="mt-6">
+            <h3 class="mb-3">Batch Generation</h3>
+            <div class="form-group" style="max-width: 300px; margin: 0 auto;">
+                <label for="count" class="form-label">Number of UUIDs</label>
+                <input type="number" id="count" min="1" max="100" value="5" class="form-control">
+            </div>
+            <button id="batchBtn" class="btn btn-primary mt-3">Generate Batch</button>
+        </div>
+    </div>
+    
+    <div id="batch-result" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Generated UUIDs:</h3>
+        <pre class="result-output"></pre>
+        <button class="btn btn-sm copy-btn mt-2">Copy All</button>
+    </div>
+</div>
+
+<style>
+.uuid-result {
+    display: inline-block;
+    background-color: var(--bg-secondary);
+    color: var(--yellow);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    font-family: 'Monaco', 'Consolas', monospace;
+    user-select: all;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    text-align: center;
+}
+
+.result-container {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.result-output {
+    background-color: var(--bg-primary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.copy-btn {
+    background-color: var(--cyan);
+    color: var(--background);
+}
+</style>
+

@@ -5,7 +5,8 @@ const cors = require('cors');
 
 const fetch = require('node-fetch');
 
-const myHeaders = require('../middleware/headers');
+const { getHeaders } = require('../middleware/headers');
+const { fetchAllGitHubPages } = require('../utils/pagination');
 const githubToken = process.env.GITHUB_API_KEY;
 const api = 'https://api.github.com/repos/malaks-us/jason/contents/_posts';
 
@@ -51,18 +52,15 @@ blogRoute.get('/jason', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const repo = req.params.id;
-  const response = await fetch(blog, {
-    Headers: {
-      Authorization: `token ${githubToken}`,
-      myHeaders,
-    },
-  });
   try {
-    const json = await response.json();
+    const headers = getHeaders({
+      'Authorization': `token ${githubToken}`
+    });
+    
+    const posts = await fetchAllGitHubPages(blog, headers);
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
-  } catch (err) {
+    res.send(posts);
+  } catch (error) {
     res.json({ error: error.message });
   }
 });
@@ -71,20 +69,17 @@ blogRoute.get('/:id', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  const repoID = req.params.id;
-  const repoURL = 'https://api.github.com/' + repoID + '/contents/_posts';
-
-  const response = await fetch(repoURL, {
-    Headers: {
-      Authorization: `token ${githubToken}`,
-      myHeaders,
-    },
-  });
   try {
-    const json = await response.json();
+    const repoID = req.params.id;
+    const repoURL = 'https://api.github.com/' + repoID + '/contents/_posts';
+    const headers = getHeaders({
+      'Authorization': `token ${githubToken}`
+    });
+
+    const posts = await fetchAllGitHubPages(repoURL, headers);
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
-  } catch (err) {
+    res.send(posts);
+  } catch (error) {
     res.json({ error: error.message });
   }
 });

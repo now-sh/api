@@ -1,0 +1,315 @@
+<div class="hero fade-in">
+    <h1>School Closings & Delays</h1>
+    <p class="lead">Real-time school closing and delay information</p>
+</div>
+
+<div class="alert-banner" id="weatherAlert" style="display: none;">
+    <div class="alert-content"></div>
+</div>
+
+<div class="card">
+    <div class="closings-header">
+        <h2>Current Status</h2>
+        <div class="last-updated">
+            Last updated: <span id="lastUpdated">Loading...</span>
+        </div>
+    </div>
+    
+    <div class="filter-controls">
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="form-control search-box" 
+            placeholder="Search schools, districts, or organizations..."
+        />
+        
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="closed">Closed</button>
+            <button class="filter-btn" data-filter="delayed">Delayed</button>
+            <button class="filter-btn" data-filter="early">Early Dismissal</button>
+        </div>
+    </div>
+    
+    <div id="closingsList" class="closings-list">
+        <div class="loading">Loading school closings...</div>
+    </div>
+</div>
+
+<div class="card mt-6">
+    <h3>Submit a Closing</h3>
+    
+    <form id="closingForm" class="closing-form">
+        <div class="form-group">
+            <label for="schoolName" class="form-label">School/Organization Name</label>
+            <input 
+                type="text" 
+                id="schoolName" 
+                name="schoolName" 
+                class="form-control" 
+                placeholder="Enter school or organization name"
+                required
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="status" class="form-label">Status</label>
+            <select id="status" name="status" class="form-control" required>
+                <option value="">Select status...</option>
+                <option value="closed">Closed</option>
+                <option value="delayed">Delayed Opening</option>
+                <option value="early">Early Dismissal</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="delayTimeGroup" style="display: none;">
+            <label for="delayTime" class="form-label">Delay/Dismissal Time</label>
+            <input 
+                type="text" 
+                id="delayTime" 
+                name="delayTime" 
+                class="form-control" 
+                placeholder="e.g., 2 hours, 10:00 AM"
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="reason" class="form-label">Reason</label>
+            <textarea 
+                id="reason" 
+                name="reason" 
+                class="form-control" 
+                placeholder="Weather conditions, power outage, etc."
+                rows="2"
+            ></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit Closing</button>
+    </form>
+</div>
+
+<style>
+.alert-banner {
+    background-color: rgba(255, 85, 85, 0.2);
+    border: 2px solid var(--red);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.alert-content {
+    text-align: center;
+    color: var(--red);
+    font-weight: 500;
+}
+
+.closings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.last-updated {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.filter-controls {
+    margin-bottom: var(--space-4);
+}
+
+.search-box {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    width: 100%;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.filter-btn.active {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+
+.closings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.closing-item {
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.closing-item:hover {
+    transform: translateX(4px);
+}
+
+.closing-item.status-closed {
+    border-left: 4px solid var(--red);
+}
+
+.closing-item.status-delayed {
+    border-left: 4px solid var(--yellow);
+}
+
+.closing-item.status-early {
+    border-left: 4px solid var(--orange);
+}
+
+.closing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-2);
+}
+
+.closing-name {
+    font-weight: 600;
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+}
+
+.closing-status {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.status-badge-closed {
+    background-color: rgba(255, 85, 85, 0.2);
+    color: var(--red);
+}
+
+.status-badge-delayed {
+    background-color: rgba(241, 250, 140, 0.2);
+    color: var(--yellow);
+}
+
+.status-badge-early {
+    background-color: rgba(255, 184, 108, 0.2);
+    color: var(--orange);
+}
+
+.closing-details {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+}
+
+.closing-time {
+    font-weight: 500;
+    color: var(--cyan);
+}
+
+.closing-reason {
+    margin-top: var(--space-2);
+    font-style: italic;
+}
+
+.closing-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--text-secondary);
+}
+
+.success-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--green);
+    color: var(--background);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+

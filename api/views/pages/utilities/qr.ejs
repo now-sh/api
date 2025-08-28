@@ -1,0 +1,131 @@
+<div class="hero fade-in">
+    <h1>QR Code Generator</h1>
+    <p class="lead">Generate QR codes from text, URLs, or other data</p>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Generate QR Code</h2>
+    <p class="card-text mb-4">Enter data to encode into a QR code</p>
+    
+    <form id="qrForm" class="api-form">
+        <div class="form-group">
+            <label for="data" class="form-label">Data to Encode</label>
+            <textarea 
+                id="data" 
+                name="data" 
+                class="form-control" 
+                placeholder="Enter text, URL, or any data..."
+                rows="3"
+                required
+            ></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="size" class="form-label">Size (pixels)</label>
+            <input 
+                type="number" 
+                id="size" 
+                name="size" 
+                class="form-control" 
+                min="100"
+                max="1000"
+                value="300"
+                placeholder="300"
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="format" class="form-label">Output Format</label>
+            <select id="format" name="format" class="form-control">
+                <option value="image">Image (PNG)</option>
+                <option value="svg">SVG</option>
+                <option value="base64">Base64</option>
+            </select>
+        </div>
+        
+        <div class="btn-group mt-4">
+            <button type="submit" class="btn btn-primary">
+                Generate QR Code
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Clear
+            </button>
+        </div>
+    </form>
+    
+    <div id="qrResult" class="result-container mt-6 text-center" style="display: none;">
+        <h3 class="mb-3">Generated QR Code:</h3>
+        <div id="qrDisplay"></div>
+        <div class="btn-group mt-4">
+            <button id="downloadBtn" class="btn btn-primary btn-sm">Download</button>
+            <button id="copyDataBtn" class="btn btn-secondary btn-sm">Copy Data</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.api-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.result-container {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+#qrDisplay img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: white;
+    padding: var(--space-2);
+}
+
+#qrDisplay pre {
+    background-color: var(--bg-primary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    max-height: 400px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+</style>
+

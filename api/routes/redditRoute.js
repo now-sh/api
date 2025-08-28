@@ -22,21 +22,37 @@ redditRoute.get(default_route, cors(), async (req, res) => {
 });
 
 redditRoute.get('/jason', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/user/casjay/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
+    const response = await fetch(`https://www.reddit.com/user/casjay/.json?sort=new&limit=500`, {
+      headers: {
+        'User-Agent': 'Node.js API Client'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Reddit API returned ${response.status}: ${response.statusText}`);
+    }
+    
     const json = await response.json();
-    this.json = json.data.children;
-    this.json.shift;
-    this.json.shift;
-    this.json.shift;
+    
+    if (!json.data || !json.data.children) {
+      throw new Error('Invalid Reddit response format');
+    }
+    
+    let redditPosts = json.data.children;
+    // Remove first 3 posts (properly call shift method)
+    redditPosts.shift();
+    redditPosts.shift();
+    redditPosts.shift();
+    
     res.send(
       JSON.stringify({
-        reddit: this.json,
+        reddit: redditPosts,
       })
     );
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

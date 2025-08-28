@@ -20,4 +20,12 @@ const userSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Export a function that returns the model using the correct connection
+module.exports = (() => {
+  // If connections are available, use the api connection
+  if (global.mongoConnections && global.mongoConnections.api) {
+    return global.mongoConnections.api.model('User', userSchema);
+  }
+  // Fallback to default mongoose connection
+  return mongoose.model('User', userSchema);
+})();

@@ -79,6 +79,7 @@ apiRoute.get('/help', cors(), async (req, res) => {
         Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
         TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/help`,
         PassGen: `${req.protocol}://${req.headers.host}/api/v1/passwd`,
+        Documentation: `${req.protocol}://${req.headers.host}/api/docs`,
       })
     );
   } catch (error) {

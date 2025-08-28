@@ -1,0 +1,133 @@
+<div class="v-100">
+  <h1 class="text-danger">📊 Anime Quotes</h1>
+  <p class="lead">Get random anime quotes and inspiration</p>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border border-danger">
+        <div class="card-header">
+          <h5 class="mb-0">Random Anime Quote</h5>
+        </div>
+        <div class="card-body text-center">
+          <button id="getQuote" class="btn btn-danger btn-lg">
+            <i class="bi bi-quote"></i> Get Random Quote
+          </button>
+        </div>
+      </div>
+      
+      <div id="quote-result" class="mt-4" style="display: none;">
+        <div class="card border border-success">
+          <div class="card-header">
+            <h5 class="mb-0">Anime Quote</h5>
+          </div>
+          <div class="card-body">
+            <div id="quote-display" class="text-center mb-3">
+              <blockquote class="blockquote">
+                <p id="quote-text" class="fs-5 text-primary"></p>
+                <footer class="blockquote-footer">
+                  <span id="quote-character"></span> from <cite id="quote-anime"></cite>
+                </footer>
+              </blockquote>
+            </div>
+            <div class="text-center">
+              <button class="btn btn-outline-success btn-sm" onclick="copyToClipboard('#quote-text')">
+                <i class="bi bi-clipboard"></i> Copy Quote
+              </button>
+              <button id="getAnotherQuote" class="btn btn-primary btn-sm ms-2">
+                <i class="bi bi-arrow-clockwise"></i> Another Quote
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+      <div class="card border-info">
+        <div class="card-header">
+          <h5 class="mb-0">API Information</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Endpoint:</strong> <code>/api/v1/anime/quote</code></p>
+          <p><strong>Method:</strong> GET</p>
+          <p><strong>Returns:</strong> Random anime quote with character and anime name</p>
+          <a href="/api/v1/anime/quote" class="btn btn-info btn-sm" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> View API Response
+          </a>
+          <a href="http://quotes.casjay.coffee" class="btn btn-success btn-sm ms-2" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> Official Quotes Site
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(selector) {
+  const element = document.querySelector(selector);
+  if (element) {
+    navigator.clipboard.writeText(element.textContent);
+  }
+}
+
+async function fetchAnimeQuote() {
+  const resultDiv = document.getElementById('quote-result');
+  const button = document.getElementById('getQuote');
+  const anotherButton = document.getElementById('getAnotherQuote');
+  
+  // Disable button and show loading
+  const activeButton = event ? event.target : button;
+  activeButton.disabled = true;
+  activeButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+  
+  try {
+    const response = await fetch('/api/v1/anime/quote');
+    
+    if (response.ok) {
+      const text = await response.text();
+      const lines = text.trim().split('\n');
+      
+      let quote = 'No quote available';
+      let character = 'Unknown';
+      let anime = 'Unknown';
+      
+      // Parse the response format
+      lines.forEach(line => {
+        if (line.startsWith('quote: ')) {
+          quote = line.replace('quote: ', '');
+        } else if (line.startsWith('character: ')) {
+          character = line.replace('character: ', '');
+        } else if (line.startsWith('anime: ')) {
+          anime = line.replace('anime: ', '');
+        }
+      });
+      
+      // Update the display
+      document.getElementById('quote-text').textContent = `"${quote}"`;
+      document.getElementById('quote-character').textContent = character;
+      document.getElementById('quote-anime').textContent = anime;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      alert('Failed to fetch quote. Please try again.');
+    }
+  } catch (error) {
+    alert(`Error: ${error.message}`);
+  } finally {
+    // Re-enable buttons
+    activeButton.disabled = false;
+    if (activeButton === button) {
+      activeButton.innerHTML = '<i class="bi bi-quote"></i> Get Random Quote';
+    } else {
+      activeButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Another Quote';
+    }
+  }
+}
+
+document.getElementById('getQuote').addEventListener('click', fetchAnimeQuote);
+document.getElementById('getAnotherQuote').addEventListener('click', fetchAnimeQuote);
+</script>

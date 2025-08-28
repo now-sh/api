@@ -1,0 +1,190 @@
+<div class="hero fade-in">
+    <h1>Domain Manager</h1>
+    <p class="lead">Check and manage domain information</p>
+</div>
+
+<div class="card">
+    <h2>Check Domain</h2>
+    <p>Enter a domain name to check its availability and information</p>
+    
+    <form id="domainForm" class="domain-form">
+        <div class="form-group">
+            <label for="domain" class="form-label">Domain Name</label>
+            <input 
+                type="text" 
+                id="domain" 
+                name="domain" 
+                class="form-control" 
+                placeholder="example.com"
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$"
+                required
+            />
+            <small class="text-secondary">Enter domain without http:// or https://</small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Check Domain</button>
+    </form>
+    
+    <div id="domainResult" class="result-container" style="display: none;">
+        <h3>Domain Information</h3>
+        <div class="result-content"></div>
+    </div>
+</div>
+
+<div class="card mt-6">
+    <h3>Available Domains</h3>
+    <div id="domainsList" class="domains-grid">
+        <div class="loading">Loading domains...</div>
+    </div>
+</div>
+
+<style>
+.domain-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.result-container {
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.result-content {
+    margin-top: var(--space-3);
+}
+
+.domain-info {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    color: var(--text-primary);
+}
+
+.domains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .domains-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.domain-item {
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.domain-item:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+}
+
+.domain-name {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--cyan);
+    margin-bottom: var(--space-2);
+}
+
+.domain-status {
+    display: inline-block;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-2);
+}
+
+.status-available {
+    background-color: rgba(80, 250, 123, 0.2);
+    color: var(--green);
+}
+
+.status-taken {
+    background-color: rgba(255, 85, 85, 0.2);
+    color: var(--red);
+}
+
+.domain-details {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--text-secondary);
+}
+
+.error-message {
+    background-color: rgba(255, 85, 85, 0.1);
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-3);
+}
+
+.success-message {
+    background-color: rgba(80, 250, 123, 0.1);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-3);
+}
+</style>
+

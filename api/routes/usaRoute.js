@@ -5,7 +5,7 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 
 const usa = require('../controllers/usa');
-const myHeaders = require('../middleware/headers');
+const { getHeaders } = require('../middleware/headers');
 const default_route = ['/', '/help'];
 const states = [
   'Alabama',
@@ -80,9 +80,7 @@ usaRoute.get('/nys', cors(), async (req, res) => {
   const hostname = req.headers.host;
   const proto = req.protocol + '://';
   const response = await fetch(proto + hostname + '/api/v1/nys', {
-    headers: {
-      myHeaders,
-    },
+    headers: getHeaders(),
   });
   try {
     const json = await response.json();
@@ -95,9 +93,7 @@ usaRoute.get('/nys', cors(), async (req, res) => {
 
 usaRoute.get('/:id', cors(), async (req, res) => {
   const response = await fetch(`https://disease.sh/v3/covid-19/states/${req.params.id}`, {
-    headers: {
-      myHeaders,
-    },
+    headers: getHeaders(),
   });
   try {
     const json = await response.json();

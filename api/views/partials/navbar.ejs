@@ -1,0 +1,90 @@
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="container">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <a href="/" class="navbar-logo" aria-label="Backend API Home">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    <span>Backend API</span>
+                </a>
+                <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+            
+            <div class="navbar-menu" id="navbarMenu">
+                <div class="navbar-start">
+                    <div class="navbar-item has-dropdown">
+                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
+                            Utilities
+                        </a>
+                        <div class="navbar-dropdown" aria-label="Utilities submenu">
+                            <a class="navbar-dropdown-item" href="/utilities/base64">Base64</a>
+                            <a class="navbar-dropdown-item" href="/utilities/hash">Hash Generator</a>
+                            <a class="navbar-dropdown-item" href="/utilities/uuid">UUID Generator</a>
+                            <a class="navbar-dropdown-item" href="/utilities/jwt">JWT Decoder</a>
+                            <a class="navbar-dropdown-item" href="/utilities/qr">QR Code</a>
+                            <a class="navbar-dropdown-item" href="/utilities/color">Color Tools</a>
+                            <a class="navbar-dropdown-item" href="/utilities/lorem">Lorem Ipsum</a>
+                            <a class="navbar-dropdown-item" href="/utilities/passwd">Password Generator</a>
+                        </div>
+                    </div>
+                    
+                    <div class="navbar-item has-dropdown">
+                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
+                            Data
+                        </a>
+                        <div class="navbar-dropdown" aria-label="Data submenu">
+                            <a class="navbar-dropdown-item" href="/data/domains">Domains</a>
+                            <a class="navbar-dropdown-item" href="/data/timezones">Timezones</a>
+                            <a class="navbar-dropdown-item" href="/data/closings">School Closings</a>
+                            <a class="navbar-dropdown-item" href="/api/v1/git/jason">GitHub Repos</a>
+                            <a class="navbar-dropdown-item" href="/api/v1/anime/quote">Anime Quotes</a>
+                        </div>
+                    </div>
+                    
+                    <div class="navbar-item has-dropdown">
+                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
+                            Services
+                        </a>
+                        <div class="navbar-dropdown" aria-label="Services submenu">
+                            <a class="navbar-dropdown-item" href="/personal/todos">Todo List</a>
+                            <a class="navbar-dropdown-item" href="/personal/notes">Notes</a>
+                            <a class="navbar-dropdown-item" href="/services/url">URL Shortener</a>
+                            <a class="navbar-dropdown-item" href="/auth">Authentication</a>
+                        </div>
+                    </div>
+                    
+                    <a class="navbar-item" href="/api/docs">
+                        API Docs
+                    </a>
+                </div>
+                
+                <div class="navbar-end">
+                    <a class="navbar-item" href="/api/health/healthz" aria-label="System Status">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <span class="navbar-text-mobile">Status</span>
+                    </a>
+                    <a class="navbar-item" href="https://github.com/now-sh/api" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                        <span class="navbar-text-mobile">GitHub</span>
+                    </a>
+                    <button class="navbar-item theme-toggle" aria-label="Toggle theme">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M12 17.5C9.5 17.5 7.5 15.5 7.5 13S9.5 8.5 12 8.5 16.5 10.5 16.5 13 14.5 17.5 12 17.5zM12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display: none;">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                        <span class="navbar-text-mobile">Theme</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

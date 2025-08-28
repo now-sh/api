@@ -1,0 +1,35 @@
+<div class="hero fade-in">
+    <h1>Hash Generator</h1>
+    <p class="lead">Generate MD5, SHA1, SHA256, and SHA512 hashes</p>
+</div>
+
+<%- include('../../partials/endpoint-form', {
+    title: 'Hash Generator',
+    description: 'Enter text to generate various hash types',
+    formId: 'hashForm',
+    submitText: 'Generate Hashes',
+    formContent: `
+        <div class="form-group">
+            <label for="input" class="form-label">Input Text</label>
+            <textarea 
+                id="input" 
+                name="text" 
+                class="form-control" 
+                placeholder="Enter text to hash..."
+                required
+            ></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="hashType" class="form-label">Hash Type</label>
+            <select id="hashType" name="type" class="form-control">
+                <option value="all">All Hash Types</option>
+                <option value="md5">MD5</option>
+                <option value="sha1">SHA1</option>
+                <option value="sha256">SHA256</option>
+                <option value="sha512">SHA512</option>
+            </select>
+        </div>
+    `
+}) %>
+

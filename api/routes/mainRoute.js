@@ -5,12 +5,305 @@ const express = require('express');
 const defaultRoute = express.Router();
 const datetime = require('node-datetime');
 const cors = require('cors');
+const utilitiesController = require('../controllers/utilities');
 
 defaultRoute.get('/', cors(), (req, res) => {
   try {
-    res.sendFile(path.join(`${__dirname}/public/index.html`));
+    res.render('pages/index', {
+      title: 'Backend API - Home',
+      description: 'Modern API endpoints for development',
+      activePage: 'home'
+    });
   } catch (error) {
     res.json({ error: error.message });
+  }
+});
+
+// ==== NEW CATEGORIZED FRONTEND ROUTES ====
+
+// 🔧 Utilities frontend routes
+defaultRoute.get('/utilities/:tool', cors(), (req, res) => {
+  try {
+    const { tool } = req.params;
+    const pageTitle = tool.charAt(0).toUpperCase() + tool.slice(1).replace('-', ' ');
+    
+    res.render(`pages/utilities/${tool}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} utility tool`,
+      activePage: 'utilities'
+    });
+  } catch (error) {
+    // Fallback to generic page if specific page doesn't exist
+    res.send(generateCategorizedEndpointPage('utilities', req.params.tool));
+  }
+});
+
+// 🛠️ Tools frontend routes  
+defaultRoute.get('/tools/:tool', cors(), (req, res) => {
+  try {
+    const { tool } = req.params;
+    const pageTitle = tool.charAt(0).toUpperCase() + tool.slice(1).replace('-', ' ');
+    
+    res.render(`pages/tools/${tool}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} tool`,
+      activePage: 'tools'
+    });
+  } catch (error) {
+    // Fallback to generic page if specific page doesn't exist
+    res.send(generateCategorizedEndpointPage('tools', req.params.tool));
+  }
+});
+
+// 📊 Data frontend routes
+defaultRoute.get('/data/:source', cors(), (req, res) => {
+  try {
+    const { source } = req.params;
+    const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
+    
+    res.render(`pages/data/${source}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} data source`,
+      activePage: 'data'
+    });
+  } catch (error) {
+    // Fallback to generic page if specific page doesn't exist
+    res.send(generateCategorizedEndpointPage('data', req.params.source));
+  }
+});
+
+// 🏥 Health frontend routes
+defaultRoute.get('/health/:service', cors(), (req, res) => {
+  try {
+    const servicePath = path.join(`${__dirname}/../public/health/${req.params.service}/index.html`);
+    if (require('fs').existsSync(servicePath)) {
+      res.sendFile(servicePath);
+    } else {
+      res.send(generateCategorizedEndpointPage('health', req.params.service));
+    }
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
+// 👤 Personal frontend routes
+defaultRoute.get('/personal/:service', cors(), (req, res) => {
+  try {
+    const { service } = req.params;
+    const pageTitle = service.charAt(0).toUpperCase() + service.slice(1).replace('-', ' ');
+    
+    res.render(`pages/personal/${service}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} personal service`,
+      activePage: 'personal'
+    });
+  } catch (error) {
+    // Fallback to generic page if specific page doesn't exist
+    res.send(generateCategorizedEndpointPage('personal', req.params.service));
+  }
+});
+
+// 🌐 Services frontend routes
+defaultRoute.get('/services/:service', cors(), (req, res) => {
+  try {
+    const { service } = req.params;
+    const pageTitle = service.charAt(0).toUpperCase() + service.slice(1).replace('-', ' ');
+    
+    res.render(`pages/services/${service}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} service`,
+      activePage: 'services'
+    });
+  } catch (error) {
+    // Fallback to generic page if specific page doesn't exist
+    res.send(generateCategorizedEndpointPage('services', req.params.service));
+  }
+});
+
+// ==== LEGACY FRONTEND ROUTES (BACKWARD COMPATIBILITY) ====
+
+// Auth route (special case)
+defaultRoute.get('/auth', cors(), (req, res) => {
+  try {
+    res.render('pages/services/auth', {
+      title: 'Authentication - Backend API',
+      description: 'User authentication and JWT management',
+      activePage: 'auth'
+    });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
+// Legacy specific routes
+defaultRoute.get('/base64', cors(), (req, res) => {
+  res.redirect('/utilities/base64');
+});
+
+defaultRoute.get('/commit', cors(), (req, res) => {
+  res.redirect('/tools/commit');
+});
+
+// Generic legacy frontend route handler for all other endpoints
+defaultRoute.get('/:endpoint', cors(), (req, res) => {
+  try {
+    const endpointPath = path.join(`${__dirname}/../public/${req.params.endpoint}/index.html`);
+    // Check if specific page exists, otherwise serve generic template
+    if (require('fs').existsSync(endpointPath)) {
+      res.sendFile(endpointPath);
+    } else {
+      // Serve a generic API endpoint page
+      res.send(generateGenericEndpointPage(req.params.endpoint));
+    }
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
+// Function to generate generic endpoint pages
+function generateGenericEndpointPage(endpoint) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)} - Backend API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="bi bi-code-slash"></i> Backend API</a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/api/docs">API Docs</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-5 text-center">
+    <h1 class="text-danger">${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)} API</h1>
+    <p class="lead">This endpoint provides ${endpoint} functionality</p>
+    <div class="card border-info mt-4">
+      <div class="card-body">
+        <h5>API Endpoint</h5>
+        <p><code>/api/v1/${endpoint}</code></p>
+        <a href="/api/v1/${endpoint}" class="btn btn-info" target="_blank">
+          <i class="bi bi-box-arrow-up-right"></i> View API Response
+        </a>
+        <a href="/api/docs" class="btn btn-outline-info ms-2">
+          <i class="bi bi-book"></i> Documentation
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// Function to generate categorized endpoint pages
+function generateCategorizedEndpointPage(category, tool) {
+  const categoryEmoji = {
+    'utilities': '🔧',
+    'tools': '🛠️', 
+    'data': '📊',
+    'health': '🏥',
+    'personal': '👤',
+    'services': '🌐'
+  };
+  
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${tool.charAt(0).toUpperCase() + tool.slice(1)} ${category.charAt(0).toUpperCase() + category.slice(1)} - Backend API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="bi bi-code-slash"></i> Backend API</a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/api/docs">API Docs</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-5 text-center">
+    <h1 class="text-danger">
+      ${categoryEmoji[category] || '🔗'} ${tool.charAt(0).toUpperCase() + tool.slice(1)} 
+      <small class="text-muted">${category.charAt(0).toUpperCase() + category.slice(1)}</small>
+    </h1>
+    <p class="lead">This ${category} endpoint provides ${tool} functionality</p>
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-8">
+        <div class="card border-info">
+          <div class="card-header">
+            <h5 class="mb-0">API Endpoints</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="text-success">New Categorized</h6>
+                <p><code>/api/v1/${category}/${tool}</code></p>
+                <a href="/api/v1/${category}/${tool}" class="btn btn-success btn-sm" target="_blank">
+                  <i class="bi bi-box-arrow-up-right"></i> View Response
+                </a>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-warning">Legacy (Compatible)</h6>
+                <p><code>/api/v1/${tool}</code></p>
+                <a href="/api/v1/${tool}" class="btn btn-warning btn-sm" target="_blank">
+                  <i class="bi bi-box-arrow-up-right"></i> View Response
+                </a>
+              </div>
+            </div>
+            <hr>
+            <a href="/api/docs" class="btn btn-outline-info">
+              <i class="bi bi-book"></i> Full Documentation
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// URL Shortener redirect handler
+defaultRoute.get('/s/:code', cors(), async (req, res) => {
+  try {
+    const url = await utilitiesController.getUrlByCode(req.params.code);
+    
+    // Perform actual redirect
+    res.redirect(301, url.originalUrl);
+  } catch (error) {
+    // Return error page or redirect to home
+    res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Link Not Found</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+          h1 { color: #e74c3c; }
+          p { color: #7f8c8d; margin: 20px 0; }
+          a { color: #3498db; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        <h1>404 - Link Not Found</h1>
+        <p>${error.message}</p>
+        <p><a href="/">Return to Home</a></p>
+      </body>
+      </html>
+    `);
   }
 });
 

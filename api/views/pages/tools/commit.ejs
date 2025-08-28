@@ -1,0 +1,136 @@
+<div class="hero fade-in">
+    <h1>Commit Message Generator</h1>
+    <p class="lead">Generate standardized Git commit messages</p>
+</div>
+
+<%- include('../../partials/endpoint-form', {
+    title: 'Git Commit Message',
+    description: 'Create consistent and descriptive commit messages',
+    formId: 'commitForm',
+    submitText: 'Generate Message',
+    formContent: `
+        <div class="form-group">
+            <label for="type" class="form-label">Commit Type</label>
+            <select id="type" name="type" class="form-control" required>
+                <option value="feat">✨ feat - New feature</option>
+                <option value="fix">🐛 fix - Bug fix</option>
+                <option value="docs">📚 docs - Documentation changes</option>
+                <option value="style">💎 style - Code style changes</option>
+                <option value="refactor">♻️ refactor - Code refactoring</option>
+                <option value="test">🧪 test - Adding tests</option>
+                <option value="chore">🔧 chore - Maintenance tasks</option>
+                <option value="perf">⚡ perf - Performance improvements</option>
+                <option value="build">📦 build - Build system changes</option>
+                <option value="ci">👷 ci - CI/CD changes</option>
+                <option value="revert">⏪ revert - Revert changes</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scope" class="form-label">Scope (Optional)</label>
+            <input 
+                type="text" 
+                id="scope" 
+                name="scope" 
+                class="form-control" 
+                placeholder="e.g., api, frontend, auth"
+            />
+            <small class="text-secondary">Component or area affected</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="subject" class="form-label">Short Description</label>
+            <input 
+                type="text" 
+                id="subject" 
+                name="subject" 
+                class="form-control" 
+                placeholder="Brief description of changes"
+                maxlength="50"
+                required
+            />
+            <small class="text-secondary">Imperative mood, max 50 characters</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="body" class="form-label">Detailed Description (Optional)</label>
+            <textarea 
+                id="body" 
+                name="body" 
+                class="form-control" 
+                placeholder="Explain the motivation for the change and contrast with previous behavior"
+                rows="4"
+            ></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="footer" class="form-label">Footer (Optional)</label>
+            <textarea 
+                id="footer" 
+                name="footer" 
+                class="form-control" 
+                placeholder="Breaking changes, issues closed, etc."
+                rows="2"
+            ></textarea>
+            <small class="text-secondary">e.g., "BREAKING CHANGE: ...", "Closes #123"</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="emoji" checked>
+                Include emoji in commit type
+            </label>
+        </div>
+    `
+}) %>
+
+<div class="card mt-6">
+    <h3>Common Examples</h3>
+    <div class="example-list">
+        <div class="example-item">
+            <code>feat: add user authentication</code>
+            <p class="text-secondary">Adding a new feature</p>
+        </div>
+        <div class="example-item">
+            <code>fix(api): resolve memory leak in user service</code>
+            <p class="text-secondary">Fixing a bug with scope</p>
+        </div>
+        <div class="example-item">
+            <code>docs: update API documentation</code>
+            <p class="text-secondary">Documentation changes</p>
+        </div>
+        <div class="example-item">
+            <code>refactor(auth): simplify token validation logic</code>
+            <p class="text-secondary">Code refactoring</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.example-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.example-item {
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.example-item code {
+    display: block;
+    margin-bottom: var(--space-2);
+    padding: var(--space-2);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+
+.example-item p {
+    margin: 0;
+    font-size: var(--text-sm);
+}
+</style>
+

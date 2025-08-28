@@ -1,0 +1,116 @@
+<div class="v-100">
+  <h1 class="text-danger">📊 COVID-19 Statistics</h1>
+  <p class="lead">Global COVID-19 data and statistics</p>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border border-danger">
+        <div class="card-header">
+          <h5 class="mb-0">COVID-19 Data</h5>
+        </div>
+        <div class="card-body">
+          <button id="loadGlobalData" class="btn btn-danger me-2">
+            <i class="bi bi-globe"></i> Load Global Data
+          </button>
+          <button id="loadNYSData" class="btn btn-warning me-2">
+            <i class="bi bi-geo-alt"></i> Load NY State Data
+          </button>
+          <button id="loadArcGISData" class="btn btn-info">
+            <i class="bi bi-map"></i> Load ArcGIS Data
+          </button>
+        </div>
+      </div>
+      
+      <div id="covid-result" class="mt-4" style="display: none;">
+        <div class="card border border-success">
+          <div class="card-header">
+            <h5 class="mb-0">COVID-19 Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div class="result-output bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.875rem;"></div>
+            <button class="btn btn-outline-success btn-sm mt-2" onclick="copyToClipboard('.result-output')">
+              <i class="bi bi-clipboard"></i> Copy Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+      <div class="card border-info">
+        <div class="card-header">
+          <h5 class="mb-0">API Endpoints</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li><strong>Global Data:</strong> <code>/api/v1/global</code></li>
+            <li><strong>NY State:</strong> <code>/api/v1/usa/nys</code></li>
+            <li><strong>ArcGIS Data:</strong> <code>/api/v1/arcgis</code></li>
+          </ul>
+          <a href="/api/v1/global" class="btn btn-info btn-sm" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> View Global API
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(selector) {
+  const element = document.querySelector(selector);
+  if (element) {
+    navigator.clipboard.writeText(element.textContent);
+  }
+}
+
+async function loadCovidData(endpoint, buttonId) {
+  const resultDiv = document.getElementById('covid-result');
+  const resultOutput = resultDiv.querySelector('.result-output');
+  const button = document.getElementById(buttonId);
+  
+  button.disabled = true;
+  button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+  
+  try {
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    
+    if (response.ok) {
+      resultOutput.textContent = JSON.stringify(data, null, 2);
+      resultDiv.style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      resultOutput.textContent = `Error: ${data.message || 'Failed to fetch data'}`;
+      resultDiv.style.display = 'block';
+    }
+  } catch (error) {
+    resultOutput.textContent = `Error: ${error.message}`;
+    resultDiv.style.display = 'block';
+  } finally {
+    button.disabled = false;
+    // Restore original button text
+    if (buttonId === 'loadGlobalData') {
+      button.innerHTML = '<i class="bi bi-globe"></i> Load Global Data';
+    } else if (buttonId === 'loadNYSData') {
+      button.innerHTML = '<i class="bi bi-geo-alt"></i> Load NY State Data';
+    } else if (buttonId === 'loadArcGISData') {
+      button.innerHTML = '<i class="bi bi-map"></i> Load ArcGIS Data';
+    }
+  }
+}
+
+document.getElementById('loadGlobalData').addEventListener('click', () => {
+  loadCovidData('/api/v1/global', 'loadGlobalData');
+});
+
+document.getElementById('loadNYSData').addEventListener('click', () => {
+  loadCovidData('/api/v1/usa/nys', 'loadNYSData');
+});
+
+document.getElementById('loadArcGISData').addEventListener('click', () => {
+  loadCovidData('/api/v1/arcgis', 'loadArcGISData');
+});
+</script>

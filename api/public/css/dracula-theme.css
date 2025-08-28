@@ -1,0 +1,458 @@
+/* Dracula Theme for Backend API */
+/* Based on Dracula color palette: https://draculatheme.com/contribute */
+
+:root {
+  /* Dracula Colors */
+  --dracula-background: #282a36;
+  --dracula-current-line: #44475a;
+  --dracula-foreground: #f8f8f2;
+  --dracula-comment: #6272a4;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-pink: #ff79c6;
+  --dracula-purple: #bd93f9;
+  --dracula-red: #ff5555;
+  --dracula-yellow: #f1fa8c;
+
+  /* Theme Variables */
+  --bg-primary: var(--dracula-background);
+  --bg-secondary: var(--dracula-current-line);
+  --bg-card: #363849; /* Solid color for better readability */
+  --text-primary: var(--dracula-foreground);
+  --text-secondary: #a0a4b8; /* Lighter than comment for better contrast */
+  --border-color: rgba(98, 114, 164, 0.5);
+  
+  /* Category Colors */
+  --color-utilities: var(--dracula-cyan);
+  --color-tools: var(--dracula-green);
+  --color-data: var(--dracula-purple);
+  --color-health: var(--dracula-red);
+  --color-personal: var(--dracula-orange);
+  --color-services: var(--dracula-pink);
+  --color-other: var(--dracula-comment);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: rgba(0, 0, 0, 0.125);
+  
+  /* Adjusted colors for light theme */
+  --color-utilities: #0dcaf0;
+  --color-tools: #198754;
+  --color-data: #6f42c1;
+  --color-health: #dc3545;
+  --color-personal: #fd7e14;
+  --color-services: #d63384;
+  --color-other: #6c757d;
+  
+  /* Light shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Hacker Theme */
+[data-theme="hacker"] {
+  --bg-primary: #151515;
+  --bg-secondary: #1a1a1a;
+  --bg-card: #0d0d0d;
+  --text-primary: #eaeaea;
+  --text-secondary: #b5e853;
+  --border-color: rgba(181, 232, 83, 0.3);
+  
+  /* Hacker green colors */
+  --color-utilities: #b5e853;
+  --color-tools: #50fa7b;
+  --color-data: #8be9fd;
+  --color-health: #ff5555;
+  --color-personal: #ffb86c;
+  --color-services: #ff79c6;
+  --color-other: #6272a4;
+  
+  /* Shadows with green glow */
+  --shadow-sm: 0 1px 3px rgba(181, 232, 83, 0.1);
+  --shadow-md: 0 4px 6px rgba(181, 232, 83, 0.2);
+  --shadow-lg: 0 10px 15px rgba(181, 232, 83, 0.3);
+  --shadow-xl: 0 20px 25px rgba(181, 232, 83, 0.4);
+}
+
+/* Base Styles */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hacker theme specific styles */
+[data-theme="hacker"] body {
+  font-family: 'Monaco', 'Consolas', 'Terminal', monospace;
+  background-image: url('https://casjaysdev-sites.github.io/static/assets/images/bkg.png');
+}
+
+[data-theme="hacker"] h1,
+[data-theme="hacker"] h2,
+[data-theme="hacker"] h3,
+[data-theme="hacker"] h4,
+[data-theme="hacker"] h5,
+[data-theme="hacker"] h6 {
+  color: var(--text-secondary);
+  text-shadow: 0 0 5px rgba(181, 232, 83, 0.5);
+}
+
+[data-theme="hacker"] code,
+[data-theme="hacker"] .endpoint-badge {
+  background-color: #000000;
+  color: #b5e853;
+  border-color: #b5e853;
+}
+
+[data-theme="hacker"] .card {
+  border: 1px solid #b5e853 !important;
+}
+
+[data-theme="hacker"] a {
+  color: #b5e853;
+}
+
+[data-theme="hacker"] a:hover {
+  color: #50fa7b;
+  text-shadow: 0 0 5px rgba(181, 232, 83, 0.8);
+}
+
+/* Override Bootstrap Dark Theme */
+.navbar-dark {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: var(--text-primary) !important;
+}
+
+.navbar-dark .nav-link:hover {
+  color: var(--dracula-cyan) !important;
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--dracula-purple) !important;
+}
+
+/* Category Specific Colors */
+.border-primary {
+  border-color: var(--color-utilities) !important;
+}
+
+.border-success {
+  border-color: var(--color-tools) !important;
+}
+
+.border-info {
+  border-color: var(--color-data) !important;
+}
+
+.border-warning {
+  border-color: var(--color-health) !important;
+}
+
+.border-secondary {
+  border-color: var(--color-personal) !important;
+}
+
+.border-danger {
+  border-color: var(--color-services) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--color-utilities);
+  border-color: var(--color-utilities);
+  color: var(--dracula-background);
+}
+
+.btn-primary:hover {
+  background-color: var(--dracula-cyan);
+  border-color: var(--dracula-cyan);
+  filter: brightness(1.1);
+}
+
+.btn-outline-primary {
+  color: var(--color-utilities);
+  border-color: var(--color-utilities);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-utilities);
+  color: var(--dracula-background);
+}
+
+.btn-success {
+  background-color: var(--color-tools);
+  border-color: var(--color-tools);
+  color: var(--dracula-background);
+}
+
+.btn-outline-success {
+  color: var(--color-tools);
+  border-color: var(--color-tools);
+}
+
+.btn-info {
+  background-color: var(--color-data);
+  border-color: var(--color-data);
+  color: var(--dracula-background);
+}
+
+.btn-outline-info {
+  color: var(--color-data);
+  border-color: var(--color-data);
+}
+
+.btn-warning {
+  background-color: var(--color-health);
+  border-color: var(--color-health);
+  color: var(--dracula-background);
+}
+
+.btn-outline-warning {
+  color: var(--color-health);
+  border-color: var(--color-health);
+}
+
+.btn-secondary {
+  background-color: var(--color-personal);
+  border-color: var(--color-personal);
+  color: var(--dracula-background);
+}
+
+.btn-outline-secondary {
+  color: var(--color-personal);
+  border-color: var(--color-personal);
+}
+
+.btn-danger {
+  background-color: var(--color-services);
+  border-color: var(--color-services);
+  color: var(--dracula-background);
+}
+
+.btn-outline-danger {
+  color: var(--color-services);
+  border-color: var(--color-services);
+}
+
+/* Text Colors */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.card-text {
+  color: var(--text-secondary) !important;
+}
+
+.text-danger {
+  color: var(--dracula-red) !important;
+}
+
+/* Badges */
+.badge {
+  font-weight: 500;
+}
+
+.bg-secondary {
+  background-color: var(--dracula-comment) !important;
+}
+
+/* Code blocks */
+code, .endpoint-badge {
+  background-color: #1e1f29;
+  color: var(--dracula-yellow);
+  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.5rem;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+}
+
+/* Links */
+a {
+  color: var(--dracula-cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--dracula-purple);
+  text-decoration: underline;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Category Headers with Dracula colors */
+.category-header {
+  border-bottom-color: var(--border-color);
+}
+
+.bi-tools {
+  color: var(--color-utilities);
+}
+
+.bi-wrench {
+  color: var(--color-tools);
+}
+
+.bi-database {
+  color: var(--color-data);
+}
+
+.bi-heart-pulse {
+  color: var(--color-health);
+}
+
+.bi-person {
+  color: var(--color-personal);
+}
+
+.bi-globe {
+  color: var(--color-services);
+}
+
+.bi-box {
+  color: var(--color-other);
+}
+
+/* Gradient text for header */
+h1.text-danger {
+  background: linear-gradient(45deg, var(--dracula-red), var(--dracula-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero section background */
+.hero-section {
+  background: linear-gradient(135deg, rgba(189, 147, 249, 0.1) 0%, rgba(255, 121, 198, 0.1) 100%);
+}
+
+[data-theme="light"] .hero-section {
+  background: linear-gradient(135deg, rgba(189, 147, 249, 0.05) 0%, rgba(255, 121, 198, 0.05) 100%);
+}
+
+[data-theme="hacker"] .hero-section {
+  background: linear-gradient(135deg, rgba(181, 232, 83, 0.1) 0%, rgba(80, 250, 123, 0.1) 100%);
+}
+
+/* Footer adjustments */
+.footer {
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.footer a {
+  color: var(--dracula-cyan);
+}
+
+.footer a:hover {
+  color: var(--dracula-purple);
+}
+
+.footer img {
+  filter: brightness(1.2);
+  height: 30px;
+  width: auto;
+}
+
+[data-theme="light"] .footer img {
+  filter: none;
+}
+
+[data-theme="hacker"] .footer {
+  background-color: #000000;
+  border-top-color: #b5e853;
+}
+
+[data-theme="hacker"] .footer a {
+  color: #b5e853;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dracula-comment);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dracula-purple);
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--dracula-purple);
+  color: var(--dracula-foreground);
+}
+
+/* Focus styles */
+*:focus {
+  outline-color: var(--dracula-purple);
+}
+
+/* HR styling */
+hr {
+  border-color: var(--border-color);
+  opacity: 1;
+}

@@ -1,0 +1,233 @@
+<div class="hero fade-in">
+    <h1>Todo List Manager</h1>
+    <p class="lead">Create and manage your personal todo items</p>
+</div>
+
+<div class="card mb-6">
+    <h2 class="card-title">Add New Todo</h2>
+    
+    <form id="todoForm" class="api-form">
+        <div class="form-group">
+            <label for="title" class="form-label">Todo Title</label>
+            <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                class="form-control" 
+                placeholder="What needs to be done?"
+                required
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="description" class="form-label">Description (Optional)</label>
+            <textarea 
+                id="description" 
+                name="description" 
+                class="form-control" 
+                placeholder="Add more details..."
+                rows="3"
+            ></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="priority" class="form-label">Priority</label>
+            <select id="priority" name="priority" class="form-control">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Add Todo</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="mb-0">Your Todos</h2>
+        <div class="filter-buttons mt-3">
+            <button class="btn btn-sm filter-btn active" data-filter="all">All</button>
+            <button class="btn btn-sm filter-btn" data-filter="pending">Pending</button>
+            <button class="btn btn-sm filter-btn" data-filter="completed">Completed</button>
+        </div>
+    </div>
+    
+    <div id="todosList" class="todos-container">
+        <div class="loading text-center">Loading todos...</div>
+    </div>
+</div>
+
+<style>
+.api-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-4);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.filter-btn {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+}
+
+.filter-btn.active {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+
+.todos-container {
+    min-height: 200px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.todo-item:hover {
+    transform: translateX(4px);
+    border-color: var(--purple);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+}
+
+.todo-item.completed .todo-title {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.todo-checkbox {
+    margin-top: 2px;
+}
+
+.todo-content {
+    flex: 1;
+}
+
+.todo-title {
+    font-weight: 500;
+    margin-bottom: var(--space-1);
+}
+
+.todo-description {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.todo-meta {
+    display: flex;
+    gap: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.priority-badge {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+}
+
+.priority-low { 
+    background-color: rgba(139, 233, 253, 0.2); 
+    color: var(--cyan);
+}
+.priority-medium { 
+    background-color: rgba(241, 250, 140, 0.2); 
+    color: var(--yellow);
+}
+.priority-high { 
+    background-color: rgba(255, 85, 85, 0.2); 
+    color: var(--red);
+}
+
+.todo-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-1);
+    transition: color 0.2s ease;
+}
+
+.btn-icon:hover {
+    color: var(--text-primary);
+}
+
+.btn-icon.delete:hover {
+    color: var(--red);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+}
+
+.loading {
+    padding: var(--space-8);
+    color: var(--text-secondary);
+}
+</style>
+
+<%- locals.customScripts = '<script src="/js/todos.js"></script>' %>

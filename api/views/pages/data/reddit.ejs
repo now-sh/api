@@ -1,0 +1,102 @@
+<div class="v-100">
+  <h1 class="text-danger">📊 Reddit User Data</h1>
+  <p class="lead">View Reddit user posts and activity</p>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border border-danger">
+        <div class="card-header">
+          <h5 class="mb-0">Reddit User Lookup</h5>
+        </div>
+        <div class="card-body">
+          <form id="redditForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Reddit Username</label>
+              <input type="text" class="form-control" id="username" name="username" value="casjay" placeholder="Enter Reddit username...">
+            </div>
+            
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-reddit"></i> Get Reddit Posts
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      <div id="redditForm-result" class="mt-4" style="display: none;">
+        <div class="card border border-success">
+          <div class="card-header">
+            <h5 class="mb-0">Reddit Posts</h5>
+          </div>
+          <div class="card-body">
+            <div class="result-output bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.875rem;"></div>
+            <button class="btn btn-outline-success btn-sm mt-2" onclick="copyToClipboard('.result-output')">
+              <i class="bi bi-clipboard"></i> Copy JSON
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+      <div class="card border-info">
+        <div class="card-header">
+          <h5 class="mb-0">API Endpoints</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li><strong>My Posts:</strong> <code>/api/v1/reddit/jason</code></li>
+            <li><strong>User Posts:</strong> <code>/api/v1/reddit/u/:username</code></li>
+            <li><strong>Subreddit Posts:</strong> <code>/api/v1/reddit/r/:subreddit</code></li>
+          </ul>
+          <a href="/api/v1/reddit/jason" class="btn btn-info btn-sm" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> View Casjay Posts
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(selector) {
+  const element = document.querySelector(selector);
+  if (element) {
+    navigator.clipboard.writeText(element.textContent);
+  }
+}
+
+document.getElementById('redditForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const username = formData.get('username');
+  const resultDiv = document.getElementById('redditForm-result');
+  const resultOutput = resultDiv.querySelector('.result-output');
+  
+  if (!username) {
+    alert('Please enter a username');
+    return;
+  }
+  
+  try {
+    const endpoint = username === 'casjay' ? '/api/v1/reddit/jason' : `/api/v1/reddit/u/${username}`;
+    
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    
+    if (response.ok) {
+      resultOutput.textContent = JSON.stringify(data, null, 2);
+      resultDiv.style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      resultOutput.textContent = `Error: ${data.message || 'Failed to fetch data'}`;
+      resultDiv.style.display = 'block';
+    }
+  } catch (error) {
+    resultOutput.textContent = `Error: ${error.message}`;
+    resultDiv.style.display = 'block';
+  }
+});
+</script>

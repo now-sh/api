@@ -1,0 +1,243 @@
+<div class="hero fade-in">
+    <h1>Notes Manager</h1>
+    <p class="lead">Create, edit, and organize your personal notes</p>
+</div>
+
+<div class="grid grid-sidebar">
+    <!-- Sidebar with notes list -->
+    <aside class="notes-sidebar card">
+        <div class="sidebar-header">
+            <h3>Your Notes</h3>
+            <button id="newNoteBtn" class="btn btn-primary btn-sm">+ New Note</button>
+        </div>
+        <div id="notesList" class="notes-list">
+            <div class="loading">Loading notes...</div>
+        </div>
+    </aside>
+    
+    <!-- Main editor area -->
+    <main class="note-editor card">
+        <div id="editorContainer" style="display: none;">
+            <input 
+                type="text" 
+                id="noteTitle" 
+                class="form-control note-title-input" 
+                placeholder="Note Title..."
+            />
+            
+            <div class="editor-toolbar">
+                <button class="toolbar-btn" data-format="bold" title="Bold">
+                    <strong>B</strong>
+                </button>
+                <button class="toolbar-btn" data-format="italic" title="Italic">
+                    <em>I</em>
+                </button>
+                <button class="toolbar-btn" data-format="underline" title="Underline">
+                    <u>U</u>
+                </button>
+                <span class="toolbar-separator"></span>
+                <select id="categorySelect" class="form-control form-control-sm" style="width: auto;">
+                    <option value="">No Category</option>
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="ideas">Ideas</option>
+                    <option value="todo">Todo</option>
+                </select>
+            </div>
+            
+            <textarea 
+                id="noteContent" 
+                class="form-control note-content" 
+                placeholder="Start writing your note..."
+            ></textarea>
+            
+            <div class="editor-footer">
+                <span id="lastSaved" class="text-secondary"></span>
+                <div class="btn-group">
+                    <button id="saveNoteBtn" class="btn btn-primary btn-sm">Save</button>
+                    <button id="deleteNoteBtn" class="btn btn-secondary btn-sm">Delete</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="welcomeMessage" class="empty-state">
+            <h3>Welcome to Notes</h3>
+            <p>Select a note from the sidebar or create a new one to get started.</p>
+        </div>
+    </main>
+</div>
+
+<style>
+.grid-sidebar {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .grid-sidebar {
+        grid-template-columns: 1fr;
+    }
+    
+    .notes-sidebar {
+        max-height: 300px;
+    }
+}
+
+.notes-sidebar {
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-4);
+}
+
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.note-item {
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.note-item:hover {
+    border-color: var(--purple);
+}
+
+.note-item.active {
+    background-color: var(--purple);
+    color: var(--background);
+}
+
+.note-item-title {
+    font-weight: 500;
+    margin-bottom: var(--space-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.note-item-preview {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.note-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+}
+
+.note-category {
+    padding: var(--space-1) var(--space-2);
+    background-color: rgba(189, 147, 249, 0.2);
+    color: var(--purple);
+    border-radius: var(--radius-sm);
+}
+
+.note-editor {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.note-title-input {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    margin-bottom: var(--space-4);
+}
+
+.note-title-input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--purple);
+}
+
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+}
+
+.toolbar-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-btn:hover {
+    background-color: var(--purple);
+    color: var(--background);
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 20px;
+    background-color: var(--border-color);
+    margin: 0 var(--space-2);
+}
+
+.note-content {
+    flex: 1;
+    min-height: 300px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.6;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+}
+
+.editor-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-4);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--text-secondary);
+}
+</style>
+
+<%- locals.customScripts = '<script src="/js/notes.js"></script>' %>
+

@@ -4,7 +4,8 @@ const githubRoute = express.Router();
 const cors = require('cors');
 const fetch = require('node-fetch');
 
-const myHeaders = require('../middleware/headers');
+const { getHeaders } = require('../middleware/headers');
+const { fetchAllGitHubPages } = require('../utils/pagination');
 const githubToken = process.env.GITHUB_API_KEY;
 const cache = null;
 const lastCacheTime = null;
@@ -52,86 +53,157 @@ githubRoute.get('/help', cors(), async (req, res) => {
 
 githubRoute.get('/jason', cors(), async (req, res) => {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
+    return res.json(cache);
   }
-  const response = await fetch('https://api.github.com/users/casjay?per_page=200&sort=name', {
-    method: 'GET',
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': api_version, Authorization: 'Bearer ' + githubToken, myHeaders },
-  });
   try {
+    const response = await fetch('https://api.github.com/users/casjay', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': api_version,
+        'User-Agent': 'Node.js API Client'
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+    }
+    
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 githubRoute.get('/user/:id', cors(), async (req, res) => {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
-  const response = await fetch(`https://api.github.com/users/${req.params.id}?per_page=200&sort=name`, {
-    method: 'GET',
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': api_version, Authorization: 'Bearer ' + githubToken, myHeaders },
-  });
   try {
+    const response = await fetch(`https://api.github.com/users/${req.params.id}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': api_version,
+        'User-Agent': 'Node.js API Client'
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+    }
+    
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 githubRoute.get('/repos/:id', cors(), async (req, res) => {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
-  const response = await fetch(`https://api.github.com/users/${req.params.id}/repos?per_page=200&sort=name`, {
-    method: 'GET',
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': api_version, Authorization: 'Bearer ' + githubToken, myHeaders },
-  });
   try {
-    const json = await response.json();
+    let allRepos = [];
+    let page = 1;
+    let hasMorePages = true;
+    
+    while (hasMorePages) {
+      const response = await fetch(`https://api.github.com/users/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': api_version,
+          'User-Agent': 'Node.js API Client'
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const repos = await response.json();
+      
+      if (repos.length === 0) {
+        hasMorePages = false;
+      } else {
+        allRepos = allRepos.concat(repos);
+        page++;
+        
+        // Safety limit to prevent infinite loops
+        if (page > 20) {
+          hasMorePages = false;
+        }
+      }
+    }
+    
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(allRepos);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 githubRoute.get('/orgs/:id', cors(), async (req, res) => {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
-  const response = await fetch(`https://api.github.com/users/${req.params.id}/orgs?per_page=200&sort=name`, {
-    method: 'GET',
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': api_version, Authorization: 'Bearer ' + githubToken, myHeaders },
-  });
   try {
-    const json = await response.json();
+    let allOrgs = [];
+    let page = 1;
+    let hasMorePages = true;
+    
+    while (hasMorePages) {
+      const response = await fetch(`https://api.github.com/users/${req.params.id}/orgs?sort=name&per_page=100&page=${page}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': api_version,
+          'User-Agent': 'Node.js API Client'
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const orgs = await response.json();
+      
+      if (orgs.length === 0) {
+        hasMorePages = false;
+      } else {
+        allOrgs = allOrgs.concat(orgs);
+        page++;
+        
+        // Safety limit to prevent infinite loops
+        if (page > 10) {
+          hasMorePages = false;
+        }
+      }
+    }
+    
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(allOrgs);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 githubRoute.get('/org/:id', cors(), async (req, res) => {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
-  const response = await fetch(`https://api.github.com/orgs/${req.params.id}?per_page=200&sort=name`, {
-    method: 'GET',
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': api_version, Authorization: 'Bearer ' + githubToken, myHeaders },
-  });
   try {
+    const response = await fetch(`https://api.github.com/orgs/${req.params.id}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': api_version,
+        'User-Agent': 'Node.js API Client'
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+    }
+    
     const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

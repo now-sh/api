@@ -1,0 +1,484 @@
+/* Swagger UI - Dracula Theme */
+
+/* Override Swagger UI Colors with Dracula Theme */
+.swagger-ui {
+  /* Background colors */
+  --swagger-background: #282a36;
+  --swagger-background-secondary: #44475a;
+  --swagger-background-tertiary: #363949;
+  
+  /* Text colors - Enhanced for better readability */
+  --swagger-text-primary: #f8f8f2;
+  --swagger-text-secondary: #d1d5db;
+  --swagger-text-muted: #9ca3af;
+  
+  /* Dracula colors */
+  --swagger-cyan: #8be9fd;
+  --swagger-green: #50fa7b;
+  --swagger-orange: #ffb86c;
+  --swagger-pink: #ff79c6;
+  --swagger-purple: #bd93f9;
+  --swagger-red: #ff5555;
+  --swagger-yellow: #f1fa8c;
+}
+
+/* Hide default topbar */
+.swagger-ui .topbar {
+  display: none;
+}
+
+/* Main background */
+.swagger-ui {
+  background-color: var(--swagger-background);
+  color: var(--swagger-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Headers */
+.swagger-ui .info h1,
+.swagger-ui .info h2,
+.swagger-ui .info h3,
+.swagger-ui .info h4,
+.swagger-ui .info h5 {
+  color: var(--swagger-purple);
+}
+
+/* Info section */
+.swagger-ui .info {
+  background-color: var(--swagger-background-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.swagger-ui .info .title {
+  color: var(--swagger-purple);
+}
+
+.swagger-ui .info .base-url {
+  color: var(--swagger-cyan);
+}
+
+/* Models section */
+.swagger-ui .model-container {
+  background-color: var(--swagger-background-secondary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+}
+
+/* Operations */
+.swagger-ui .opblock {
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background-color: var(--swagger-background-secondary);
+}
+
+/* GET operations */
+.swagger-ui .opblock.opblock-get .opblock-summary {
+  background-color: rgba(80, 250, 123, 0.1);
+  border-color: var(--swagger-green);
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background-color: var(--swagger-green);
+  color: var(--swagger-background);
+}
+
+/* POST operations */
+.swagger-ui .opblock.opblock-post .opblock-summary {
+  background-color: rgba(139, 233, 253, 0.1);
+  border-color: var(--swagger-cyan);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background-color: var(--swagger-cyan);
+  color: var(--swagger-background);
+}
+
+/* PUT operations */
+.swagger-ui .opblock.opblock-put .opblock-summary {
+  background-color: rgba(255, 184, 108, 0.1);
+  border-color: var(--swagger-orange);
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+  background-color: var(--swagger-orange);
+  color: var(--swagger-background);
+}
+
+/* DELETE operations */
+.swagger-ui .opblock.opblock-delete .opblock-summary {
+  background-color: rgba(255, 85, 85, 0.1);
+  border-color: var(--swagger-red);
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+  background-color: var(--swagger-red);
+  color: var(--swagger-background);
+}
+
+/* Operation summary */
+.swagger-ui .opblock-summary {
+  background-color: var(--swagger-background-tertiary);
+  color: var(--swagger-text-primary);
+}
+
+.swagger-ui .opblock-summary-description {
+  color: var(--swagger-text-primary);
+}
+
+.swagger-ui .opblock-summary-path {
+  color: var(--swagger-pink);
+}
+
+/* Expanded operation */
+.swagger-ui .opblock.is-open .opblock-summary {
+  border-bottom: 1px solid rgba(98, 114, 164, 0.3);
+}
+
+/* Parameters - Enhanced readability */
+.swagger-ui .parameters-col_description {
+  color: var(--swagger-text-secondary);
+  font-weight: 500;
+}
+
+.swagger-ui .parameter__name {
+  color: var(--swagger-purple);
+  font-weight: 600;
+}
+
+.swagger-ui .parameter__type {
+  color: var(--swagger-cyan);
+  font-weight: 500;
+}
+
+/* Input fields */
+.swagger-ui input[type=text],
+.swagger-ui input[type=password],
+.swagger-ui input[type=email],
+.swagger-ui input[type=number],
+.swagger-ui textarea,
+.swagger-ui select {
+  background-color: var(--swagger-background);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  color: var(--swagger-text-primary);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.swagger-ui input[type=text]:focus,
+.swagger-ui input[type=password]:focus,
+.swagger-ui input[type=email]:focus,
+.swagger-ui input[type=number]:focus,
+.swagger-ui textarea:focus,
+.swagger-ui select:focus {
+  border-color: var(--swagger-purple);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.2);
+}
+
+/* Buttons */
+.swagger-ui .btn {
+  background-color: var(--swagger-purple);
+  color: var(--swagger-background);
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.swagger-ui .btn:hover {
+  background-color: var(--swagger-pink);
+}
+
+.swagger-ui .btn.authorize {
+  background-color: var(--swagger-green);
+}
+
+.swagger-ui .btn.authorize:hover {
+  background-color: var(--swagger-cyan);
+}
+
+.swagger-ui .btn.execute {
+  background-color: var(--swagger-cyan);
+}
+
+.swagger-ui .btn.execute:hover {
+  background-color: var(--swagger-green);
+}
+
+.swagger-ui .btn.cancel {
+  background-color: var(--swagger-red);
+}
+
+.swagger-ui .btn.cancel:hover {
+  background-color: var(--swagger-orange);
+}
+
+/* Response section */
+.swagger-ui .responses-wrapper {
+  background-color: var(--swagger-background-secondary);
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.swagger-ui .response {
+  background-color: var(--swagger-background);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+}
+
+/* Code blocks */
+.swagger-ui .highlight-code pre,
+.swagger-ui .example pre,
+.swagger-ui .microlight {
+  background-color: var(--swagger-background);
+  color: var(--swagger-text-primary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+}
+
+/* JSON syntax highlighting */
+.swagger-ui .hljs-string {
+  color: var(--swagger-yellow);
+}
+
+.swagger-ui .hljs-number {
+  color: var(--swagger-purple);
+}
+
+.swagger-ui .hljs-boolean {
+  color: var(--swagger-pink);
+}
+
+.swagger-ui .hljs-null {
+  color: var(--swagger-red);
+}
+
+.swagger-ui .hljs-attr {
+  color: var(--swagger-cyan);
+}
+
+/* Tables */
+.swagger-ui table {
+  background-color: var(--swagger-background-secondary);
+  color: var(--swagger-text-primary);
+}
+
+.swagger-ui table thead tr th {
+  background-color: var(--swagger-background-tertiary);
+  color: var(--swagger-purple);
+  border-color: rgba(98, 114, 164, 0.3);
+}
+
+.swagger-ui table tbody tr td {
+  border-color: rgba(98, 114, 164, 0.3);
+}
+
+/* Tabs */
+.swagger-ui .tab {
+  background-color: var(--swagger-background-secondary);
+  color: var(--swagger-text-secondary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+}
+
+.swagger-ui .tab.active {
+  background-color: var(--swagger-purple);
+  color: var(--swagger-background);
+  border-color: var(--swagger-purple);
+}
+
+/* Models */
+.swagger-ui .model-box {
+  background-color: var(--swagger-background-secondary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+}
+
+.swagger-ui .model-title {
+  color: var(--swagger-purple);
+  background-color: var(--swagger-background-tertiary);
+}
+
+/* Schema section */
+.swagger-ui .scheme-container {
+  background-color: var(--swagger-background-secondary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+/* Scrollbar */
+.swagger-ui ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+  background: var(--swagger-background);
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+  background: var(--swagger-background-tertiary);
+  border-radius: 4px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+  background: var(--swagger-purple);
+}
+
+/* Links */
+.swagger-ui a {
+  color: var(--swagger-cyan);
+}
+
+.swagger-ui a:hover {
+  color: var(--swagger-pink);
+}
+
+/* Errors */
+.swagger-ui .errors-wrapper {
+  background-color: rgba(255, 85, 85, 0.1);
+  border: 1px solid var(--swagger-red);
+  color: var(--swagger-red);
+  border-radius: 4px;
+  padding: 15px;
+}
+
+/* Loading */
+.swagger-ui .loading-container {
+  background-color: var(--swagger-background-secondary);
+  color: var(--swagger-text-primary);
+}
+
+/* Authorization */
+.swagger-ui .auth-wrapper {
+  background-color: var(--swagger-background-secondary);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+}
+
+.swagger-ui .auth-container {
+  background-color: var(--swagger-background);
+  border: 1px solid rgba(98, 114, 164, 0.3);
+  border-radius: 4px;
+}
+
+/* Dialogs */
+.swagger-ui .dialog-ux {
+  background-color: rgba(40, 42, 54, 0.9);
+}
+
+.swagger-ui .dialog-ux .modal-ux {
+  background-color: var(--swagger-background-secondary);
+  border: 1px solid var(--swagger-purple);
+  border-radius: 8px;
+  color: var(--swagger-text-primary);
+}
+
+.swagger-ui .dialog-ux .modal-ux-header {
+  background-color: var(--swagger-background-tertiary);
+  border-bottom: 1px solid rgba(98, 114, 164, 0.3);
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+  color: var(--swagger-purple);
+}
+
+/* Enhanced readability fixes for low contrast text */
+
+/* Section headers - make them much more visible */
+.swagger-ui .opblock-tag {
+  color: var(--swagger-text-primary) !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  background-color: var(--swagger-background-secondary) !important;
+  border: 1px solid rgba(189, 147, 249, 0.3) !important;
+  border-radius: 6px !important;
+  padding: 12px 16px !important;
+  margin: 16px 0 8px 0 !important;
+}
+
+.swagger-ui .opblock-tag-section {
+  background-color: transparent !important;
+}
+
+.swagger-ui .opblock-tag small {
+  color: var(--swagger-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Operation summaries - increase contrast */
+.swagger-ui .opblock-summary-description {
+  color: var(--swagger-text-primary) !important;
+  font-weight: 500 !important;
+}
+
+.swagger-ui .opblock-summary-path {
+  color: var(--swagger-pink) !important;
+  font-weight: 600 !important;
+}
+
+/* Operation titles */
+.swagger-ui .opblock .opblock-summary-operation-id {
+  color: var(--swagger-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Make sure all general text has good contrast */
+.swagger-ui .renderedMarkdown p,
+.swagger-ui .renderedMarkdown div,
+.swagger-ui .description {
+  color: var(--swagger-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Parameter descriptions */
+.swagger-ui .parameter__description {
+  color: var(--swagger-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Model property descriptions */
+.swagger-ui .prop-type {
+  color: var(--swagger-cyan) !important;
+  font-weight: 500 !important;
+}
+
+.swagger-ui .prop-format {
+  color: var(--swagger-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Response descriptions */
+.swagger-ui .response-col_description {
+  color: var(--swagger-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Server URL display */
+.swagger-ui .servers > label {
+  color: var(--swagger-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.swagger-ui .servers select {
+  color: var(--swagger-text-primary) !important;
+  background-color: var(--swagger-background-secondary) !important;
+  border: 1px solid var(--swagger-purple) !important;
+  font-weight: 500 !important;
+}
+
+/* Filter input */
+.swagger-ui .filter .operation-filter-input {
+  background-color: var(--swagger-background-secondary) !important;
+  border: 1px solid var(--swagger-purple) !important;
+  color: var(--swagger-text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Make section collapse/expand more visible */
+.swagger-ui .opblock-tag:hover {
+  background-color: var(--swagger-background-tertiary) !important;
+  border-color: var(--swagger-purple) !important;
+}

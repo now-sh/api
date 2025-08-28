@@ -34,101 +34,96 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
-    <title>Backend API</title>
+    
+    <title><%= locals.title || 'Backend API' %></title>
+    
+    <!-- Custom Page CSS -->
+    <%- locals.customStyles || '' %>
   </head>
   <body>
-    <div class="container text-center mt-5">
-      <div clas="v-100">
-        <h1 class="text-danger">Welcome to my api!</h1>
-        <br />
-        <h2 class="text-success">Here are the current endpoints:</h2>
-
-        <div class="h-100 row row-cols-md-3 justify-content-center">
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/version</h5>
-                <p class="card-text">api version</p>
-                <a href="/api/v1/version" class="btn btn-danger">go to backend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/timezones/help</h5>
-                <p class="card-text">timeZone help</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/git/jason</h5>
-                <p class="card-text">My github Repos</p>
-                <a href="/api/v1/git/jason" class="btn btn-danger">go to backend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/reddit/jason</h5>
-                <p class="card-text">Casjay on Reddit</p>
-                <a href="/api/v1/reddit/jason" class="btn btn-danger">go to backend</a>
-                <a href="/api/v1/reddit/casjay" class="btn btn-success">go to frontend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/anime</h5>
-                <p class="card-text">random quote</p>
-                <a href="/api/v1/anime/quote" class="btn btn-danger">go to backend</a>
-                <a href="http://quotes.casjay.coffee" class="btn btn-success">go to frontend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/global</h5>
-                <p class="card-text">covid-19 global stats</p>
-                <a href="/api/v1/global" class="btn btn-danger">go to backend</a>
-                <a href="http://covid.casjay.coffee" class="btn btn-success">go to frontend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/usa/nys</h5>
-                <p class="card-text">covid-19 stats for New York state</p>
-                <a href="/api/v1/usa/nys" class="btn btn-danger">go to backend</a>
-                <a href="http://api.covid.casjay.coffee" class="btn btn-success">go to frontend</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card border border-danger">
-              <div class="card-body">
-                <h5 class="card-title">endpoints: <br />/api/v1/arcgis</h5>
-                <p class="card-text">covid-19 stats from Johns Hopkins CSSE</p>
-                <a href="/api/v1/arcgis" class="btn btn-danger">go to backend</a>
-                <a href="http://location.covid.casjay.coffee" class="btn btn-success">go to frontend</a>
-              </div>
-            </div>
-          </div>
+    <!-- Navigation Menu -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-api"></i> Backend API
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="bi bi-house"></i> Home
+              </a>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="utilitiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tools"></i> Utilities
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/utilities/base64"><i class="bi bi-code"></i> Base64</a></li>
+                <li><a class="dropdown-item" href="/utilities/hash"><i class="bi bi-shield-lock"></i> Hash Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/uuid"><i class="bi bi-dice-6"></i> UUID Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/jwt"><i class="bi bi-key"></i> JWT Decoder</a></li>
+                <li><a class="dropdown-item" href="/utilities/qr"><i class="bi bi-qr-code"></i> QR Code</a></li>
+                <li><a class="dropdown-item" href="/utilities/color"><i class="bi bi-palette"></i> Color Tools</a></li>
+                <li><a class="dropdown-item" href="/utilities/lorem"><i class="bi bi-text-paragraph"></i> Lorem Ipsum</a></li>
+                <li><a class="dropdown-item" href="/utilities/passwd"><i class="bi bi-shield-check"></i> Password Generator</a></li>
+              </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-database"></i> Data & APIs
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/data/git"><i class="bi bi-github"></i> GitHub Data</a></li>
+                <li><a class="dropdown-item" href="/data/reddit"><i class="bi bi-reddit"></i> Reddit Data</a></li>
+                <li><a class="dropdown-item" href="/data/covid"><i class="bi bi-virus"></i> COVID-19 Data</a></li>
+                <li><a class="dropdown-item" href="/data/anime"><i class="bi bi-chat-quote"></i> Anime Quotes</a></li>
+                <li><a class="dropdown-item" href="/data/domains"><i class="bi bi-globe"></i> Domain Checker</a></li>
+                <li><a class="dropdown-item" href="/data/timezones"><i class="bi bi-clock"></i> Timezones</a></li>
+                <li><a class="dropdown-item" href="/data/closings"><i class="bi bi-building"></i> School Closings</a></li>
+              </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear"></i> Tools & Services
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/tools/commit"><i class="bi bi-git"></i> Git Commit Generator</a></li>
+                <li><a class="dropdown-item" href="/services/url"><i class="bi bi-link"></i> URL Shortener</a></li>
+                <li><a class="dropdown-item" href="/personal/todos"><i class="bi bi-check-square"></i> Todo Manager</a></li>
+                <li><a class="dropdown-item" href="/personal/notes"><i class="bi bi-journal-text"></i> Notes Manager</a></li>
+                <li><a class="dropdown-item" href="/auth"><i class="bi bi-person-lock"></i> Authentication</a></li>
+              </ul>
+            </li>
+          </ul>
+          
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/api/v1/version" target="_blank">
+                <i class="bi bi-info-circle"></i> API Info
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://github.com/now-sh/api" target="_blank">
+                <i class="bi bi-github"></i> GitHub
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
+    </nav>
+    
+    <div class="container text-center mt-5">
+      <%- body %>
+      
       <br />
       <br />
       <br />
@@ -244,5 +239,19 @@
         </div>
       </div>
     </div>
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" 
+            crossorigin="anonymous"></script>
+    
+    <!-- Global copy functionality -->
+    <script src="/js/copy.js"></script>
+    
+    <!-- Utility forms handler -->
+    <script src="/js/utility-forms.js"></script>
+    
+    <!-- Custom Page JavaScript -->
+    <%- locals.customScripts || '' %>
   </body>
 </html>

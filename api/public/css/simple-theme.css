@@ -1,0 +1,180 @@
+/* Simple Theme for Original Layout */
+
+/* Dark Theme (Default) */
+:root {
+  --bs-dark-bg: #212529;
+  --bs-dark-rgb: 33, 37, 41;
+  --bs-white: #fff;
+  --bs-light: #f8f9fa;
+  --bs-body-bg: #212529;
+  --bs-body-color: #fff;
+  --bs-border-color: #495057;
+  --bs-card-bg: #303030;
+  --bs-danger: #dc3545;
+  --bs-success: #28a745;
+  --bs-primary: #0d6efd;
+  --bs-info: #17a2b8;
+  --bs-warning: #ffc107;
+}
+
+/* Base dark theme */
+body {
+  background-color: #212529;
+  color: #fff;
+}
+
+/* Cards */
+.card {
+  background-color: #303030;
+  border-width: 2px !important;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bs-body-bg: #ffffff;
+  --bs-body-color: #212529;
+  --bs-card-bg: #f8f9fa;
+  --bs-border-color: #dee2e6;
+}
+
+[data-theme="light"] body {
+  background-color: #ffffff;
+  color: #212529;
+}
+
+[data-theme="light"] .card {
+  background-color: #f8f9fa;
+  border-color: #dee2e6 !important;
+}
+
+[data-theme="light"] h1.text-danger {
+  color: #dc3545 !important;
+}
+
+[data-theme="light"] h2.text-success {
+  color: #28a745 !important;
+}
+
+/* Hacker Theme */
+[data-theme="hacker"] {
+  --bs-body-bg: #151515;
+  --bs-body-color: #eaeaea;
+  --bs-card-bg: #0d0d0d;
+  --bs-border-color: #b5e853;
+  --bs-danger: #b5e853;
+  --bs-success: #50fa7b;
+}
+
+[data-theme="hacker"] body {
+  background-color: #151515;
+  color: #eaeaea;
+  font-family: 'Monaco', 'Consolas', 'Terminal', monospace;
+  background-image: url('https://casjaysdev-sites.github.io/static/assets/images/bkg.png');
+}
+
+[data-theme="hacker"] .card {
+  background-color: #0d0d0d;
+  border-color: #b5e853 !important;
+}
+
+[data-theme="hacker"] h1.text-danger {
+  color: #b5e853 !important;
+  text-shadow: 0 0 5px rgba(181, 232, 83, 0.5);
+}
+
+[data-theme="hacker"] h2.text-success {
+  color: #50fa7b !important;
+  text-shadow: 0 0 5px rgba(80, 250, 123, 0.5);
+}
+
+[data-theme="hacker"] .btn-danger {
+  background-color: #b5e853;
+  border-color: #b5e853;
+  color: #000;
+}
+
+[data-theme="hacker"] .btn-success {
+  background-color: #50fa7b;
+  border-color: #50fa7b;
+  color: #000;
+}
+
+[data-theme="hacker"] a {
+  color: #b5e853;
+}
+
+/* Footer fixes */
+.footer {
+  background-color: var(--bs-card-bg);
+  padding: 2rem 0;
+  margin-top: 3rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.footer img {
+  height: 30px;
+  width: auto;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--bs-card-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+  color: var(--bs-body-color);
+}
+
+/* Ensure proper spacing */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.v-100 {
+  flex: 1;
+}
+
+/* Fix GitHub ribbon */
+.github-fork-ribbon {
+  position: fixed !important;
+}
+
+/* Fix EU compliance banner */
+.cc-window {
+  margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+}

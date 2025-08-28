@@ -1,0 +1,311 @@
+<div class="hero fade-in">
+    <h1>Timezone Information</h1>
+    <p class="lead">Convert times between different timezones</p>
+</div>
+
+<div class="card">
+    <h2>Current Times</h2>
+    <div id="currentTimes" class="times-grid">
+        <div class="loading">Loading times...</div>
+    </div>
+</div>
+
+<div class="card mt-6">
+    <h2>Timezone Converter</h2>
+    
+    <form id="converterForm" class="converter-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sourceTime" class="form-label">Date & Time</label>
+                <input 
+                    type="datetime-local" 
+                    id="sourceTime" 
+                    name="sourceTime" 
+                    class="form-control"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="fromTimezone" class="form-label">From Timezone</label>
+                <select id="fromTimezone" name="fromTimezone" class="form-control" required>
+                    <option value="">Select timezone...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="toTimezone" class="form-label">To Timezone</label>
+                <select id="toTimezone" name="toTimezone" class="form-control" required>
+                    <option value="">Select timezone...</option>
+                </select>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Convert Time</button>
+    </form>
+    
+    <div id="conversionResult" class="result-display" style="display: none;">
+        <h3>Conversion Result</h3>
+        <div class="conversion-details"></div>
+    </div>
+</div>
+
+<div class="card mt-6">
+    <h3>All Timezones</h3>
+    <div class="search-box">
+        <input 
+            type="text" 
+            id="searchTimezone" 
+            class="form-control" 
+            placeholder="Search timezones..."
+        />
+    </div>
+    <div id="timezonesList" class="timezones-list">
+        <div class="loading">Loading timezones...</div>
+    </div>
+</div>
+
+<style>
+.times-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .times-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.time-card {
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.time-city {
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: var(--space-2);
+}
+
+.time-value {
+    font-size: var(--text-2xl);
+    color: var(--cyan);
+    font-family: 'Monaco', 'Consolas', monospace;
+    margin-bottom: var(--space-1);
+}
+
+.time-date {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.time-offset {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+}
+
+.converter-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+
+.result-display {
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--green);
+}
+
+.conversion-details {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+}
+
+.conversion-item {
+    padding: var(--space-3);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+}
+
+.conversion-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.conversion-value {
+    font-size: var(--text-xl);
+    color: var(--cyan);
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.search-box {
+    margin-bottom: var(--space-4);
+}
+
+.timezones-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.timezone-group {
+    margin-bottom: var(--space-4);
+}
+
+.timezone-region {
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: var(--space-2);
+    padding: var(--space-2);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.timezone-items {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.timezone-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timezone-item:hover {
+    border-color: var(--purple);
+}
+
+.timezone-name {
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--text-primary);
+}
+
+.timezone-offset {
+    font-size: var(--text-sm);
+    color: var(--cyan);
+}
+
+.timezone-time {
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--green);
+    font-size: var(--text-sm);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--text-secondary);
+}
+
+.highlighted {
+    background-color: rgba(241, 250, 140, 0.1);
+    border-color: var(--yellow);
+}
+</style>
+
+<script>
+// Load current times for major timezones
+document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentTimes();
+    
+    // Update times every minute
+    setInterval(loadCurrentTimes, 60000);
+});
+
+function loadCurrentTimes() {
+    const majorTimezones = [
+        'America/New_York',
+        'America/Chicago', 
+        'America/Denver',
+        'America/Los_Angeles',
+        'Europe/London',
+        'Europe/Paris',
+        'Europe/Berlin',
+        'Asia/Tokyo',
+        'Asia/Shanghai',
+        'Australia/Sydney'
+    ];
+    
+    const currentTimesDiv = document.getElementById('currentTimes');
+    const timesHtml = majorTimezones.map(tz => {
+        const time = new Date().toLocaleString('en-US', {
+            timeZone: tz,
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        const city = tz.split('/').pop().replace('_', ' ');
+        
+        return `
+            <div class="timezone-item">
+                <div class="timezone-name">${city}</div>
+                <div class="timezone-time">${time}</div>
+            </div>
+        `;
+    }).join('');
+    
+    currentTimesDiv.innerHTML = `<div class="timezone-items">${timesHtml}</div>`;
+}
+</script>
+

@@ -1,0 +1,186 @@
+<div class="hero fade-in">
+    <h1>URL Shortener</h1>
+    <p class="lead">Create short, shareable links for your long URLs</p>
+</div>
+
+<%- include('../../partials/endpoint-form', {
+    title: 'Shorten URL',
+    description: 'Enter a long URL to generate a short link',
+    formId: 'urlForm',
+    submitText: 'Shorten URL',
+    formContent: `
+        <div class="form-group">
+            <label for="url" class="form-label">Long URL</label>
+            <input 
+                type="url" 
+                id="url" 
+                name="url" 
+                class="form-control" 
+                placeholder="https://example.com/very/long/url/path"
+                required
+            />
+            <small class="text-secondary">Must be a valid URL starting with http:// or https://</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="customCode" class="form-label">Custom Short Code (Optional)</label>
+            <input 
+                type="text" 
+                id="customCode" 
+                name="customCode" 
+                class="form-control" 
+                placeholder="my-link"
+                pattern="[a-zA-Z0-9-_]+"
+            />
+            <small class="text-secondary">Letters, numbers, hyphens and underscores only</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="expiresIn" class="form-label">Expiration (Optional)</label>
+            <select id="expiresIn" name="expiresIn" class="form-control">
+                <option value="">Never expire</option>
+                <option value="1h">1 hour</option>
+                <option value="24h">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+            </select>
+        </div>
+    `
+}) %>
+
+<div class="card mt-6">
+    <h3 class="mb-4">Your Recent URLs</h3>
+    <div id="recentUrls" class="urls-list">
+        <div class="loading">Loading recent URLs...</div>
+    </div>
+</div>
+
+<style>
+.urls-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.url-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.url-item:hover {
+    border-color: var(--purple);
+}
+
+.url-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.short-url {
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--cyan);
+    font-weight: 500;
+    margin-bottom: var(--space-1);
+}
+
+.short-url a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.short-url a:hover {
+    text-decoration: underline;
+}
+
+.original-url {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.url-stats {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.url-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.qr-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-primary);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-color);
+    z-index: 1000;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+}
+
+.qr-popup img {
+    background: white;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.success-message {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--green);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-4);
+    display: none;
+}
+
+.success-message .short-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.success-message .short-link input {
+    flex: 1;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--cyan);
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--text-secondary);
+}
+</style>
+
