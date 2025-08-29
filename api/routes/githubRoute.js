@@ -6,8 +6,10 @@ const { getHeaders } = require('../middleware/headers');
 const { getJson } = require('../utils/httpClient');
 const { fetchAllGitHubPages } = require('../utils/pagination');
 const githubToken = process.env.GITHUB_API_KEY;
-const cache = null;
-const lastCacheTime = null;
+
+// Cache for API responses by endpoint
+const apiCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 const api_version = process.env.GITHUB_API_VERSION || '2022-11-28';
 
@@ -33,9 +35,6 @@ const buildGitHubHeaders = () => {
 
 githubRoute.get('', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
   try {
     res.send(
       JSON.stringify({
@@ -52,9 +51,6 @@ githubRoute.get('', cors(), async (req, res) => {
 });
 githubRoute.get('/help', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
-  }
   try {
     res.send(
       JSON.stringify({
@@ -70,14 +66,31 @@ githubRoute.get('/help', cors(), async (req, res) => {
   }
 });
 
-githubRoute.get('/jason', cors(), async (req, res) => {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return res.json(cache);
+// Helper function to fetch with cache
+async function fetchWithCache(url, cacheKey) {
+  const now = Date.now();
+  const cached = apiCache.get(cacheKey);
+  
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return cached.data;
   }
+  
+  const data = await getJson(url, {
+    headers: buildGitHubHeaders(),
+    timeout: 10000
+  });
+  
+  apiCache.set(cacheKey, {
+    data: data,
+    timestamp: now
+  });
+  
+  return data;
+}
+
+githubRoute.get('/jason', cors(), async (req, res) => {
   try {
-    const json = await getJson('https://api.github.com/users/casjay', {
-      headers: buildGitHubHeaders()
-    });
+    const json = await fetchWithCache('https://api.github.com/users/casjay', 'user:casjay');
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {

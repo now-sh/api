@@ -7,17 +7,24 @@ dtyester.offsetInHours(-48);
 const yesterday = dtyester.format('Y-m-d');
 
 const nysurl = `https://disease.sh/v3/covid-19/states/New%20York`;
-const cache = null;
-const lastCacheTime = null;
+let cache = null;
+let lastCacheTime = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 async function nys() {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+  const now = Date.now();
+  
+  if (cache && lastCacheTime && (now - lastCacheTime) < CACHE_TTL) {
     return cache;
   }
+  
   try {
-    return await getJson(nysurl);
+    const data = await getJson(nysurl);
+    cache = data;
+    lastCacheTime = now;
+    return data;
   } catch (error) {
-    throw new Error(error + `error accessing ${nysurl} `);
+    throw new Error(error + ` error accessing ${nysurl} `);
   }
 }
 

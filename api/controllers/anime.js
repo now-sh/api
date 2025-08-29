@@ -14,13 +14,9 @@ const ANIME_APIS = [
   // - yurippe.vercel.app (now dead)
 ];
 
-// Cache
-let cache = {
-  quote: null,
-  timestamp: 0
-};
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Cache for API responses by URL
+const apiCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes for API data
 
 /**
  * Parse quote based on API response format
@@ -53,23 +49,53 @@ function parseQuoteResponse(data, apiUrl) {
 }
 
 /**
+ * Fetch data from API with caching
+ */
+async function fetchWithCache(apiUrl) {
+  const now = Date.now();
+  const cached = apiCache.get(apiUrl);
+  
+  // Return cached data if still valid
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return cached.data;
+  }
+  
+  // Fetch fresh data
+  const data = await getJson(apiUrl, { timeout: 5000 });
+  
+  // Cache the response
+  apiCache.set(apiUrl, {
+    data: data,
+    timestamp: now
+  });
+  
+  return data;
+}
+
+/**
  * Get a random anime quote
  */
 async function getRandomQuote() {
-  const now = Date.now();
-  
-  // Return cached quote if still valid
-  if (cache.quote && (now - cache.timestamp) < CACHE_TTL) {
-    return cache.quote;
-  }
-  
   let quote = null;
   
-  // Try external APIs
+  // Try each API until we get a quote
   for (const api of ANIME_APIS) {
     try {
-      const data = await getJson(api, { timeout: 5000 });
-      quote = parseQuoteResponse(data, api);
+      const data = await fetchWithCache(api);
+      
+      // For the dataset API, pick a random quote
+      if (api.includes('apimgr/anime-quotes') && Array.isArray(data)) {
+        const randomIndex = Math.floor(Math.random() * data.length);
+        quote = {
+          quote: data[randomIndex].quote,
+          character: data[randomIndex].character,
+          anime: data[randomIndex].anime
+        };
+      } else {
+        // For other APIs, parse the response
+        quote = parseQuoteResponse(data, api);
+      }
+      
       if (quote) break;
     } catch (error) {
       console.log(`Failed to fetch from ${api}:`, error.message);
@@ -87,12 +113,6 @@ async function getRandomQuote() {
     character: quote.character,
     anime: quote.anime,
     source: quote.source || 'anime-quotes'
-  };
-  
-  // Update cache
-  cache = {
-    quote: result,
-    timestamp: now
   };
   
   return result;

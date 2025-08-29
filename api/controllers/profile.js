@@ -1,15 +1,22 @@
 const { getJson } = require('../utils/httpClient');
 
 const PROFILE_URL = process.env.PROFILE_URL || 'https://raw.githubusercontent.com/casjay/casjay/main/profile.json';
-const cache = null;
-const lastCacheTime = null;
+let cache = null;
+let lastCacheTime = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 async function profileData() {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
+  const now = Date.now();
+  
+  if (cache && lastCacheTime && (now - lastCacheTime) < CACHE_TTL) {
     return cache;
   }
+  
   try {
-    return await getJson(PROFILE_URL);
+    const data = await getJson(PROFILE_URL);
+    cache = data;
+    lastCacheTime = now;
+    return data;
   } catch (error) {
     throw error;
   }
