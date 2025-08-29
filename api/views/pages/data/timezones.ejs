@@ -259,53 +259,5 @@
 }
 </style>
 
-<script>
-// Load current times for major timezones
-document.addEventListener('DOMContentLoaded', function() {
-    loadCurrentTimes();
-    
-    // Update times every minute
-    setInterval(loadCurrentTimes, 60000);
-});
-
-function loadCurrentTimes() {
-    const majorTimezones = [
-        'America/New_York',
-        'America/Chicago', 
-        'America/Denver',
-        'America/Los_Angeles',
-        'Europe/London',
-        'Europe/Paris',
-        'Europe/Berlin',
-        'Asia/Tokyo',
-        'Asia/Shanghai',
-        'Australia/Sydney'
-    ];
-    
-    const currentTimesDiv = document.getElementById('currentTimes');
-    const timesHtml = majorTimezones.map(tz => {
-        const time = new Date().toLocaleString('en-US', {
-            timeZone: tz,
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        
-        const city = tz.split('/').pop().replace('_', ' ');
-        
-        return `
-            <div class="timezone-item">
-                <div class="timezone-name">${city}</div>
-                <div class="timezone-time">${time}</div>
-            </div>
-        `;
-    }).join('');
-    
-    currentTimesDiv.innerHTML = `<div class="timezone-items">${timesHtml}</div>`;
-}
-</script>
+<%- locals.customScripts = '<script src="/js/timezones.js"></script>' %>
 

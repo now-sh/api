@@ -33,12 +33,21 @@ const formatResponse = (req, res, next) => {
   // Override json method
   res.json = function(data) {
     const userAgent = req.headers['user-agent'] || '';
-    const acceptsText = req.accepts('text/plain');
-    const forceJson = req.query.json === 'true';
-    const forcePlain = req.query.plain === 'true';
+    const acceptHeader = req.headers.accept || '';
+    const acceptsJson = acceptHeader.includes('application/json');
+    const acceptsText = acceptHeader.includes('text/plain');
     
-    // Force plain text if requested
-    if (forcePlain || (isCliClient(userAgent) && !forceJson && acceptsText)) {
+    // Very selective text formatting:
+    // - Only /api/v1/commit root defaults to text for CLI tools (scripting use case)
+    // - Everything else defaults to JSON
+    // - Accept: text/plain always forces text
+    const isCommitRoot = req.path === '/' && req.baseUrl === '/api/v1/commit';
+    const isTextEndpoint = isCommitRoot && !req.path.includes('/help');
+    
+    const shouldReturnText = acceptsText || 
+      (isTextEndpoint && !acceptsJson && isCliClient(userAgent));
+    
+    if (shouldReturnText) {
       res.set('Content-Type', 'text/plain');
       
       // Format response based on endpoint type
@@ -76,25 +85,47 @@ const formatResponse = (req, res, next) => {
       
       // Default: try to extract the main value
       if (data.data && typeof data.data === 'string') {
-        return res.send(data.data);
+        return res.send(data.data + '\n');
       }
       
       if (data.result && typeof data.result === 'string') {
-        return res.send(data.result);
+        return res.send(data.result + '\n');
       }
       
       if (data.message) {
-        return res.send(data.message);
+        return res.send(data.message + '\n');
+      }
+      
+      // For commit endpoints specifically - extract message even from /json endpoint
+      if (path.includes('/commit') && data.message) {
+        return res.send(data.message + '\n');
       }
       
       // For errors
       if (data.error) {
-        return res.send(`Error: ${data.error}`);
+        return res.send(`Error: ${data.error}\n`);
       }
       
       if (data.errors && Array.isArray(data.errors)) {
         const errorMessages = data.errors.map(e => e.msg || e.message).join(', ');
-        return res.send(`Error: ${errorMessages}`);
+        return res.send(`Error: ${errorMessages}\n`);
+      }
+      
+      // Special handling for help endpoints
+      if (path.includes('/help') && typeof data === 'object') {
+        const formatHelpText = (obj, indent = '') => {
+          const lines = [];
+          for (const [key, value] of Object.entries(obj)) {
+            if (typeof value === 'object' && value !== null) {
+              lines.push(`${indent}${key}:`);
+              lines.push(formatHelpText(value, indent + '  '));
+            } else {
+              lines.push(`${indent}${key}: ${value}`);
+            }
+          }
+          return lines.filter(line => line.trim()).join('\n');
+        };
+        return res.send(formatHelpText(data) + '\n');
       }
       
       // If we can't determine a simple format, return key=value pairs
@@ -103,11 +134,17 @@ const formatResponse = (req, res, next) => {
           .filter(([key, value]) => typeof value !== 'object')
           .map(([key, value]) => `${key}: ${value}`)
           .join('\n');
-        return res.send(pairs || JSON.stringify(data));
+        return res.send((pairs || JSON.stringify(data)) + '\n');
       }
       
       // Fallback to stringified data
-      return res.send(String(data));
+      return res.send(String(data) + '\n');
+    }
+    
+    // Default to JSON with newline for CLI tools
+    if (isCliClient(userAgent)) {
+      res.set('Content-Type', 'application/json');
+      return res.send(JSON.stringify(data) + '\n');
     }
     
     // Default to JSON

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.matches('[data-toggle-form]')) {
             e.preventDefault();
             const formType = e.target.getAttribute('data-toggle-form');
-            toggleForms(e, formType);
+            toggleForms(formType);
         }
         
         // Handle logout button
@@ -23,10 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            hideMessages();
             
             const formData = new FormData(e.target);
             const data = {
-                username: formData.get('username'),
+                email: formData.get('email'),
                 password: formData.get('password')
             };
             
@@ -46,10 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     showAuthenticatedState(result.token, result.user);
                     showMessage('Login successful!', 'success');
                 } else {
-                    showMessage(`Error: ${result.message}`, 'error');
+                    showMessage(result.message || 'Login failed', 'error');
                 }
             } catch (error) {
-                showMessage(`Error: ${error.message}`, 'error');
+                showMessage('Network error. Please try again.', 'error');
             }
         });
     }
@@ -59,16 +60,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            hideMessages();
             
             const formData = new FormData(e.target);
             const data = {
-                username: formData.get('username'),
+                name: formData.get('name'),
                 email: formData.get('email'),
                 password: formData.get('password')
             };
             
             try {
-                const response = await fetch('/api/v1/auth/register', {
+                const response = await fetch('/api/v1/auth/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -79,13 +81,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showMessage('Registration successful! Please login.', 'success');
-                    toggleForms(null, 'login');
+                    localStorage.setItem('authToken', result.token);
+                    showAuthenticatedState(result.token, result.user);
+                    showMessage('Registration successful!', 'success');
                 } else {
-                    showMessage(`Error: ${result.message}`, 'error');
+                    showMessage(result.message || 'Registration failed', 'error');
                 }
             } catch (error) {
-                showMessage(`Error: ${error.message}`, 'error');
+                showMessage('Network error. Please try again.', 'error');
             }
         });
     }
@@ -94,19 +97,19 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAuthState();
 });
 
-function toggleForms(event, formType) {
-    if (event) event.preventDefault();
+function toggleForms(formType) {
+    const loginCard = document.getElementById('loginCard');
+    const registerCard = document.getElementById('registerCard');
     
-    const loginForm = document.getElementById('loginFormContainer');
-    const registerForm = document.getElementById('registerFormContainer');
-    
-    if (formType === 'login') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-    } else if (formType === 'register') {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
+    if (formType === 'register') {
+        loginCard.style.display = 'none';
+        registerCard.style.display = 'block';
+    } else {
+        loginCard.style.display = 'block';
+        registerCard.style.display = 'none';
     }
+    
+    hideMessages();
 }
 
 function logout() {
@@ -116,69 +119,146 @@ function logout() {
 }
 
 function copyToken() {
-    const tokenElement = document.getElementById('userToken');
+    const tokenElement = document.getElementById('tokenValue');
     if (tokenElement) {
-        const token = tokenElement.textContent;
+        const token = tokenElement.value;
         navigator.clipboard.writeText(token).then(() => {
-            showMessage('Token copied to clipboard!', 'success');
+            const button = document.querySelector('[data-action="copy-token"]');
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('btn-success');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('btn-success');
+            }, 2000);
         }).catch(err => {
-            console.error('Failed to copy token:', err);
-            showMessage('Failed to copy token', 'error');
+            // Fallback for older browsers
+            tokenElement.select();
+            document.execCommand('copy');
+            showMessage('Token copied!', 'success');
         });
     }
 }
 
-function checkAuthState() {
+async function checkAuthState() {
     const token = localStorage.getItem('authToken');
     if (token) {
-        // Verify token with server
-        fetch('/api/v1/auth/verify', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.valid) {
-                showAuthenticatedState(token, data.user);
+        try {
+            // Get current user info
+            const response = await fetch('/api/v1/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                showAuthenticatedState(token, result.user);
             } else {
                 localStorage.removeItem('authToken');
                 showUnauthenticatedState();
             }
-        })
-        .catch(() => {
+        } catch (error) {
             localStorage.removeItem('authToken');
             showUnauthenticatedState();
-        });
+        }
     } else {
         showUnauthenticatedState();
     }
 }
 
 function showAuthenticatedState(token, user) {
-    document.getElementById('authForms').style.display = 'none';
-    document.getElementById('authSuccess').style.display = 'block';
+    // Hide login/register forms
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('registerCard').style.display = 'none';
     
-    document.getElementById('userToken').textContent = token;
-    if (user && user.username) {
-        document.getElementById('userName').textContent = user.username;
+    // Show profile card
+    const profileCard = document.getElementById('profileCard');
+    profileCard.style.display = 'block';
+    
+    // Update profile info
+    document.getElementById('profileName').textContent = user.name || '-';
+    document.getElementById('profileEmail').textContent = user.email || '-';
+    document.getElementById('profileId').textContent = user._id || user.id || '-';
+    
+    // Show token card
+    const tokenCard = document.getElementById('tokenCard');
+    tokenCard.style.display = 'block';
+    document.getElementById('tokenValue').value = token;
+    
+    // Decode and display token details
+    try {
+        const tokenParts = token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        
+        const detailsHtml = `
+            <div class="detail-row">
+                <span class="detail-label">User ID:</span>
+                <span class="detail-value">${payload.userId || payload.id || '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">${payload.email || '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Issued At:</span>
+                <span class="detail-value">${payload.iat ? new Date(payload.iat * 1000).toLocaleString() : '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Expires:</span>
+                <span class="detail-value">${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'Never'}</span>
+            </div>
+        `;
+        
+        document.getElementById('tokenDetails').innerHTML = detailsHtml;
+    } catch (error) {
+        document.getElementById('tokenDetails').innerHTML = '<p class="text-secondary">Unable to decode token details</p>';
     }
 }
 
 function showUnauthenticatedState() {
-    document.getElementById('authForms').style.display = 'block';
-    document.getElementById('authSuccess').style.display = 'none';
+    // Show login form
+    document.getElementById('loginCard').style.display = 'block';
+    document.getElementById('registerCard').style.display = 'none';
+    
+    // Hide profile and token
+    document.getElementById('profileCard').style.display = 'none';
+    document.getElementById('tokenCard').style.display = 'none';
+    
+    // Clear form inputs
+    document.getElementById('loginForm').reset();
+    document.getElementById('registerForm').reset();
 }
 
 function showMessage(message, type = 'info') {
-    const messageDiv = document.getElementById('message');
-    if (messageDiv) {
-        messageDiv.textContent = message;
-        messageDiv.className = `message message-${type}`;
-        messageDiv.style.display = 'block';
-        
-        setTimeout(() => {
-            messageDiv.style.display = 'none';
-        }, 5000);
+    // Remove any existing message
+    hideMessages();
+    
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+    messageDiv.textContent = message;
+    messageDiv.style.display = 'block';
+    
+    // Find the active card and insert message after the h2
+    const activeCard = document.querySelector('.auth-card:not([style*="display: none"])');
+    if (activeCard) {
+        const h2 = activeCard.querySelector('h2');
+        if (h2 && h2.nextSibling) {
+            h2.parentNode.insertBefore(messageDiv, h2.nextSibling);
+        } else {
+            activeCard.prepend(messageDiv);
+        }
     }
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
+}
+
+function hideMessages() {
+    const messages = document.querySelectorAll('.error-message, .success-message');
+    messages.forEach(msg => msg.remove());
 }

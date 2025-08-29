@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
 const cheerio = require('cheerio');
+const { getText } = require('../utils/httpClient');
 
-const url = 'https://511ny.org/list/events/traffic?start=0&length=100&order%5Bi%5D=1&order%5Bdir%5D=asc';
+const TRAFFIC_URL = process.env.TRAFFIC_URL || 'https://511ny.org/list/events/traffic?start=0&length=100&order%5Bi%5D=1&order%5Bdir%5D=asc';
 let cache = null;
 let lastCacheTime = null;
 
@@ -9,8 +9,7 @@ async function traffic() {
   // if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
   //   return cache;
   // }
-  const response = await fetch(url);
-  const html = await response.text();
+  const html = await getText(TRAFFIC_URL);
   const $ = cheerio.load(html);
   const title = $('traffic').text();
   const table = $('table');

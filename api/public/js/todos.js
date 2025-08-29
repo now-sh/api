@@ -1,12 +1,41 @@
 let todos = [];
 let currentFilter = 'all';
 
-// Load todos on page load
-document.addEventListener('DOMContentLoaded', loadTodos);
+// Check authentication and load todos on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+});
+
+// Check authentication
+function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    loadTodos();
+}
+
+// Show authentication required message
+function showAuthRequired() {
+    document.getElementById('todosList').innerHTML = `
+        <div class="empty-state">
+            <p>Please sign in to manage your todos.</p>
+            <a href="/auth" class="btn btn-primary mt-3">Sign In</a>
+        </div>
+    `;
+    document.getElementById('todoForm').style.display = 'none';
+}
 
 // Add todo form submission
 document.getElementById('todoForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please sign in to add todos', 'error');
+        return;
+    }
     
     const formData = new FormData(e.target);
     const todoData = {
@@ -20,7 +49,8 @@ document.getElementById('todoForm').addEventListener('submit', async (e) => {
         const response = await fetch('/api/v1/personal/todos', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(todoData)
         });
@@ -40,10 +70,29 @@ document.getElementById('todoForm').addEventListener('submit', async (e) => {
 
 // Load todos from API
 async function loadTodos() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    
     try {
-        const response = await fetch('/api/v1/personal/todos');
-        const data = await response.json();
+        const response = await fetch('/api/v1/personal/todos', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                showAuthRequired();
+                return;
+            }
+            throw new Error('Failed to load todos');
+        }
+        
+        const data = await response.json();
         todos = data.todos || data || [];
         renderTodos();
     } catch (error) {
@@ -116,6 +165,12 @@ function renderTodos() {
 
 // Toggle todo completion
 async function toggleTodo(id) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please sign in to update todos', 'error');
+        return;
+    }
+    
     const todo = todos.find(t => t._id === id || t.id === id);
     if (!todo) return;
     
@@ -123,7 +178,8 @@ async function toggleTodo(id) {
         const response = await fetch(`/api/v1/personal/todos/${id}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ completed: !todo.completed })
         });
@@ -140,11 +196,20 @@ async function toggleTodo(id) {
 
 // Delete todo
 async function deleteTodo(id) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please sign in to delete todos', 'error');
+        return;
+    }
+    
     if (!confirm('Are you sure you want to delete this todo?')) return;
     
     try {
         const response = await fetch(`/api/v1/personal/todos/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         
         if (response.ok) {

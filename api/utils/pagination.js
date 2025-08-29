@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const { httpClient } = require('./httpClient');
 
 /**
  * Fetch all pages from a GitHub API endpoint
@@ -22,14 +22,8 @@ async function fetchAllGitHubPages(url, headers, maxPages = 10) {
     try {
       console.log(`📄 Fetching GitHub API page ${pageCount + 1}: ${currentUrl}`);
       
-      const response = await fetch(currentUrl, { headers });
-      
-      if (!response.ok) {
-        console.error(`GitHub API error: ${response.status} ${response.statusText}`);
-        break;
-      }
-      
-      const data = await response.json();
+      const response = await httpClient.get(currentUrl, { headers });
+      const data = response.data;
       
       // Handle both array responses and object responses with data arrays
       if (Array.isArray(data)) {
@@ -41,13 +35,13 @@ async function fetchAllGitHubPages(url, headers, maxPages = 10) {
       }
       
       // Look for next page link in Link header
-      const linkHeader = response.headers.get('link');
+      const linkHeader = response.headers['link'];
       currentUrl = parseLinkHeader(linkHeader, 'next');
       
       pageCount++;
       
       // Respect rate limiting
-      const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
+      const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
       if (rateLimitRemaining && parseInt(rateLimitRemaining) < 10) {
         console.warn('⚠️ GitHub rate limit approaching, stopping pagination');
         break;
@@ -108,14 +102,8 @@ async function fetchGitHubSearch(query, type, headers, maxPages = 5) {
     try {
       console.log(`🔍 Searching GitHub ${type}: ${query} (page ${pageCount + 1})`);
       
-      const response = await fetch(currentUrl, { headers });
-      
-      if (!response.ok) {
-        console.error(`GitHub Search API error: ${response.status} ${response.statusText}`);
-        break;
-      }
-      
-      const data = await response.json();
+      const response = await httpClient.get(currentUrl, { headers });
+      const data = response.data;
       
       if (pageCount === 0) {
         totalCount = data.total_count || 0;
@@ -131,13 +119,13 @@ async function fetchGitHubSearch(query, type, headers, maxPages = 5) {
       }
       
       // Look for next page
-      const linkHeader = response.headers.get('link');
+      const linkHeader = response.headers['link'];
       currentUrl = parseLinkHeader(linkHeader, 'next');
       
       pageCount++;
       
       // Rate limiting check
-      const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
+      const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
       if (rateLimitRemaining && parseInt(rateLimitRemaining) < 10) {
         console.warn('⚠️ GitHub search rate limit approaching, stopping');
         break;

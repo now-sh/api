@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
 const datetime = require('node-datetime');
+const { getJson } = require('../utils/httpClient');
 
 const dttoday = datetime.create();
 const dtyester = datetime.create();
@@ -14,9 +14,11 @@ async function nys() {
   if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
     return cache;
   }
-  return fetch(nysurl)
-    .then((response) => response.json())
-    .catch((error) => response.status(500).send(error + `error accessing ${nysurl} `));
+  try {
+    return await getJson(nysurl);
+  } catch (error) {
+    throw new Error(error + `error accessing ${nysurl} `);
+  }
 }
 
 module.exports = nys;

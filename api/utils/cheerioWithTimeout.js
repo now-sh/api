@@ -1,5 +1,5 @@
 const cheerio = require('cheerio');
-const fetchWithTimeout = require('./fetchWithTimeout');
+const { getText } = require('./httpClient');
 
 /**
  * Load a URL into cheerio with timeout support
@@ -12,14 +12,11 @@ async function cheerioLoadWithTimeout(url, options = {}) {
   const fetchOptions = options.fetchOptions || {};
 
   try {
-    // Fetch the URL with timeout
-    const response = await fetchWithTimeout(url, fetchOptions, timeout);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const html = await response.text();
+    // Fetch the URL with timeout using httpClient
+    const html = await getText(url, {
+      timeout,
+      ...fetchOptions
+    });
     
     // Load HTML into cheerio
     const $ = cheerio.load(html, {
@@ -29,7 +26,7 @@ async function cheerioLoadWithTimeout(url, options = {}) {
     
     return $;
   } catch (error) {
-    if (error.name === 'AbortError') {
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
       throw new Error(`Request timed out after ${timeout}ms`);
     }
     throw error;

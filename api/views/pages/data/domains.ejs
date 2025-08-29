@@ -1,38 +1,24 @@
 <div class="hero fade-in">
-    <h1>Domain Manager</h1>
-    <p class="lead">Check and manage domain information</p>
+    <h1>My Domains</h1>
+    <p class="lead">View all registered domains and subdomains</p>
 </div>
 
 <div class="card">
-    <h2>Check Domain</h2>
-    <p>Enter a domain name to check its availability and information</p>
+    <h2>Domain List</h2>
+    <p>Below are all the domains and subdomains currently in the system.</p>
     
-    <form id="domainForm" class="domain-form">
-        <div class="form-group">
-            <label for="domain" class="form-label">Domain Name</label>
-            <input 
-                type="text" 
-                id="domain" 
-                name="domain" 
-                class="form-control" 
-                placeholder="example.com"
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$"
-                required
-            />
-            <small class="text-secondary">Enter domain without http:// or https://</small>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Check Domain</button>
-    </form>
-    
-    <div id="domainResult" class="result-container" style="display: none;">
-        <h3>Domain Information</h3>
-        <div class="result-content"></div>
+    <div class="search-box mb-4">
+        <input 
+            type="text" 
+            id="domainSearch" 
+            class="form-control" 
+            placeholder="Search domains..."
+        />
     </div>
 </div>
 
 <div class="card mt-6">
-    <h3>Available Domains</h3>
+    <h3>All Domains</h3>
     <div id="domainsList" class="domains-grid">
         <div class="loading">Loading domains...</div>
     </div>
@@ -187,4 +173,6 @@
     margin-top: var(--space-3);
 }
 </style>
+
+<%- locals.customScripts = '<script src="/js/domains.js"></script>' %>
 

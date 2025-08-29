@@ -1,17 +1,13 @@
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
+const { getJson } = require('../utils/httpClient');
 
 const arcgisurl = process.env.ARGIS_URL || '';
-const cache = null;
-const lastCacheTime = null;
 
 async function arcgisData() {
-  if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-    return cache;
+  if (!arcgisurl) {
+    throw new Error('ARGIS_URL not configured');
   }
-  return fetch(arcgisurl)
-    .then((response) => response.json())
-    .catch((error) => response.status(500).send(error));
+  
+  return await getJson(arcgisurl);
 }
 
 module.exports = arcgisData;

@@ -1,64 +1,17 @@
-const { fetchWithTimeout } = require('../utils/fetchWithTimeout');
+const { getJson } = require('../utils/httpClient');
+const { getHeaders } = require('../middleware/headers');
 
-// Alternative anime quote sources
-const animeQuotes = [
-  {
-    quote: "People die when they are killed.",
-    character: "Emiya Shirou",
-    anime: "Fate/Stay Night"
-  },
-  {
-    quote: "I'll take a potato chip... and eat it!",
-    character: "Light Yagami",
-    anime: "Death Note"
-  },
-  {
-    quote: "Believe in the me that believes in you!",
-    character: "Kamina",
-    anime: "Gurren Lagann"
-  },
-  {
-    quote: "The only ones who should kill are those who are prepared to be killed!",
-    character: "Lelouch Lamperouge",
-    anime: "Code Geass"
-  },
-  {
-    quote: "I am mad scientist. It's so cool! Sonuvabitch!",
-    character: "Okabe Rintarou",
-    anime: "Steins;Gate"
-  },
-  {
-    quote: "Whatever happens, happens.",
-    character: "Spike Spiegel",
-    anime: "Cowboy Bebop"
-  },
-  {
-    quote: "It's not about whether I can, I have to do it.",
-    character: "Megumi Fushiguro",
-    anime: "Jujutsu Kaisen"
-  },
-  {
-    quote: "If you don't like your destiny, don't accept it. Instead, have the courage to change it the way you want it to be!",
-    character: "Naruto Uzumaki",
-    anime: "Naruto"
-  },
-  {
-    quote: "Being weak is nothing to be ashamed of... Staying weak is!",
-    character: "Fuegoleon Vermillion",
-    anime: "Black Clover"
-  },
-  {
-    quote: "A person can only be saved by another person.",
-    character: "Gintoki Sakata",
-    anime: "Gintama"
-  }
-];
 
 // External API sources
 const ANIME_APIS = [
-  'https://api.quotable.io/random?tags=anime',
-  'https://animechan.vercel.app/api/random',
-  'https://waifu.it/api/quote'
+  'https://katanime.vercel.app/api/getrandom',
+  'https://raw.githubusercontent.com/apimgr/anime-quotes/refs/heads/main/dataset.json'
+  // Removed dead APIs:
+  // - api.quotable.io (no anime tag support)
+  // - animechan.vercel.app (dead)
+  // - waifu.it (requires auth)
+  // - animechan.io (404 on endpoints)
+  // - yurippe.vercel.app (now dead)
 ];
 
 // Cache
@@ -67,30 +20,34 @@ let cache = {
   timestamp: 0
 };
 
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Parse quote based on API response format
  */
 function parseQuoteResponse(data, apiUrl) {
-  if (apiUrl.includes('quotable.io')) {
-    return {
-      quote: data.content,
-      character: data.author || 'Unknown',
-      anime: 'Various Anime'
-    };
-  } else if (apiUrl.includes('animechan')) {
-    return {
-      quote: data.quote,
-      character: data.character,
-      anime: data.anime
-    };
-  } else if (apiUrl.includes('waifu.it')) {
-    return {
-      quote: data.quote,
-      character: data.author || 'Unknown',
-      anime: data.anime || 'Unknown Anime'
-    };
+  if (apiUrl.includes('katanime.vercel.app')) {
+    // Katanime returns an object with result array
+    if (data.sukses && data.result && data.result.length > 0) {
+      const quote = data.result[0];
+      return {
+        quote: quote.english || quote.indo,
+        character: quote.character,
+        anime: quote.anime
+      };
+    }
+  } else if (apiUrl.includes('apimgr/anime-quotes')) {
+    // apimgr dataset is an array of quotes
+    if (Array.isArray(data) && data.length > 0) {
+      // Pick a random quote from the dataset
+      const randomIndex = Math.floor(Math.random() * data.length);
+      const quote = data[randomIndex];
+      return {
+        quote: quote.quote,
+        character: quote.character,
+        anime: quote.anime
+      };
+    }
   }
   return null;
 }
@@ -108,28 +65,20 @@ async function getRandomQuote() {
   
   let quote = null;
   
-  // Try external APIs first
+  // Try external APIs
   for (const api of ANIME_APIS) {
     try {
-      const response = await fetchWithTimeout(api, {
-        method: "GET"
-      }, 5000); // 5 second timeout
-      
-      if (response.ok) {
-        const data = await response.json();
-        quote = parseQuoteResponse(data, api);
-        if (quote) break;
-      }
+      const data = await getJson(api, { timeout: 5000 });
+      quote = parseQuoteResponse(data, api);
+      if (quote) break;
     } catch (error) {
       console.log(`Failed to fetch from ${api}:`, error.message);
       continue;
     }
   }
   
-  // Fallback to local quotes if all APIs fail
   if (!quote) {
-    const randomIndex = Math.floor(Math.random() * animeQuotes.length);
-    quote = animeQuotes[randomIndex];
+    throw new Error('All anime quote APIs are currently unavailable');
   }
   
   // Format the response

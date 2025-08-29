@@ -69,10 +69,11 @@ const initializeDatabases = async () => {
   // Check if at least one connection was successful
   const activeConnections = Object.values(connections).filter(conn => conn !== null);
   if (activeConnections.length === 0) {
-    console.error('❌ No database connections established!');
-    console.error('Please set at least one MONGO_URI_* environment variable in your .env file');
-    console.error('Available options: MONGO_URI_API, MONGO_URI_TODOS, MONGO_URI_NOTES, MONGO_URI_SHRTNR');
-    process.exit(1);
+    console.warn('⚠️  WARNING: No database connections established!');
+    console.warn('Most personal features (todos, notes, auth) will not work without MongoDB.');
+    console.warn('To enable these features, set MONGO_URI_* environment variables in your .env file');
+    console.warn('Available options: MONGO_URI_API, MONGO_URI_TODOS, MONGO_URI_NOTES, MONGO_URI_SHRTNR');
+    console.warn('\n🚀 Starting server with limited functionality (utilities only)...\n');
   }
   
   console.log(`\n✅ Successfully connected to ${activeConnections.length} database(s)\n`);

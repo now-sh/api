@@ -2,11 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const tzRoute = express.Router();
 const cors = require('cors');
-const { fetchJsonWithTimeout } = require('../utils/fetchWithTimeout');
+const { getJson } = require('../utils/httpClient');
 
 // GitHub URLs for data
-const TIMEZONE_URL = 'https://github.com/apimgr/timezones/raw/refs/heads/main/timezones.json';
-const COUNTRIES_URL = 'https://github.com/apimgr/countries/raw/refs/heads/main/countries.json';
+const TIMEZONE_URL = process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/refs/heads/main/timezones.json';
+const COUNTRIES_URL = process.env.COUNTRIES_URL || 'https://raw.githubusercontent.com/apimgr/countries/refs/heads/main/countries.json';
 
 // Cache data with TTL
 let cache = {
@@ -14,7 +14,7 @@ let cache = {
   countries: { data: null, timestamp: 0 }
 };
 
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour cache
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
 // Function to fetch and cache data
 async function fetchWithCache(url, cacheKey) {
@@ -25,24 +25,15 @@ async function fetchWithCache(url, cacheKey) {
     return cache[cacheKey].data;
   }
   
-  try {
-    const data = await fetchJsonWithTimeout(url, {}, 5000);
-    
-    // Update cache
-    cache[cacheKey] = {
-      data: data,
-      timestamp: now
-    };
-    
-    return data;
-  } catch (error) {
-    // If fetch fails and we have cached data, return it anyway
-    if (cache[cacheKey].data) {
-      console.error(`Failed to fetch fresh data from ${url}, using cache:`, error.message);
-      return cache[cacheKey].data;
-    }
-    throw error;
-  }
+  const data = await getJson(url, { timeout: 5000 });
+  
+  // Update cache
+  cache[cacheKey] = {
+    data: data,
+    timestamp: now
+  };
+  
+  return data;
 }
 
 
@@ -52,8 +43,8 @@ tzRoute.get('/', cors(), async (req, res) => {
     const timezoneData = await fetchWithCache(TIMEZONE_URL, 'timezones');
     res.json(timezoneData);
   } catch (error) {
-    res.status(500).json({ 
-      error: 'Failed to fetch timezone data',
+    res.status(503).json({ 
+      error: 'Timezone data service unavailable',
       message: error.message 
     });
   }
@@ -65,8 +56,8 @@ tzRoute.get('/countries', cors(), async (req, res) => {
     const countryData = await fetchWithCache(COUNTRIES_URL, 'countries');
     res.json(countryData);
   } catch (error) {
-    res.status(500).json({ 
-      error: 'Failed to fetch country data',
+    res.status(503).json({ 
+      error: 'Country data service unavailable',
       message: error.message 
     });
   }
@@ -87,8 +78,8 @@ tzRoute.get('/search/:query', cors(), async (req, res) => {
     
     res.json(results);
   } catch (error) {
-    res.status(500).json({ 
-      error: 'Failed to search timezones',
+    res.status(503).json({ 
+      error: 'Timezone search service unavailable',
       message: error.message 
     });
   }
@@ -111,8 +102,8 @@ tzRoute.get('/country/:code', cors(), async (req, res) => {
     
     res.json(country);
   } catch (error) {
-    res.status(500).json({ 
-      error: 'Failed to fetch country',
+    res.status(503).json({ 
+      error: 'Country lookup service unavailable',
       message: error.message 
     });
   }

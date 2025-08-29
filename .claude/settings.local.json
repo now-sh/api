@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(npm install:*)",
       "Bash(npm run lint)",
@@ -40,7 +41,21 @@
       "Bash(for:*)",
       "Bash(do sed -i '/<script>/,/<\\/script>/d' \"$file\")",
       "Bash(true)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      "Bash(./test-api.sh:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(tail:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(do [ -f \"api/public/js/$file\" ])",
+      "Bash(echo:*)",
+      "Bash(ss:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm update:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(./test-endpoints.sh)",
+      "Bash(bash:*)",
+      "Bash(do echo:*)"
     ],
     "deny": []
   }

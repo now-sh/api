@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         await handleAllHashTypes(data.text, resultOutput, resultDiv);
                         return;
                     } else {
-                        endpoint = `/api/v1/hash/${hashType}?json=true`;
+                        endpoint = `/api/v1/utilities/hash/${hashType}?json=true`;
                         requestOptions = {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -49,6 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (formId === 'base64Form') {
                     // Base64 is handled by its own script
                     return;
+                } else if (formId === 'loremForm') {
+                    const type = data.type || 'sentences';
+                    const count = data.count || 3;
+                    endpoint = `/api/v1/utilities/lorem/${type}/${count}`;
+                    requestOptions = {
+                        method: 'GET'
+                    };
                 } else {
                     endpoint = getEndpointForForm(formId);
                     if (!endpoint) return;
@@ -101,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         for (const hashType of hashTypes) {
             try {
-                const response = await fetch(`/api/v1/hash/${hashType}?json=true`, {
+                const response = await fetch(`/api/v1/utilities/hash/${hashType}?json=true`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `text=${encodeURIComponent(text)}`
@@ -129,20 +136,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function getEndpointForForm(formId) {
         const endpoints = {
-            'hashForm': '/api/v1/hash',
-            'uuidForm': '/api/v1/uuid',
-            'jwtForm': '/api/v1/jwt',
-            'qrForm': '/api/v1/qr',
-            'colorForm': '/api/v1/color',
-            'loremForm': '/api/v1/lorem',
-            'passwdForm': '/api/v1/passwd',
+            'hashForm': '/api/v1/utilities/hash',
+            'uuidForm': '/api/v1/utilities/uuid/generate',
+            'jwtForm': '/api/v1/utilities/jwt/decode',
+            'qrForm': '/api/v1/utilities/qr/generate',
+            'colorForm': '/api/v1/utilities/color/convert',
+            'loremForm': '/api/v1/utilities/lorem',
+            'passwdForm': '/api/v1/utilities/passwd/generate',
             'commitForm': '/api/v1/commit',
             'domainsForm': '/api/v1/domains',
             'timezonesForm': '/api/v1/timezones',
             'closingsForm': '/api/v1/closings',
-            'notesForm': '/api/v1/notes',
+            'notesForm': '/api/v1/personal/notes',
             'authForm': '/api/v1/auth',
-            'urlForm': '/api/v1/url'
+            'urlForm': '/api/v1/services/url'
         };
         
         return endpoints[formId];

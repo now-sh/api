@@ -1,0 +1,121 @@
+<%- include('../../partials/navbar') %>
+
+<div class="container my-5">
+    <h1 class="text-center mb-5">Blog Posts</h1>
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Jason's Blog</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">View blog posts from GitHub repository</p>
+                    
+                    <form id="blogForm">
+                        <div class="form-group">
+                            <label for="source">Blog Source</label>
+                            <select class="form-control" id="source" name="source">
+                                <option value="jason">Jason's Blog</option>
+                                <option value="custom">Custom Repository</option>
+                            </select>
+                        </div>
+                        
+                        <div id="customRepo" style="display: none;">
+                            <div class="form-group">
+                                <label for="user">GitHub User</label>
+                                <input type="text" class="form-control" id="user" name="user" placeholder="username">
+                            </div>
+                            <div class="form-group">
+                                <label for="repo">Repository Name</label>
+                                <input type="text" class="form-control" id="repo" name="repo" placeholder="repository">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Load Blog Posts</button>
+                    </form>
+                    
+                    <div id="blogForm-result" style="display: none;" class="mt-4">
+                        <h4>Blog Posts</h4>
+                        <div id="blogPosts" class="blog-posts"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.blog-post {
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.blog-post h5 {
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.blog-post .meta {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.blog-post .meta > * {
+    margin-right: 15px;
+}
+
+.blog-post .meta .date {
+    font-weight: bold;
+}
+
+.blog-post .meta .tags,
+.blog-post .meta .categories {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+.blog-post .content {
+    margin-top: 10px;
+    white-space: pre-wrap;
+}
+
+.blog-post details {
+    margin-top: 10px;
+}
+
+.blog-post details summary {
+    cursor: pointer;
+    color: #007bff;
+    font-size: 0.9em;
+}
+
+.blog-post .full-content {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.blog-post a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.blog-post a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<script src="/js/blogs.js"></script>
+
+<%- include('../../partials/footer') %>

@@ -28,7 +28,7 @@ animeRoute.get('/quote', cors(), async (req, res) => {
     const quote = await getRandomQuote();
     res.json(quote);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(503).json({ error: error.message });
   }
 });
 

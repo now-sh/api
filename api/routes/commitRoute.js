@@ -2,10 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const commitRoute = express.Router();
 const cors = require('cors');
-const { fetchJsonWithTimeout } = require('../utils/fetchWithTimeout');
+const { getJson } = require('../utils/httpClient');
 
 // GitHub URL for commit messages
-const COMMIT_MESSAGES_URL = process.env.GIT_MESSAGE_URL || 'https://github.com/apimgr/Commitmessages/raw/refs/heads/main/gitmessages.json';
+const COMMIT_MESSAGES_URL = process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/Commitmessages/refs/heads/main/gitmessages.json';
 
 // Cache for messages
 let messagesCache = {
@@ -13,26 +13,8 @@ let messagesCache = {
   timestamp: 0
 };
 
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour cache
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
-// Fallback messages in case GitHub is unavailable
-const fallbackMessages = [
-  "🗃️ Committing everything that changed 🗃️",
-  "🚀 Version Bump: {version}-git 🚀",
-  "🔧 Fixed bug that prevented this from working",
-  "✨ Added new feature",
-  "📝 Updated documentation",
-  "🐛 Fixed typo in code",
-  "♻️ Refactored for better performance",
-  "🎨 Improved code structure",
-  "⚡️ Performance improvements",
-  "🔒 Security patch applied",
-  "🌐 Updated dependencies",
-  "💄 UI improvements",
-  "🔨 Build configuration update",
-  "🧹 Code cleanup",
-  "📦 Package updates"
-];
 
 // Function to fetch messages with caching
 async function fetchMessages() {
@@ -43,25 +25,15 @@ async function fetchMessages() {
     return messagesCache.data;
   }
   
-  try {
-    const data = await fetchJsonWithTimeout(COMMIT_MESSAGES_URL, {}, 5000);
-    
-    // Update cache
-    messagesCache = {
-      data: data,
-      timestamp: now
-    };
-    
-    return data;
-  } catch (error) {
-    console.error('Failed to fetch commit messages from GitHub:', error.message);
-    
-    // Return cached data if available, otherwise use fallback
-    if (messagesCache.data) {
-      return messagesCache.data;
-    }
-    return fallbackMessages;
-  }
+  const data = await getJson(COMMIT_MESSAGES_URL, { timeout: 5000 });
+  
+  // Update cache
+  messagesCache = {
+    data: data,
+    timestamp: now
+  };
+  
+  return data;
 }
 
 
@@ -102,9 +74,9 @@ commitRoute.get('/txt', cors(), async (req, res) => {
     const index = Math.floor(Math.random() * messages.length);
     const commitMessage = messages[index];
     
-    res.send(commitMessage);
+    res.send(commitMessage + '\n');
   } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
+    res.status(500).send(`Error: ${error.message}\n`);
   }
 });
 

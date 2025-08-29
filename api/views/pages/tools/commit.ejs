@@ -1,136 +1,276 @@
 <div class="hero fade-in">
-    <h1>Commit Message Generator</h1>
-    <p class="lead">Generate standardized Git commit messages</p>
+    <h1>Git Commit Message Generator</h1>
+    <p class="lead">Get random commit messages for your git commits</p>
 </div>
 
-<%- include('../../partials/endpoint-form', {
-    title: 'Git Commit Message',
-    description: 'Create consistent and descriptive commit messages',
-    formId: 'commitForm',
-    submitText: 'Generate Message',
-    formContent: `
-        <div class="form-group">
-            <label for="type" class="form-label">Commit Type</label>
-            <select id="type" name="type" class="form-control" required>
-                <option value="feat">✨ feat - New feature</option>
-                <option value="fix">🐛 fix - Bug fix</option>
-                <option value="docs">📚 docs - Documentation changes</option>
-                <option value="style">💎 style - Code style changes</option>
-                <option value="refactor">♻️ refactor - Code refactoring</option>
-                <option value="test">🧪 test - Adding tests</option>
-                <option value="chore">🔧 chore - Maintenance tasks</option>
-                <option value="perf">⚡ perf - Performance improvements</option>
-                <option value="build">📦 build - Build system changes</option>
-                <option value="ci">👷 ci - CI/CD changes</option>
-                <option value="revert">⏪ revert - Revert changes</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="scope" class="form-label">Scope (Optional)</label>
-            <input 
-                type="text" 
-                id="scope" 
-                name="scope" 
-                class="form-control" 
-                placeholder="e.g., api, frontend, auth"
-            />
-            <small class="text-secondary">Component or area affected</small>
-        </div>
-        
-        <div class="form-group">
-            <label for="subject" class="form-label">Short Description</label>
-            <input 
-                type="text" 
-                id="subject" 
-                name="subject" 
-                class="form-control" 
-                placeholder="Brief description of changes"
-                maxlength="50"
-                required
-            />
-            <small class="text-secondary">Imperative mood, max 50 characters</small>
-        </div>
-        
-        <div class="form-group">
-            <label for="body" class="form-label">Detailed Description (Optional)</label>
-            <textarea 
-                id="body" 
-                name="body" 
-                class="form-control" 
-                placeholder="Explain the motivation for the change and contrast with previous behavior"
-                rows="4"
-            ></textarea>
-        </div>
-        
-        <div class="form-group">
-            <label for="footer" class="form-label">Footer (Optional)</label>
-            <textarea 
-                id="footer" 
-                name="footer" 
-                class="form-control" 
-                placeholder="Breaking changes, issues closed, etc."
-                rows="2"
-            ></textarea>
-            <small class="text-secondary">e.g., "BREAKING CHANGE: ...", "Closes #123"</small>
-        </div>
-        
-        <div class="form-group">
-            <label class="checkbox-label">
-                <input type="checkbox" name="emoji" checked>
-                Include emoji in commit type
-            </label>
-        </div>
-    `
-}) %>
+<div class="card">
+    <h2>Random Commit Message</h2>
+    <p class="text-secondary mb-4">Click the button to generate a random commit message from our collection.</p>
+    
+    <div id="messageDisplay" class="message-display" style="display: none;">
+        <div class="result-output" id="commitMessage"></div>
+        <button class="btn btn-sm btn-secondary copy-btn" data-action="copy-message">Copy</button>
+    </div>
+    
+    <button id="generateBtn" class="btn btn-primary btn-lg">Generate Random Message</button>
+    
+    <div class="mt-4">
+        <button id="showAllBtn" class="btn btn-secondary btn-sm">Show All Messages</button>
+    </div>
+</div>
+
+<div class="card mt-6" id="allMessagesCard" style="display: none;">
+    <h3>All Available Messages</h3>
+    <div id="allMessagesList" class="messages-list">
+        <div class="loading">Loading messages...</div>
+    </div>
+</div>
 
 <div class="card mt-6">
-    <h3>Common Examples</h3>
-    <div class="example-list">
-        <div class="example-item">
-            <code>feat: add user authentication</code>
-            <p class="text-secondary">Adding a new feature</p>
-        </div>
-        <div class="example-item">
-            <code>fix(api): resolve memory leak in user service</code>
-            <p class="text-secondary">Fixing a bug with scope</p>
-        </div>
-        <div class="example-item">
-            <code>docs: update API documentation</code>
-            <p class="text-secondary">Documentation changes</p>
-        </div>
-        <div class="example-item">
-            <code>refactor(auth): simplify token validation logic</code>
-            <p class="text-secondary">Code refactoring</p>
-        </div>
+    <h3>CLI Usage</h3>
+    <p>You can use this API directly from your terminal:</p>
+    
+    <div class="code-block">
+        <h4>Get a random commit message:</h4>
+        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt</code></pre>
+    </div>
+    
+    <div class="code-block">
+        <h4>Create a git alias:</h4>
+        <pre><code>git config --global alias.random-commit '!f() { git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt)"; }; f'</code></pre>
+        <p class="text-secondary">Then use: <code>git random-commit</code></p>
+    </div>
+    
+    <div class="code-block">
+        <h4>Bash function:</h4>
+        <pre><code>commit_random() {
+    git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt)" "$@"
+}</code></pre>
+        <p class="text-secondary">Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code></p>
     </div>
 </div>
 
 <style>
-.example-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+.message-display {
+    position: relative;
+    margin-bottom: var(--space-4);
 }
 
-.example-item {
+.result-output {
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--green);
+    border-radius: var(--radius-md);
+    font-size: var(--text-lg);
+    font-family: 'Monaco', 'Consolas', monospace;
+    word-wrap: break-word;
+}
+
+.copy-btn {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+}
+
+.messages-list {
+    max-height: 400px;
+    overflow-y: auto;
+    display: grid;
+    gap: var(--space-2);
+}
+
+.message-item {
     padding: var(--space-3);
     background-color: var(--bg-secondary);
-    border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-family: 'Monaco', 'Consolas', monospace;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
 }
 
-.example-item code {
-    display: block;
+.message-item:hover {
+    border-color: var(--purple);
+    transform: translateX(4px);
+}
+
+.message-item .copy-icon {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.message-item:hover .copy-icon {
+    opacity: 1;
+}
+
+.code-block {
+    margin-bottom: var(--space-4);
+}
+
+.code-block h4 {
+    font-size: var(--text-base);
     margin-bottom: var(--space-2);
-    padding: var(--space-2);
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
 }
 
-.example-item p {
-    margin: 0;
-    font-size: var(--text-sm);
+.code-block pre {
+    background-color: var(--bg-secondary);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+}
+
+.code-block code {
+    color: var(--cyan);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--text-secondary);
+}
+
+.btn-lg {
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--text-lg);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-display {
+    animation: fadeIn 0.3s ease;
 }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    const showAllBtn = document.getElementById('showAllBtn');
+    const messageDisplay = document.getElementById('messageDisplay');
+    const commitMessage = document.getElementById('commitMessage');
+    const allMessagesCard = document.getElementById('allMessagesCard');
+    const allMessagesList = document.getElementById('allMessagesList');
+    
+    // Generate random message
+    generateBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/v1/commit/json');
+            const data = await response.json();
+            
+            if (response.ok) {
+                commitMessage.textContent = data.message;
+                messageDisplay.style.display = 'block';
+                
+                // Auto-select for easy copying
+                const range = document.createRange();
+                range.selectNodeContents(commitMessage);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                commitMessage.textContent = 'Error generating message';
+                messageDisplay.style.display = 'block';
+            }
+        } catch (error) {
+            commitMessage.textContent = 'Network error. Please try again.';
+            messageDisplay.style.display = 'block';
+        }
+    });
+    
+    // Show all messages
+    showAllBtn.addEventListener('click', async () => {
+        if (allMessagesCard.style.display === 'block') {
+            allMessagesCard.style.display = 'none';
+            showAllBtn.textContent = 'Show All Messages';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/v1/commit/all');
+            const data = await response.json();
+            
+            if (response.ok && data.messages) {
+                const messagesHtml = data.messages.map((msg, index) => `
+                    <div class="message-item" data-message="${msg.replace(/"/g, '&quot;')}">
+                        ${msg}
+                        <span class="copy-icon">📋</span>
+                    </div>
+                `).join('');
+                
+                allMessagesList.innerHTML = messagesHtml;
+                allMessagesCard.style.display = 'block';
+                showAllBtn.textContent = 'Hide All Messages';
+                
+                // Add click handlers for copying
+                document.querySelectorAll('.message-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const message = item.getAttribute('data-message');
+                        copyToClipboard(message, item);
+                    });
+                });
+            }
+        } catch (error) {
+            allMessagesList.innerHTML = '<div class="error">Failed to load messages</div>';
+            allMessagesCard.style.display = 'block';
+        }
+    });
+    
+    // Copy button handler
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-action="copy-message"]')) {
+            const message = commitMessage.textContent;
+            copyToClipboard(message, e.target);
+        }
+    });
+    
+    // Copy to clipboard function
+    function copyToClipboard(text, element) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = element.textContent;
+            const isButton = element.tagName === 'BUTTON';
+            
+            if (isButton) {
+                element.textContent = 'Copied!';
+                element.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    element.textContent = originalText;
+                    element.classList.remove('btn-success');
+                }, 2000);
+            } else {
+                // For message items, show brief feedback
+                const originalBg = element.style.backgroundColor;
+                element.style.backgroundColor = 'var(--green)';
+                element.style.color = 'var(--background)';
+                
+                setTimeout(() => {
+                    element.style.backgroundColor = originalBg;
+                    element.style.color = '';
+                }, 300);
+            }
+        }).catch(() => {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            if (element.tagName === 'BUTTON') {
+                element.textContent = 'Copied!';
+                setTimeout(() => {
+                    element.textContent = 'Copy';
+                }, 2000);
+            }
+        });
+    }
+});
+</script>

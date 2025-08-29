@@ -3,7 +3,7 @@ const express = require('express');
 const redditRoute = express.Router();
 const cors = require('cors');
 
-const fetch = require('node-fetch');
+const { fetchRedditData } = require('../utils/redditHelper');
 const default_route = ['/', '/help'];
 
 redditRoute.get(default_route, cors(), async (req, res) => {
@@ -24,92 +24,156 @@ redditRoute.get(default_route, cors(), async (req, res) => {
 redditRoute.get('/jason', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   try {
-    const response = await fetch(`https://www.reddit.com/user/casjay/.json?sort=new&limit=500`, {
-      headers: {
-        'User-Agent': 'Node.js API Client'
+    const data = await fetchRedditData('casjay');
+    
+    if (data && data.data && data.data.children) {
+      // Remove first 3 posts if we have enough
+      let posts = data.data.children;
+      if (posts.length > 3) {
+        posts = posts.slice(3);
       }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Reddit API returned ${response.status}: ${response.statusText}`);
+      
+      res.send(
+        JSON.stringify({
+          reddit: posts,
+          totalPosts: posts.length
+        })
+      );
+    } else {
+      res.send(
+        JSON.stringify({
+          reddit: [],
+          totalPosts: 0,
+          message: "No data available"
+        })
+      );
     }
-    
-    const json = await response.json();
-    
-    if (!json.data || !json.data.children) {
-      throw new Error('Invalid Reddit response format');
-    }
-    
-    let redditPosts = json.data.children;
-    // Remove first 3 posts (properly call shift method)
-    redditPosts.shift();
-    redditPosts.shift();
-    redditPosts.shift();
-    
+  } catch (error) {
+    console.error('Reddit API error:', error);
     res.send(
       JSON.stringify({
-        reddit: redditPosts,
+        reddit: [],
+        totalPosts: 0,
+        message: "Reddit API is currently unavailable"
       })
     );
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 
 redditRoute.get('/u/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/u/${req.params.id}/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
-    const json = await response.json();
-    this.json = json.data.children;
-    this.json.shift;
-    this.json.shift;
-    this.json.shift;
+    const data = await fetchRedditData(req.params.id);
+    
+    if (data && data.data && data.data.children) {
+      // Remove first 3 posts if we have enough
+      let posts = data.data.children;
+      if (posts.length > 3) {
+        posts = posts.slice(3);
+      }
+      
+      res.send(
+        JSON.stringify({
+          reddit: posts,
+          totalPosts: posts.length
+        })
+      );
+    } else {
+      res.send(
+        JSON.stringify({
+          reddit: [],
+          totalPosts: 0,
+          message: "No data available"
+        })
+      );
+    }
+  } catch (error) {
+    console.error('Reddit API error:', error);
     res.send(
       JSON.stringify({
-        reddit: this.json,
+        reddit: [],
+        totalPosts: 0,
+        message: "Reddit API is currently unavailable"
       })
     );
-  } catch (error) {
-    res.json({ error: error.message });
   }
 });
 
 redditRoute.get('/r/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/r/${req.params.id}/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
-    const json = await response.json();
-    this.json = json.data.children;
-    this.json.shift;
-    this.json.shift;
-    this.json.shift;
+    const data = await fetchRedditData(null, req.params.id);
+    
+    if (data && data.data && data.data.children) {
+      // Remove first 3 posts if we have enough
+      let posts = data.data.children;
+      if (posts.length > 3) {
+        posts = posts.slice(3);
+      }
+      
+      res.send(
+        JSON.stringify({
+          reddit: posts,
+          totalPosts: posts.length
+        })
+      );
+    } else {
+      res.send(
+        JSON.stringify({
+          reddit: [],
+          totalPosts: 0,
+          message: "No data available"
+        })
+      );
+    }
+  } catch (error) {
+    console.error('Reddit API error:', error);
     res.send(
       JSON.stringify({
-        reddit: this.json,
+        reddit: [],
+        totalPosts: 0,
+        message: "Reddit API is currently unavailable"
       })
     );
-  } catch (error) {
-    res.json({ error: error.message });
   }
 });
 
 redditRoute.get('/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://www.reddit.com/r/${req.params.id}/.json?sort=new&limit=500`);
   res.setHeader('Content-Type', 'application/json');
   try {
-    const json = await response.json();
-    this.json = json.data.children;
-    this.json.shift;
-    this.json.shift;
-    this.json.shift;
+    const data = await fetchRedditData(null, req.params.id);
+    
+    if (data && data.data && data.data.children) {
+      // Remove first 3 posts if we have enough
+      let posts = data.data.children;
+      if (posts.length > 3) {
+        posts = posts.slice(3);
+      }
+      
+      res.send(
+        JSON.stringify({
+          reddit: posts,
+          totalPosts: posts.length
+        })
+      );
+    } else {
+      res.send(
+        JSON.stringify({
+          reddit: [],
+          totalPosts: 0,
+          message: "No data available"
+        })
+      );
+    }
+  } catch (error) {
+    console.error('Reddit API error:', error);
     res.send(
       JSON.stringify({
-        reddit: this.json,
+        reddit: [],
+        totalPosts: 0,
+        message: "Reddit API is currently unavailable"
       })
     );
-  } catch (error) {
-    res.json({ error: error.message });
   }
 });
 

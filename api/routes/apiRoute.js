@@ -17,7 +17,11 @@ const timeZone = process.env.TIMEZONE || 'America/New_York';
 const version = process.env.VERSION;
 const githubToken = process.env.GITHUB_API_KEY;
 
-const githubHeader = (githubToken && 'Token is set') || 'Token is unset';
+// Check if GitHub token is valid (not blank, not placeholder)
+const isValidToken = githubToken && 
+                    githubToken.trim() !== '' && 
+                    githubToken !== 'myverylonggithubapikey';
+const githubHeader = isValidToken ? 'Token is set' : 'Token is NOT set';
 
 apiRoute.get('', cors(), (req, res) => {
   res.setHeader('Content-Type', 'application/json');

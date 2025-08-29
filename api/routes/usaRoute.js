@@ -2,10 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const usaRoute = express.Router();
 const cors = require('cors');
-const fetch = require('node-fetch');
-
 const usa = require('../controllers/usa');
 const { getHeaders } = require('../middleware/headers');
+const { getJson } = require('../utils/httpClient');
 const default_route = ['/', '/help'];
 const states = [
   'Alabama',
@@ -62,15 +61,24 @@ const states = [
 ];
 
 usaRoute.get(default_route, cors(), async (req, res) => {
+  const host = `${req.protocol}://${req.headers.host}`;
   res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        About: 'Disease info by state',
-        Help: [`State: Alabama: ${req.protocol}://${req.headers.host}/api/v1/usa/Alabama`],
-        states: states,
-      })
-    );
+    res.json({
+      title: 'USA COVID-19 Data API by State',
+      endpoint: `${host}/api/v1/usa`,
+      description: 'Get COVID-19 statistics by US state from disease.sh API',
+      data_source: 'https://disease.sh/v3/covid-19/states/',
+      endpoints: {
+        all_states_help: `${host}/api/v1/usa`,
+        by_state: `${host}/api/v1/usa/{state}`,
+        example_state: `${host}/api/v1/usa/Alabama`,
+        nys_specific: `${host}/api/v1/usa/nys`
+      },
+      cli_example: `curl ${host}/api/v1/usa/California`,
+      bash_function: `usa_covid() { state="\${1:-California}"; curl -s "${host}/api/v1/usa/\$state" | jq -r '\"\\(.state): Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)\"'; }`,
+      available_states: states
+    });
   } catch (error) {
     res.json({ error: 'An error has occurred' });
   }
@@ -79,11 +87,10 @@ usaRoute.get(default_route, cors(), async (req, res) => {
 usaRoute.get('/nys', cors(), async (req, res) => {
   const hostname = req.headers.host;
   const proto = req.protocol + '://';
-  const response = await fetch(proto + hostname + '/api/v1/nys', {
-    headers: getHeaders(),
-  });
   try {
-    const json = await response.json();
+    const json = await getJson(proto + hostname + '/api/v1/nys', {
+      headers: getHeaders(),
+    });
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
@@ -92,11 +99,10 @@ usaRoute.get('/nys', cors(), async (req, res) => {
 });
 
 usaRoute.get('/:id', cors(), async (req, res) => {
-  const response = await fetch(`https://disease.sh/v3/covid-19/states/${req.params.id}`, {
-    headers: getHeaders(),
-  });
   try {
-    const json = await response.json();
+    const json = await getJson(`https://disease.sh/v3/covid-19/states/${req.params.id}`, {
+      headers: getHeaders(),
+    });
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {

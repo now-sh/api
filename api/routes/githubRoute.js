@@ -2,15 +2,34 @@ require('dotenv').config();
 const express = require('express');
 const githubRoute = express.Router();
 const cors = require('cors');
-const fetch = require('node-fetch');
-
 const { getHeaders } = require('../middleware/headers');
+const { getJson } = require('../utils/httpClient');
 const { fetchAllGitHubPages } = require('../utils/pagination');
 const githubToken = process.env.GITHUB_API_KEY;
 const cache = null;
 const lastCacheTime = null;
 
 const api_version = process.env.GITHUB_API_VERSION || '2022-11-28';
+
+// Check if GitHub token is valid (not blank, not placeholder)
+const isValidToken = githubToken && 
+                    githubToken.trim() !== '' && 
+                    githubToken !== 'myverylonggithubapikey';
+
+// Build headers with or without auth
+const buildGitHubHeaders = () => {
+  const baseHeaders = {
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': api_version
+  };
+  
+  if (isValidToken) {
+    baseHeaders['Authorization'] = `token ${githubToken}`;
+  }
+  
+  // Use getHeaders to include the HEADER_AGENT
+  return getHeaders(baseHeaders);
+};
 
 githubRoute.get('', cors(), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -56,20 +75,9 @@ githubRoute.get('/jason', cors(), async (req, res) => {
     return res.json(cache);
   }
   try {
-    const response = await fetch('https://api.github.com/users/casjay', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': api_version,
-        'User-Agent': 'Node.js API Client'
-      },
+    const json = await getJson('https://api.github.com/users/casjay', {
+      headers: buildGitHubHeaders()
     });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
-    }
-    
-    const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
@@ -79,20 +87,9 @@ githubRoute.get('/jason', cors(), async (req, res) => {
 
 githubRoute.get('/user/:id', cors(), async (req, res) => {
   try {
-    const response = await fetch(`https://api.github.com/users/${req.params.id}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': api_version,
-        'User-Agent': 'Node.js API Client'
-      },
+    const json = await getJson(`https://api.github.com/users/${req.params.id}`, {
+      headers: buildGitHubHeaders()
     });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
-    }
-    
-    const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {
@@ -107,20 +104,9 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
     let hasMorePages = true;
     
     while (hasMorePages) {
-      const response = await fetch(`https://api.github.com/users/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/vnd.github+json',
-          'X-GitHub-Api-Version': api_version,
-          'User-Agent': 'Node.js API Client'
-        },
+      const repos = await getJson(`https://api.github.com/users/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
+        headers: buildGitHubHeaders()
       });
-      
-      if (!response.ok) {
-        throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
-      }
-      
-      const repos = await response.json();
       
       if (repos.length === 0) {
         hasMorePages = false;
@@ -136,7 +122,10 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
     }
     
     res.setHeader('Content-Type', 'application/json');
-    res.send(allRepos);
+    res.send({
+      repos: allRepos,
+      totalRepos: allRepos.length
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -149,20 +138,9 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
     let hasMorePages = true;
     
     while (hasMorePages) {
-      const response = await fetch(`https://api.github.com/users/${req.params.id}/orgs?sort=name&per_page=100&page=${page}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/vnd.github+json',
-          'X-GitHub-Api-Version': api_version,
-          'User-Agent': 'Node.js API Client'
-        },
+      const orgs = await getJson(`https://api.github.com/users/${req.params.id}/orgs?sort=name&per_page=100&page=${page}`, {
+        headers: buildGitHubHeaders()
       });
-      
-      if (!response.ok) {
-        throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
-      }
-      
-      const orgs = await response.json();
       
       if (orgs.length === 0) {
         hasMorePages = false;
@@ -178,7 +156,10 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
     }
     
     res.setHeader('Content-Type', 'application/json');
-    res.send(allOrgs);
+    res.send({
+      orgs: allOrgs,
+      totalOrgs: allOrgs.length
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -186,20 +167,9 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
 
 githubRoute.get('/org/:id', cors(), async (req, res) => {
   try {
-    const response = await fetch(`https://api.github.com/orgs/${req.params.id}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': api_version,
-        'User-Agent': 'Node.js API Client'
-      },
+    const json = await getJson(`https://api.github.com/orgs/${req.params.id}`, {
+      headers: buildGitHubHeaders()
     });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
-    }
-    
-    const json = await response.json();
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
   } catch (error) {

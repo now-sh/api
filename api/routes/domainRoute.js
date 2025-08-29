@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const domainRoute = express.Router();
 const cors = require('cors');
-const { fetchJsonWithTimeout } = require('../utils/fetchWithTimeout');
+const { getJson } = require('../utils/httpClient');
 
 const domain_json = 'https://raw.githubusercontent.com/casjay/casjay/main/domains.json';
 const domain_file = process.env.DOMAIN_LIST || domain_json;
@@ -13,7 +13,7 @@ let domainCache = {
   timestamp: 0
 };
 
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour cache
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
 
 domainRoute.get('/', cors(), async (req, res) => {
@@ -25,7 +25,7 @@ domainRoute.get('/', cors(), async (req, res) => {
   }
   
   try {
-    const data = await fetchJsonWithTimeout(domain_file, {}, 5000);
+    const data = await getJson(domain_file, { timeout: 5000 });
     
     // Update cache
     domainCache = {
@@ -36,16 +36,27 @@ domainRoute.get('/', cors(), async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(data);
   } catch (error) {
-    // Return cached data if available
-    if (domainCache.data) {
-      console.error('Failed to fetch fresh domain data, using cache:', error.message);
-      return res.json(domainCache.data);
-    }
-    
-    res.status(500).json({ 
-      error: 'Failed to fetch domain data',
+    res.status(503).json({ 
+      error: 'Domain data service unavailable',
       message: error.message 
     });
+  }
+});
+
+domainRoute.get('/help', cors(), async (req, res) => {
+  const host = `${req.protocol}://${req.headers.host}`;
+  res.setHeader('Content-Type', 'application/json');
+  try {
+    res.json({
+      title: 'Domain List API',
+      endpoint: `${host}/api/v1/domains`,
+      description: 'Get list of CasJay\'s domains',
+      data_source: domain_file,
+      cli_example: `curl ${host}/api/v1/domains`,
+      search_function: `domain_search() { curl -s "${host}/api/v1/domains" | jq -r '.[] | select(. | test($1; "i"))' --arg 1 "$1"; }`
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

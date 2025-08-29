@@ -1,9 +1,9 @@
 const cheerioLoadWithTimeout = require('../utils/cheerioWithTimeout');
-const { fetchJsonWithTimeout } = require('../utils/fetchWithTimeout');
+const { getJson } = require('../utils/httpClient');
 
 // URLs for closings data
-const ALBANY_CLOSINGS_URL = 'https://wnyt.com/wp-content/uploads/dynamic-assets/schoolalert.html';
-const UTICA_CLOSINGS_URL = 'https://amb-feeds.s3.amazonaws.com/WKTV_closings.json';
+const ALBANY_CLOSINGS_URL = process.env.ALBANY_CLOSINGS_URL || 'https://wnyt.com/wp-content/uploads/dynamic-assets/schoolalert.html';
+const UTICA_CLOSINGS_URL = process.env.UTICA_CLOSINGS_URL || 'https://amb-feeds.s3.amazonaws.com/WKTV_closings.json';
 
 // Types
 
@@ -106,7 +106,7 @@ async function fetchUticaClosings() {
   }
   
   try {
-    const data = await fetchJsonWithTimeout(UTICA_CLOSINGS_URL, {}, 5000);
+    const data = await getJson(UTICA_CLOSINGS_URL, { timeout: 5000 });
     
     const closings = [];
     const hasClosings = parseInt(data.numClosings) > 0;

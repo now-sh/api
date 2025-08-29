@@ -13,7 +13,6 @@ app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
 const startdb = require('./controllers/mongodb');
-startdb();
 
 const middlewares = require('./middleware/errorHandler');
 const handlers = require('./middleware/defaultHandler');
@@ -85,6 +84,17 @@ app.use('/api/v1/services/timezones', require('./routes/timezoneRoute'));
 app.use('/api/v1/services/url', require('./routes/urlRoute'));
 app.use('/api/health', require('./routes/healthRoute')); // Keep unversioned
 
+// Add healthz at v1 level
+const healthRoute = require('./routes/healthRoute');
+app.use('/api/v1', (req, res, next) => {
+  if (req.path === '/healthz') {
+    req.url = '/healthz';
+    healthRoute(req, res, next);
+  } else {
+    next();
+  }
+});
+
 // 🔐 Authentication Services
 app.use('/api/v1/auth', require('./routes/authRoute'));
 
@@ -154,10 +164,12 @@ app.get('/data/anime', (req, res) => res.render('pages/data/anime'));
 app.get('/data/domains', (req, res) => res.render('pages/data/domains'));
 app.get('/data/timezones', (req, res) => res.render('pages/data/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/data/closings'));
+app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));
 
 // Personal frontend pages
 app.get('/personal/todos', (req, res) => res.render('pages/personal/todos'));
 app.get('/personal/notes', (req, res) => res.render('pages/personal/notes'));
+app.get('/personal/profile', (req, res) => res.render('pages/personal/profile'));
 
 // Service frontend pages
 app.get('/services/url', (req, res) => res.render('pages/services/url'));
@@ -169,4 +181,7 @@ app.use(middlewares.errorHandler);
 const port = process.env.PORT || 2000;
 const hostname = process.env.HOSTNAME;
 
-app.listen(port, () => console.log(`Starting server: http://${hostname}:${port}`));
+app.listen(port, async () => {
+  await startdb();
+  console.log(`🚀 Server started: http://${hostname}:${port}`);
+});

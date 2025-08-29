@@ -1,0 +1,347 @@
+<div class="hero fade-in">
+    <h1>My Profile</h1>
+    <p class="lead">Manage your account and view your activity</p>
+</div>
+
+<div class="dashboard-container" id="authRequired" style="display: none;">
+    <div class="empty-state">
+        <h3>Please Sign In</h3>
+        <p>You need to be signed in to view your profile.</p>
+        <a href="/auth" class="btn btn-primary mt-3">Sign In</a>
+    </div>
+</div>
+
+<div class="dashboard-container" id="profileContent" style="display: none;">
+    <!-- User Info Card -->
+    <div class="card mb-6">
+        <h2>Account Information</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Name</label>
+                <span id="userName">-</span>
+            </div>
+            <div class="info-item">
+                <label>Email</label>
+                <span id="userEmail">-</span>
+            </div>
+            <div class="info-item">
+                <label>User ID</label>
+                <span id="userId" class="mono">-</span>
+            </div>
+            <div class="info-item">
+                <label>Member Since</label>
+                <span id="userCreated">-</span>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button id="updateProfileBtn" class="btn btn-primary">Update Profile</button>
+            <button id="logoutBtn" class="btn btn-secondary">Sign Out</button>
+        </div>
+    </div>
+    
+    <!-- Activity Overview -->
+    <div class="card mb-6">
+        <h2>Activity Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon urls-icon">🔗</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="urlCount">0</div>
+                    <div class="stat-label">Short URLs</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon todos-icon">✓</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="todoCount">0</div>
+                    <div class="stat-label">Todos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon notes-icon">📝</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="noteCount">0</div>
+                    <div class="stat-label">Notes</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon tokens-icon">🔐</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="tokenCount">0</div>
+                    <div class="stat-label">Active Tokens</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="card mb-6">
+        <h2>Quick Links</h2>
+        <div class="quick-links">
+            <a href="/services/url" class="quick-link">
+                <span class="link-icon">🔗</span>
+                <span>URL Shortener</span>
+            </a>
+            <a href="/personal/todos" class="quick-link">
+                <span class="link-icon">✓</span>
+                <span>My Todos</span>
+            </a>
+            <a href="/personal/notes" class="quick-link">
+                <span class="link-icon">📝</span>
+                <span>My Notes</span>
+            </a>
+            <a href="/auth" class="quick-link">
+                <span class="link-icon">🔐</span>
+                <span>Token Management</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="card">
+        <h2>Recent URLs</h2>
+        <div id="recentUrls" class="recent-items">
+            <div class="loading">Loading recent URLs...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Profile Modal -->
+<div id="updateModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Update Profile</h3>
+        <form id="updateForm">
+            <div class="form-group">
+                <label for="updateName">Name</label>
+                <input type="text" id="updateName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="updateEmail">Email</label>
+                <input type="email" id="updateEmail" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="currentPassword">Current Password (required)</label>
+                <input type="password" id="currentPassword" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password (optional)</label>
+                <input type="password" id="newPassword" class="form-control" minlength="8">
+                <small class="text-secondary">Leave blank to keep current password</small>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.info-item {
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+}
+
+.info-item label {
+    display: block;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.info-item span {
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+}
+
+.mono {
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    background-color: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--purple);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(189, 147, 249, 0.1);
+    border-radius: var(--radius-md);
+}
+
+.stat-value {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.quick-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.quick-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.quick-link:hover {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+
+.link-icon {
+    font-size: 1.5rem;
+}
+
+.recent-items {
+    margin-top: var(--space-4);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+}
+
+.recent-item:hover {
+    background-color: var(--bg-primary);
+}
+
+.recent-item a {
+    color: var(--cyan);
+    text-decoration: none;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.recent-item a:hover {
+    text-decoration: underline;
+}
+
+.recent-meta {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--bg-primary);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal h3 {
+    margin-bottom: var(--space-4);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    margin-top: var(--space-4);
+}
+
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+}
+</style>
+
+<%- locals.customScripts = '<script src="/js/profile.js"></script>' %>

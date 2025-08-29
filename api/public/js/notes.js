@@ -1,90 +1,177 @@
 let notes = [];
+let currentNoteId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle toolbar button clicks
-    document.addEventListener('click', function(e) {
-        if (e.target.matches('[data-format]')) {
-            const format = e.target.getAttribute('data-format');
+    // Check authentication
+    checkAuth();
+    
+    // Event listeners
+    document.getElementById('newNoteBtn').addEventListener('click', createNewNote);
+    document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
+    document.getElementById('deleteNoteBtn').addEventListener('click', deleteCurrentNote);
+    
+    // Toolbar buttons
+    document.querySelectorAll('.toolbar-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const format = this.getAttribute('data-format');
             formatText(format);
-        }
-        
-        if (e.target.matches('[data-action="save-note"]')) {
-            saveNote();
-        }
-        
-        if (e.target.matches('[data-action="new-note"]')) {
-            newNote();
-        }
-        
-        if (e.target.matches('[data-note-id]')) {
-            const noteId = e.target.getAttribute('data-note-id');
-            const action = e.target.getAttribute('data-action');
-            
-            if (action === 'edit') {
-                editNote(noteId);
-            } else if (action === 'delete') {
-                deleteNote(noteId);
-            }
+        });
+    });
+    
+    // Auto-save on content change
+    let saveTimer;
+    document.getElementById('noteContent').addEventListener('input', function() {
+        clearTimeout(saveTimer);
+        if (currentNoteId) {
+            saveTimer = setTimeout(() => saveNote(true), 2000);
         }
     });
     
-    // Load notes on page load
-    loadNotes();
+    document.getElementById('noteTitle').addEventListener('input', function() {
+        clearTimeout(saveTimer);
+        if (currentNoteId) {
+            saveTimer = setTimeout(() => saveNote(true), 2000);
+        }
+    });
 });
 
-function formatText(command) {
-    const editor = document.getElementById('noteContent');
-    editor.focus();
-    document.execCommand(command, false, null);
+function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    loadNotes();
 }
 
-async function saveNote() {
-    const title = document.getElementById('noteTitle').value;
-    const content = document.getElementById('noteContent').innerHTML;
-    const noteId = document.getElementById('noteForm').dataset.noteId;
+function showAuthRequired() {
+    document.getElementById('notesList').innerHTML = `
+        <div class="empty-state">
+            <p>Please sign in to manage your notes.</p>
+            <a href="/auth" class="btn btn-primary btn-sm mt-3">Sign In</a>
+        </div>
+    `;
+    document.getElementById('newNoteBtn').style.display = 'none';
+}
+
+function formatText(command) {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const selectedText = range.toString();
+        
+        if (selectedText) {
+            document.execCommand(command, false, null);
+        }
+    }
+}
+
+function createNewNote() {
+    currentNoteId = null;
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteContent').value = '';
+    document.getElementById('categorySelect').value = '';
+    document.getElementById('lastSaved').textContent = '';
     
-    if (!title.trim()) {
-        showToast('Please enter a title', 'error');
+    // Show editor, hide welcome message
+    document.getElementById('editorContainer').style.display = 'block';
+    document.getElementById('welcomeMessage').style.display = 'none';
+    
+    // Remove active state from all notes
+    document.querySelectorAll('.note-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    document.getElementById('noteTitle').focus();
+}
+
+async function saveNote(autoSave = false) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please sign in to save notes', 'error');
         return;
     }
     
+    const title = document.getElementById('noteTitle').value.trim();
+    const content = document.getElementById('noteContent').value.trim();
+    const category = document.getElementById('categorySelect').value;
+    
+    if (!title && !content) {
+        if (!autoSave) {
+            showToast('Please enter a title or content', 'error');
+        }
+        return;
+    }
+    
+    const noteData = {
+        title: title || 'Untitled Note',
+        content,
+        category
+    };
+    
     try {
-        const method = noteId ? 'PUT' : 'POST';
-        const url = noteId ? `/api/v1/personal/notes/${noteId}` : '/api/v1/personal/notes';
+        const method = currentNoteId ? 'PUT' : 'POST';
+        const url = currentNoteId ? 
+            `/api/v1/personal/notes/${currentNoteId}` : 
+            '/api/v1/personal/notes';
         
         const response = await fetch(url, {
             method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ title, content })
+            body: JSON.stringify(noteData)
         });
         
         if (response.ok) {
-            showToast(noteId ? 'Note updated!' : 'Note saved!');
-            newNote();
+            const result = await response.json();
+            
+            if (!currentNoteId) {
+                currentNoteId = result.note._id || result.note.id;
+            }
+            
+            document.getElementById('lastSaved').textContent = 
+                `Last saved: ${new Date().toLocaleTimeString()}`;
+            
+            if (!autoSave) {
+                showToast(method === 'POST' ? 'Note created!' : 'Note saved!');
+            }
+            
             loadNotes();
         } else {
             const error = await response.json();
-            showToast(`Error: ${error.message}`, 'error');
+            showToast(error.message || 'Failed to save note', 'error');
         }
     } catch (error) {
-        showToast(`Error: ${error.message}`, 'error');
+        showToast('Network error. Please try again.', 'error');
     }
 }
 
-function newNote() {
-    document.getElementById('noteTitle').value = '';
-    document.getElementById('noteContent').innerHTML = '';
-    document.getElementById('noteForm').removeAttribute('data-note-id');
-    document.getElementById('saveButton').textContent = 'Save Note';
-}
-
 async function loadNotes() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    
     try {
-        const response = await fetch('/api/v1/personal/notes');
-        const data = await response.json();
+        const response = await fetch('/api/v1/personal/notes', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                showAuthRequired();
+                return;
+            }
+            throw new Error('Failed to load notes');
+        }
+        
+        const data = await response.json();
         notes = data.notes || data || [];
         renderNotes();
     } catch (error) {
@@ -97,74 +184,108 @@ function renderNotes() {
     const container = document.getElementById('notesList');
     
     if (notes.length === 0) {
-        container.innerHTML = '<div class="empty-state">No notes yet. Create your first note above!</div>';
+        container.innerHTML = '<div class="empty-state">No notes yet. Click "New Note" to create your first note!</div>';
         return;
     }
     
-    container.innerHTML = notes.map(note => `
-        <div class="note-item" data-id="${note._id || note.id}">
-            <div class="note-header">
-                <h3 class="note-title">${escapeHtml(note.title)}</h3>
-                <div class="note-actions">
-                    <button class="btn-icon" data-action="edit" data-note-id="${note._id || note.id}" title="Edit">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                    </button>
-                    <button class="btn-icon delete" data-action="delete" data-note-id="${note._id || note.id}" title="Delete">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"/>
-                        </svg>
-                    </button>
+    container.innerHTML = notes.map(note => {
+        const preview = note.content ? 
+            note.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : 
+            'No content';
+        
+        return `
+            <div class="note-item ${note._id === currentNoteId ? 'active' : ''}" 
+                 data-id="${note._id || note.id}"
+                 onclick="loadNote('${note._id || note.id}')">
+                <div class="note-item-title">${note.title || 'Untitled'}</div>
+                <div class="note-item-preview">${preview}</div>
+                <div class="note-item-meta">
+                    ${note.category ? `<span class="note-category">${note.category}</span>` : ''}
+                    <span>${formatDate(note.updatedAt || note.createdAt)}</span>
                 </div>
             </div>
-            <div class="note-content">${note.content}</div>
-            <div class="note-meta">
-                ${note.createdAt ? `Created: ${new Date(note.createdAt).toLocaleDateString()}` : ''}
-                ${note.updatedAt && note.updatedAt !== note.createdAt ? 
-                    ` • Updated: ${new Date(note.updatedAt).toLocaleDateString()}` : ''}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-async function editNote(id) {
-    const note = notes.find(n => n._id === id || n.id === id);
+window.loadNote = async function(noteId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    
+    const note = notes.find(n => n._id === noteId || n.id === noteId);
     if (!note) return;
     
-    document.getElementById('noteTitle').value = note.title;
-    document.getElementById('noteContent').innerHTML = note.content;
-    document.getElementById('noteForm').dataset.noteId = id;
-    document.getElementById('saveButton').textContent = 'Update Note';
+    currentNoteId = noteId;
     
-    // Scroll to editor
-    document.getElementById('noteForm').scrollIntoView({ behavior: 'smooth' });
+    // Update UI
+    document.getElementById('noteTitle').value = note.title || '';
+    document.getElementById('noteContent').value = note.content || '';
+    document.getElementById('categorySelect').value = note.category || '';
+    document.getElementById('lastSaved').textContent = 
+        `Last saved: ${formatDate(note.updatedAt || note.createdAt)}`;
+    
+    // Show editor, hide welcome message
+    document.getElementById('editorContainer').style.display = 'block';
+    document.getElementById('welcomeMessage').style.display = 'none';
+    
+    // Update active state
+    document.querySelectorAll('.note-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[data-id="${noteId}"]`).classList.add('active');
 }
 
-async function deleteNote(id) {
+async function deleteCurrentNote() {
+    if (!currentNoteId) return;
+    
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please sign in to delete notes', 'error');
+        return;
+    }
+    
     if (!confirm('Are you sure you want to delete this note?')) return;
     
     try {
-        const response = await fetch(`/api/v1/personal/notes/${id}`, {
-            method: 'DELETE'
+        const response = await fetch(`/api/v1/personal/notes/${currentNoteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         
         if (response.ok) {
             showToast('Note deleted successfully!');
+            currentNoteId = null;
+            
+            // Hide editor, show welcome message
+            document.getElementById('editorContainer').style.display = 'none';
+            document.getElementById('welcomeMessage').style.display = 'block';
+            
             loadNotes();
         } else {
             showToast('Error deleting note', 'error');
         }
     } catch (error) {
-        showToast(`Error: ${error.message}`, 'error');
+        showToast('Network error. Please try again.', 'error');
     }
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffDays === 1) {
+        return 'Yesterday';
+    } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+    } else {
+        return date.toLocaleDateString();
+    }
 }
 
 function showToast(message, type = 'success') {
@@ -185,4 +306,23 @@ function showToast(message, type = 'success') {
     `;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+}
+
+// Add animation
+if (!document.querySelector('style[data-notes-animations]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-notes-animations', 'true');
+    style.textContent = `
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }

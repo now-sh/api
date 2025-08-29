@@ -1,5 +1,11 @@
 const rateLimit = require('express-rate-limit');
 
+// Skip function to exempt localhost
+const skipLocalhost = (req) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  return ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' || ip === '::ffff:127.0.0.1';
+};
+
 // Default rate limiter for all routes
 const defaultLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -9,6 +15,7 @@ const defaultLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: skipLocalhost, // Skip rate limiting for localhost
   handler: (req, res) => {
     res.status(429).json({
       errors: [{
@@ -26,6 +33,7 @@ const authLimiter = rateLimit({
     error: 'Too many authentication attempts, please try again later.'
   },
   skipSuccessfulRequests: true, // Don't count successful requests
+  skip: skipLocalhost, // Skip rate limiting for localhost
   handler: (req, res) => {
     res.status(429).json({
       errors: [{
@@ -42,6 +50,7 @@ const readLimiter = rateLimit({
   message: {
     error: 'Too many requests from this IP, please try again later.'
   },
+  skip: skipLocalhost, // Skip rate limiting for localhost
   handler: (req, res) => {
     res.status(429).json({
       errors: [{

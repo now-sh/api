@@ -72,6 +72,13 @@ healthRoute.get('/healthz', cors(), async (req, res) => {
   const totalDbs = dbValues.length;
   const allDbsHealthy = healthyDbs === totalDbs && totalDbs > 0;
   
+  // Check GitHub token status
+  const githubToken = process.env.GITHUB_API_KEY;
+  const isValidToken = githubToken && 
+                      githubToken.trim() !== '' && 
+                      githubToken !== 'myverylonggithubapikey';
+  const githubTokenStatus = isValidToken ? 'Token is set' : 'Token is NOT set';
+
   // Build response
   const healthStatus = {
     status: allDbsHealthy ? 'healthy' : 'degraded',
@@ -98,6 +105,7 @@ healthRoute.get('/healthz', cors(), async (req, res) => {
         systemTotal: Math.round(os.totalmem() / 1024 / 1024) + ' MB'
       }
     },
+    githubToken: githubTokenStatus,
     responseTime: Date.now() - startTime + 'ms'
   };
   

@@ -1,5 +1,5 @@
 const myHeaders = {
-  'User-Agent': process.env.HEADER_AGENT || 'API-Server/1.0 (+https://github.com/now-sh/api)',
+  'User-Agent': process.env.HEADER_AGENT || 'Mozilla/5.0',
 };
 
 // Helper function to merge headers properly
