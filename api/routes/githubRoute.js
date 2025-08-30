@@ -180,11 +180,33 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
 
 githubRoute.get('/org/:id', cors(), async (req, res) => {
   try {
-    const json = await getJson(`https://api.github.com/orgs/${req.params.id}`, {
-      headers: buildGitHubHeaders()
-    });
+    let allRepos = [];
+    let page = 1;
+    let hasMorePages = true;
+    
+    while (hasMorePages) {
+      const repos = await getJson(`https://api.github.com/orgs/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
+        headers: buildGitHubHeaders()
+      });
+      
+      if (repos.length === 0) {
+        hasMorePages = false;
+      } else {
+        allRepos = allRepos.concat(repos);
+        page++;
+        
+        // Safety limit to prevent infinite loops
+        if (page > 20) {
+          hasMorePages = false;
+        }
+      }
+    }
+    
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send({
+      repos: allRepos,
+      totalRepos: allRepos.length
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
