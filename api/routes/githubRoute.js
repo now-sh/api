@@ -135,10 +135,7 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
     }
     
     res.setHeader('Content-Type', 'application/json');
-    res.send({
-      repos: allRepos,
-      totalRepos: allRepos.length
-    });
+    res.send(allRepos);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -169,10 +166,7 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
     }
     
     res.setHeader('Content-Type', 'application/json');
-    res.send({
-      orgs: allOrgs,
-      totalOrgs: allOrgs.length
-    });
+    res.send(allOrgs);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -203,10 +197,7 @@ githubRoute.get('/org/:id', cors(), async (req, res) => {
     }
     
     res.setHeader('Content-Type', 'application/json');
-    res.send({
-      repos: allRepos,
-      totalRepos: allRepos.length
-    });
+    res.send(allRepos);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
