@@ -3,37 +3,264 @@
     <p class="lead">Decode and validate JSON Web Tokens</p>
 </div>
 
-<%- include('../../partials/endpoint-form', {
-    title: 'JWT Decoder',
-    description: 'Paste a JWT token to decode its payload and header',
-    formId: 'jwtForm',
-    submitText: 'Decode Token',
-    formContent: `
-        <div class="form-group">
-            <label for="token" class="form-label">JWT Token</label>
-            <textarea 
-                id="token" 
-                name="token" 
-                class="form-control" 
-                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                rows="4"
-                required
-            ></textarea>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">JWT Decoder</h2>
+            <p class="card-text mb-4">Paste a JWT token to decode its payload and header</p>
+            
+            <form id="jwtForm" class="api-form">
+                <div class="form-group">
+                    <label for="token" class="form-label">JWT Token</label>
+                    <textarea 
+                        id="token" 
+                        name="token" 
+                        class="form-control" 
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        rows="4"
+                        required
+                    ></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Decode Token
+                </button>
+            </form>
+            
+            <div id="jwtForm-result" class="result-container mt-6" style="display: none;">
+                <div class="result-tabs">
+                    <button class="tab-btn active" data-tab="decoded">Decoded</button>
+                    <button class="tab-btn" data-tab="header">Header</button>
+                    <button class="tab-btn" data-tab="payload">Payload</button>
+                </div>
+                <div class="result-content">
+                    <div class="tab-content active" data-content="decoded">
+                        <pre class="result-output"></pre>
+                    </div>
+                    <div class="tab-content" data-content="header">
+                        <pre class="result-output"></pre>
+                    </div>
+                    <div class="tab-content" data-content="payload">
+                        <pre class="result-output"></pre>
+                    </div>
+                </div>
+                <button class="btn btn-sm copy-btn mt-2" onclick="copyActiveTab()">Copy</button>
+            </div>
         </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Example JWT</h3>
+            <p class="card-text">Try decoding this example JWT token:</p>
+            <div class="code-block">
+                <pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></pre>
+                <button class="btn btn-sm btn-secondary" onclick="useExample()">Use This Example</button>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Decode JWT:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/jwt/decode \
+  -H "Content-Type: application/json" \
+  -d '{"token": "eyJhbGciOiJIUzI1NiIs..."}'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('jwtForm');
+    const resultDiv = document.getElementById('jwtForm-result');
+    let decodedData = null;
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        <div class="form-group">
-            <label for="secret" class="form-label">Secret (Optional)</label>
-            <input 
-                type="text" 
-                id="secret" 
-                name="secret" 
-                class="form-control" 
-                placeholder="Enter secret to verify signature (optional)"
-            />
-            <small class="text-secondary">Leave empty to only decode without verification</small>
-        </div>
-    `
-}) %>
+        const token = document.getElementById('token').value.trim();
+        
+        if (!token) {
+            showError('Please enter a JWT token');
+            return;
+        }
+        
+        // Show loading
+        resultDiv.style.display = 'block';
+        document.querySelector('[data-content="decoded"] .result-output').innerHTML = '<div class="loading">Decoding...</div>';
+        
+        try {
+            const response = await fetch('/api/v1/tools/jwt/decode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                decodedData = data.data;
+                displayDecodedToken(decodedData);
+                
+                // Add visual feedback
+                resultDiv.classList.add('success-flash');
+                setTimeout(() => resultDiv.classList.remove('success-flash'), 500);
+            } else {
+                showError(data.error || 'Failed to decode token');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    });
+    
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            
+            // Update active states
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            document.querySelector(`[data-content="${tab}"]`).classList.add('active');
+        });
+    });
+});
 
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
+function displayDecodedToken(data) {
+    // Full decoded view
+    document.querySelector('[data-content="decoded"] .result-output').textContent = 
+        JSON.stringify(data, null, 2);
+    
+    // Header only
+    document.querySelector('[data-content="header"] .result-output').textContent = 
+        JSON.stringify(data.header, null, 2);
+    
+    // Payload only
+    document.querySelector('[data-content="payload"] .result-output').textContent = 
+        JSON.stringify(data.payload, null, 2);
+    
+    // Show metadata if available
+    if (data.payload.exp || data.payload.iat) {
+        addTimestampInfo(data.payload);
+    }
+}
 
+function addTimestampInfo(payload) {
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'jwt-info mt-3';
+    
+    let info = [];
+    
+    if (payload.iat) {
+        const issuedAt = new Date(payload.iat * 1000);
+        info.push(`Issued: ${issuedAt.toLocaleString()}`);
+    }
+    
+    if (payload.exp) {
+        const expiresAt = new Date(payload.exp * 1000);
+        const isExpired = expiresAt < new Date();
+        info.push(`Expires: ${expiresAt.toLocaleString()} ${isExpired ? '(EXPIRED)' : '(Valid)'}`);
+    }
+    
+    if (info.length > 0) {
+        infoDiv.innerHTML = `<div class="alert alert-info">${info.join('<br>')}</div>`;
+        document.querySelector('[data-content="decoded"]').appendChild(infoDiv);
+    }
+}
+
+function showError(message) {
+    const resultDiv = document.getElementById('jwtForm-result');
+    resultDiv.style.display = 'block';
+    document.querySelector('[data-content="decoded"] .result-output').innerHTML = 
+        `<div class="error">${message}</div>`;
+}
+
+function useExample() {
+    const exampleToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+    document.getElementById('token').value = exampleToken;
+    document.getElementById('jwtForm').dispatchEvent(new Event('submit'));
+}
+
+function copyActiveTab() {
+    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+    const content = document.querySelector(`[data-content="${activeTab}"] .result-output`).textContent;
+    
+    navigator.clipboard.writeText(content).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('btn-success');
+        }, 2000);
+    });
+}
+</script>
+
+<style>
+.result-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background: var(--bg-primary);
+}
+
+.tab-btn.active {
+    background: var(--purple);
+    color: var(--background);
+    border-bottom-color: transparent;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.jwt-info {
+    margin-top: 1rem;
+}
+
+.alert-info {
+    background: rgba(139, 233, 253, 0.1);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+}
+
+.success-flash {
+    animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+    0% { border-color: var(--border-color); }
+    50% { border-color: var(--green); box-shadow: 0 0 10px rgba(80, 250, 123, 0.3); }
+    100% { border-color: var(--border-color); }
+}
+
+.code-block button {
+    margin-top: 0.5rem;
+}
+</style>

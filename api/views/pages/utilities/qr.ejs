@@ -3,131 +3,376 @@
     <p class="lead">Generate QR codes from text, URLs, or other data</p>
 </div>
 
-<div class="card">
-    <h2 class="card-title">Generate QR Code</h2>
-    <p class="card-text mb-4">Enter data to encode into a QR code</p>
-    
-    <form id="qrForm" class="api-form">
-        <div class="form-group">
-            <label for="data" class="form-label">Data to Encode</label>
-            <textarea 
-                id="data" 
-                name="data" 
-                class="form-control" 
-                placeholder="Enter text, URL, or any data..."
-                rows="3"
-                required
-            ></textarea>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Generate QR Code</h2>
+            <p class="card-text mb-4">Enter data to encode into a QR code</p>
+            
+            <form id="qrForm" class="api-form">
+                <div class="form-group">
+                    <label for="text" class="form-label">Data to Encode</label>
+                    <textarea 
+                        id="text" 
+                        name="text" 
+                        class="form-control" 
+                        placeholder="Enter text, URL, or any data..."
+                        rows="3"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="size" class="form-label">Size (pixels)</label>
+                            <input 
+                                type="number" 
+                                id="size" 
+                                name="size" 
+                                class="form-control" 
+                                min="100"
+                                max="1000"
+                                value="300"
+                                placeholder="300"
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="format" class="form-label">Output Format</label>
+                            <select id="format" name="format" class="form-control">
+                                <option value="png">PNG Image</option>
+                                <option value="svg">SVG Vector</option>
+                                <option value="ascii">ASCII Art</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Generate QR Code
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        Clear
+                    </button>
+                </div>
+            </form>
+            
+            <div id="qrResult" class="result-container mt-6 text-center" style="display: none;">
+                <h3 class="mb-3">Generated QR Code:</h3>
+                <div id="qrDisplay"></div>
+                <div class="btn-group mt-4">
+                    <button id="downloadBtn" class="btn btn-primary btn-sm" style="display: none;">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                    <button id="copyBtn" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="size" class="form-label">Size (pixels)</label>
-            <input 
-                type="number" 
-                id="size" 
-                name="size" 
-                class="form-control" 
-                min="100"
-                max="1000"
-                value="300"
-                placeholder="300"
-            />
+
+        <!-- Quick generate options -->
+        <div class="card mt-4">
+            <h3 class="card-title">Quick Generate</h3>
+            <div class="quick-actions">
+                <button class="btn btn-info btn-sm" onclick="generateURL()">
+                    <i class="bi bi-link"></i> URL
+                </button>
+                <button class="btn btn-info btn-sm" onclick="generateEmail()">
+                    <i class="bi bi-envelope"></i> Email
+                </button>
+                <button class="btn btn-info btn-sm" onclick="generateWiFi()">
+                    <i class="bi bi-wifi"></i> WiFi
+                </button>
+                <button class="btn btn-info btn-sm" onclick="generatePhone()">
+                    <i class="bi bi-phone"></i> Phone
+                </button>
+                <button class="btn btn-info btn-sm" onclick="generateSMS()">
+                    <i class="bi bi-chat"></i> SMS
+                </button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="format" class="form-label">Output Format</label>
-            <select id="format" name="format" class="form-control">
-                <option value="image">Image (PNG)</option>
-                <option value="svg">SVG</option>
-                <option value="base64">Base64</option>
-            </select>
-        </div>
-        
-        <div class="btn-group mt-4">
-            <button type="submit" class="btn btn-primary">
-                Generate QR Code
-            </button>
-            <button type="reset" class="btn btn-secondary">
-                Clear
-            </button>
-        </div>
-    </form>
-    
-    <div id="qrResult" class="result-container mt-6 text-center" style="display: none;">
-        <h3 class="mb-3">Generated QR Code:</h3>
-        <div id="qrDisplay"></div>
-        <div class="btn-group mt-4">
-            <button id="downloadBtn" class="btn btn-primary btn-sm">Download</button>
-            <button id="copyDataBtn" class="btn btn-secondary btn-sm">Copy Data</button>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Generate QR code (PNG):</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/qr/generate \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello World", "format": "png"}'</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Generate QR code (ASCII):</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/qr/generate/text \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello World"}'</code></pre>
+            </div>
         </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('qrForm');
+    const resultDiv = document.getElementById('qrResult');
+    const qrDisplay = document.getElementById('qrDisplay');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    
+    let currentQRData = null;
+    let currentFormat = null;
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const text = document.getElementById('text').value.trim();
+        const size = document.getElementById('size').value || 300;
+        const format = document.getElementById('format').value;
+        
+        if (!text) {
+            showError('Please enter data to encode');
+            return;
+        }
+        
+        // Show loading
+        qrDisplay.innerHTML = '<div class="loading">Generating QR code...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const endpoint = format === 'ascii' ? '/api/v1/tools/qr/generate/text' : '/api/v1/tools/qr/generate';
+            
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text, 
+                    format,
+                    size: parseInt(size)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentFormat = format;
+                displayQRCode(data.data, format);
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError(data.error || 'Failed to generate QR code');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    });
+    
+    function displayQRCode(data, format) {
+        if (format === 'png') {
+            // Display PNG image
+            currentQRData = data.qr;
+            qrDisplay.innerHTML = `<img src="data:image/png;base64,${data.qr}" alt="QR Code">`;
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => downloadQR(data.qr, 'png');
+            copyBtn.onclick = () => copyToClipboard(data.qr, 'Base64 image data');
+        } else if (format === 'svg') {
+            // Display SVG
+            currentQRData = data.qr;
+            qrDisplay.innerHTML = data.qr;
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => downloadQR(data.qr, 'svg');
+            copyBtn.onclick = () => copyToClipboard(data.qr, 'SVG code');
+        } else if (format === 'ascii') {
+            // Display ASCII art
+            currentQRData = typeof data === 'string' ? data : data.qr;
+            qrDisplay.innerHTML = `<pre class="qr-ascii">${currentQRData}</pre>`;
+            downloadBtn.style.display = 'none';
+            copyBtn.onclick = () => copyToClipboard(currentQRData, 'ASCII QR code');
+        }
+    }
+    
+    function downloadQR(data, format) {
+        let blob, filename;
+        
+        if (format === 'png') {
+            // Convert base64 to blob
+            const byteCharacters = atob(data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            blob = new Blob([byteArray], { type: 'image/png' });
+            filename = 'qrcode.png';
+        } else if (format === 'svg') {
+            blob = new Blob([data], { type: 'image/svg+xml' });
+            filename = 'qrcode.svg';
+        }
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+    
+    function copyToClipboard(text, label) {
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                copyBtn.classList.remove('btn-success');
+            }, 2000);
+            
+            showToast(`${label} copied to clipboard!`);
+        });
+    }
+    
+    function showError(message) {
+        qrDisplay.innerHTML = `<div class="error">${message}</div>`;
+    }
+});
+
+// Quick generate functions
+function generateURL() {
+    const url = prompt('Enter URL:', 'https://');
+    if (url && url !== 'https://') {
+        document.getElementById('text').value = url;
+        document.getElementById('qrForm').dispatchEvent(new Event('submit'));
+    }
+}
+
+function generateEmail() {
+    const email = prompt('Enter email address:');
+    if (email) {
+        document.getElementById('text').value = `mailto:${email}`;
+        document.getElementById('qrForm').dispatchEvent(new Event('submit'));
+    }
+}
+
+function generateWiFi() {
+    const ssid = prompt('Enter WiFi network name (SSID):');
+    if (!ssid) return;
+    
+    const password = prompt('Enter WiFi password:');
+    const security = prompt('Security type (WPA/WEP):', 'WPA') || 'WPA';
+    
+    document.getElementById('text').value = `WIFI:T:${security};S:${ssid};P:${password};;`;
+    document.getElementById('qrForm').dispatchEvent(new Event('submit'));
+}
+
+function generatePhone() {
+    const phone = prompt('Enter phone number:');
+    if (phone) {
+        document.getElementById('text').value = `tel:${phone}`;
+        document.getElementById('qrForm').dispatchEvent(new Event('submit'));
+    }
+}
+
+function generateSMS() {
+    const phone = prompt('Enter phone number:');
+    if (!phone) return;
+    
+    const message = prompt('Enter SMS message:');
+    document.getElementById('text').value = `sms:${phone}${message ? '?body=' + encodeURIComponent(message) : ''}`;
+    document.getElementById('qrForm').dispatchEvent(new Event('submit'));
+}
+
+// Toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
 <style>
-.api-form {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.form-group {
-    margin-bottom: var(--space-4);
-}
-
-.form-label {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.form-control {
-    width: 100%;
-    padding: var(--space-3);
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-    transition: all 0.2s ease;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
-}
-
-textarea.form-control {
-    resize: vertical;
-    font-family: inherit;
-}
-
-.result-container {
-    background-color: var(--bg-secondary);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-}
-
 #qrDisplay img {
     max-width: 100%;
     height: auto;
-    border: 2px solid var(--border-color);
+    border: 4px solid white;
     border-radius: var(--radius-md);
     background: white;
-    padding: var(--space-2);
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-#qrDisplay pre {
-    background-color: var(--bg-primary);
-    padding: var(--space-4);
+#qrDisplay svg {
+    max-width: 100%;
+    height: auto;
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#qrDisplay pre.qr-ascii {
+    background: var(--bg-primary);
+    color: var(--green);
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    line-height: 0.8;
+    padding: 1rem;
     border-radius: var(--radius-md);
     overflow-x: auto;
-    max-height: 400px;
+    white-space: pre;
+    max-width: 100%;
+    display: inline-block;
     text-align: left;
-    border: 1px solid var(--border-color);
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quick-actions button {
+    flex: 0 0 auto;
+}
+
+.loading {
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    padding: 2rem;
+    color: var(--red);
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>
-
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
-

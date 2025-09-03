@@ -3,20 +3,20 @@
     <p class="lead">Encode and decode text to/from Base64 format</p>
 </div>
 
-<%- include('../../partials/endpoint-form', {
-    title: 'Base64 Converter',
-    description: 'Enter text to encode or Base64 string to decode',
-    formId: 'base64Form',
-    submitText: 'Process',
-    formContent: `
+<div class="card">
+    <h2 class="card-title">Base64 Converter</h2>
+    <p class="card-text mb-4">Enter text to encode or Base64 string to decode</p>
+    
+    <form id="base64Form" class="api-form">
         <div class="form-group">
-            <label for="input" class="form-label">Input Text</label>
+            <label for="text" class="form-label">Input Text</label>
             <textarea 
-                id="input" 
+                id="text" 
                 name="text" 
                 class="form-control" 
                 placeholder="Enter text to encode or Base64 to decode..."
                 required
+                rows="4"
             ></textarea>
         </div>
         
@@ -27,7 +27,99 @@
                 <option value="decode">Decode from Base64</option>
             </select>
         </div>
-    `
-}) %>
+        
+        <div class="btn-group mt-4">
+            <button type="submit" class="btn btn-primary">
+                Process
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Clear
+            </button>
+        </div>
+    </form>
+    
+    <div id="base64Form-result" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Result:</h3>
+        <pre class="result-output"></pre>
+        <button class="btn btn-sm copy-btn mt-2" data-form-id="base64Form">Copy Result</button>
+    </div>
+</div>
 
-<%- locals.customScripts = '<script src="/js/base64.js"></script>' %>
+<div class="card mt-4">
+    <h3 class="card-title">API Usage</h3>
+    <div class="code-block">
+        <h4>Encode to Base64:</h4>
+        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/base64/encode \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello World"}'</code></pre>
+    </div>
+    
+    <div class="code-block">
+        <h4>Decode from Base64:</h4>
+        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/base64/decode \
+  -H "Content-Type: application/json" \
+  -d '{"text": "SGVsbG8gV29ybGQ="}'</code></pre>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('base64Form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const text = formData.get('text');
+            const action = formData.get('action');
+            const resultDiv = document.getElementById('base64Form-result');
+            const resultOutput = resultDiv.querySelector('.result-output');
+            
+            // Show loading
+            resultOutput.innerHTML = '<div class="loading">Processing...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/v1/tools/base64/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    if (action === 'encode') {
+                        resultOutput.textContent = data.data.encoded;
+                    } else {
+                        resultOutput.textContent = data.data.decoded;
+                    }
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Operation failed'}</div>`;
+                }
+            } catch (error) {
+                resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    }
+    
+    // Copy button
+    document.querySelector('.copy-btn').addEventListener('click', function() {
+        const output = document.querySelector('.result-output');
+        const text = output.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            this.textContent = 'Copied!';
+            this.classList.add('copied');
+            
+            setTimeout(() => {
+                this.textContent = 'Copy Result';
+                this.classList.remove('copied');
+            }, 2000);
+        });
+    });
+});
+</script>

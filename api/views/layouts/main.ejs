@@ -34,6 +34,7 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    <link rel="stylesheet" href="/css/main.css" />
     
     <title><%= locals.title || 'Backend API' %></title>
     
@@ -277,11 +278,8 @@
     <!-- Global copy functionality -->
     <script src="/js/copy.js"></script>
     
-    <!-- Utility forms handler -->
-    <script src="/js/utility-forms.js"></script>
-    
-    <!-- Data forms handler -->
-    <script src="/js/data-forms.js"></script>
+    <!-- Enhanced utility forms handler -->
+    <script src="/js/utility-forms-v2.js"></script>
     
     <!-- Custom Page JavaScript -->
     <%- locals.customScripts || '' %>

@@ -3,159 +3,458 @@
     <p class="lead">Generate secure, random passwords with custom options</p>
 </div>
 
-<div class="card">
-    <h2 class="card-title">Generate Password</h2>
-    <p class="card-text mb-4">Customize your password requirements</p>
-    
-    <form id="passwordForm" class="api-form">
-        <div class="form-group">
-            <label for="length" class="form-label">Password Length</label>
-            <input 
-                type="number" 
-                id="length" 
-                name="length" 
-                class="form-control" 
-                min="4"
-                max="128"
-                value="16"
-                required
-            />
-            <small class="text-secondary">Between 4 and 128 characters</small>
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Character Types</label>
-            <div class="checkbox-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="uppercase" checked>
-                    Uppercase Letters (A-Z)
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="lowercase" checked>
-                    Lowercase Letters (a-z)
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="numbers" checked>
-                    Numbers (0-9)
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="symbols" checked>
-                    Special Characters (!@#$%^&*)
-                </label>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Generate Password</h2>
+            <p class="card-text mb-4">Customize your password requirements</p>
+            
+            <form id="passwordForm" class="api-form">
+                <div class="form-group">
+                    <label for="length" class="form-label">Password Length</label>
+                    <div class="length-input">
+                        <input 
+                            type="range" 
+                            id="lengthRange" 
+                            min="4" 
+                            max="128" 
+                            value="16"
+                            class="form-range"
+                        >
+                        <input 
+                            type="number" 
+                            id="length" 
+                            name="length" 
+                            class="form-control length-number" 
+                            min="4"
+                            max="128"
+                            value="16"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Character Types</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="uppercase" checked>
+                            <span>Uppercase Letters (A-Z)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="lowercase" checked>
+                            <span>Lowercase Letters (a-z)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="numbers" checked>
+                            <span>Numbers (0-9)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="symbols" checked>
+                            <span>Special Characters (!@#$%^&*)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="count" class="form-label">Number of Passwords</label>
+                            <input 
+                                type="number" 
+                                id="count" 
+                                name="count" 
+                                class="form-control" 
+                                min="1"
+                                max="20"
+                                value="1"
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">&nbsp;</label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="excludeSimilar">
+                                <span>Exclude Similar (0Ol1I)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Generate Password
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        Reset Options
+                    </button>
+                </div>
+            </form>
+            
+            <div id="passwordResult" class="result-container mt-6" style="display: none;">
+                <h3 class="mb-3">Generated Password<span id="plural">s</span>:</h3>
+                <div class="password-list"></div>
             </div>
         </div>
-        
-        <div class="form-group">
-            <label for="count" class="form-label">Number of Passwords</label>
-            <input 
-                type="number" 
-                id="count" 
-                name="count" 
-                class="form-control" 
-                min="1"
-                max="20"
-                value="1"
-            />
+
+        <div class="card mt-4">
+            <h3 class="card-title">Quick Generate</h3>
+            <div class="quick-actions">
+                <button class="btn btn-info btn-sm" onclick="quickPassword(8, false)">
+                    Simple (8 chars)
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickPassword(12, false)">
+                    Medium (12 chars)
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickPassword(16, true)">
+                    Strong (16 chars)
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickPassword(20, true)">
+                    Very Strong (20 chars)
+                </button>
+                <button class="btn btn-info btn-sm" onclick="generatePassphrase()">
+                    Passphrase
+                </button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label class="checkbox-label">
-                <input type="checkbox" name="excludeSimilar">
-                Exclude Similar Characters (0, O, l, 1, I)
-            </label>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Generate password:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/passwd/16</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Generate multiple passwords:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/passwd/batch/5/16</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Check password strength:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/passwd/check \
+  -H "Content-Type: application/json" \
+  -d '{"password": "MyP@ssw0rd123!"}'</code></pre>
+            </div>
         </div>
-        
-        <div class="btn-group mt-4">
-            <button type="submit" class="btn btn-primary">
-                Generate Password
-            </button>
-            <button type="reset" class="btn btn-secondary">
-                Reset Options
-            </button>
-        </div>
-    </form>
-    
-    <div id="passwordResult" class="result-container mt-6" style="display: none;">
-        <h3 class="mb-3">Generated Password<span class="plural">s</span>:</h3>
-        <div class="password-list"></div>
-        <div class="password-strength mt-4"></div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('passwordForm');
+    const lengthRange = document.getElementById('lengthRange');
+    const lengthNumber = document.getElementById('length');
+    const resultDiv = document.getElementById('passwordResult');
+    const passwordList = resultDiv.querySelector('.password-list');
+    
+    // Sync range and number inputs
+    lengthRange.addEventListener('input', function() {
+        lengthNumber.value = this.value;
+    });
+    
+    lengthNumber.addEventListener('input', function() {
+        lengthRange.value = this.value;
+    });
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const length = parseInt(lengthNumber.value);
+        const count = parseInt(document.getElementById('count').value);
+        const options = {
+            includeUppercase: form.uppercase.checked,
+            includeLowercase: form.lowercase.checked,
+            includeNumbers: form.numbers.checked,
+            includeSymbols: form.symbols.checked,
+            excludeSimilar: form.excludeSimilar.checked
+        };
+        
+        // Validate at least one option is selected
+        if (!options.includeUppercase && !options.includeLowercase && 
+            !options.includeNumbers && !options.includeSymbols) {
+            showError('Please select at least one character type');
+            return;
+        }
+        
+        await generatePasswords(length, count, options);
+    });
+    
+    async function generatePasswords(length, count, options) {
+        passwordList.innerHTML = '<div class="loading">Generating passwords...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const endpoint = count > 1 ? 
+                `/api/v1/tools/passwd/batch/${count}/${length}` : 
+                `/api/v1/tools/passwd/${length}`;
+            
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                const passwords = count > 1 ? data.data.passwords : [data.data.password];
+                displayPasswords(passwords);
+                
+                // Update plural
+                document.getElementById('plural').style.display = count > 1 ? 'inline' : 'none';
+                
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                passwordList.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate passwords'}</div>`;
+            }
+        } catch (error) {
+            passwordList.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    }
+    
+    function displayPasswords(passwords) {
+        passwordList.innerHTML = passwords.map((password, index) => `
+            <div class="password-item">
+                <span class="password-text" onclick="selectPassword(this)">${password}</span>
+                <div class="password-actions">
+                    <button class="btn btn-sm copy-password" onclick="copyPassword('${password}', this)">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="checkStrength('${password}')">
+                        <i class="bi bi-shield-check"></i> Check
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        // Check strength of first password
+        if (passwords.length > 0) {
+            checkStrength(passwords[0]);
+        }
+    }
+    
+    // Add validation for checkboxes
+    document.querySelectorAll('.checkbox-group input').forEach(checkbox => {
+        checkbox.addEventListener('change', validateCheckboxes);
+    });
+    
+    function validateCheckboxes() {
+        const checkboxes = document.querySelectorAll('.checkbox-group input');
+        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        
+        if (checkedCount === 0) {
+            checkboxes[0].checked = true;
+        }
+    }
+});
+
+function selectPassword(element) {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function copyPassword(password, button) {
+    navigator.clipboard.writeText(password).then(() => {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+        }, 2000);
+    });
+}
+
+async function checkStrength(password) {
+    const strengthDiv = document.querySelector('.password-strength');
+    
+    if (!strengthDiv) {
+        const resultDiv = document.getElementById('passwordResult');
+        const newStrengthDiv = document.createElement('div');
+        newStrengthDiv.className = 'password-strength mt-4';
+        resultDiv.appendChild(newStrengthDiv);
+    }
+    
+    try {
+        const response = await fetch('/api/v1/tools/passwd/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            const strength = data.data;
+            const strengthClass = strength.score >= 4 ? 'strong' : strength.score >= 3 ? 'medium' : 'weak';
+            
+            const strengthDiv = document.querySelector('.password-strength');
+            strengthDiv.innerHTML = `
+                <h4>Password Strength: <span class="strength-${strengthClass}">${strength.strength}</span></h4>
+                <div class="strength-meter">
+                    <div class="strength-bar strength-${strengthClass}"></div>
+                </div>
+                <p class="mt-2">Score: ${strength.score}/5</p>
+                ${strength.feedback ? `<p class="text-muted">${strength.feedback}</p>` : ''}
+            `;
+        }
+    } catch (error) {
+        console.error('Error checking strength:', error);
+    }
+}
+
+function quickPassword(length, includeSymbols) {
+    document.getElementById('length').value = length;
+    document.getElementById('lengthRange').value = length;
+    document.querySelector('[name="uppercase"]').checked = true;
+    document.querySelector('[name="lowercase"]').checked = true;
+    document.querySelector('[name="numbers"]').checked = true;
+    document.querySelector('[name="symbols"]').checked = includeSymbols;
+    document.getElementById('count').value = 1;
+    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
+}
+
+async function generatePassphrase() {
+    // Generate a passphrase using multiple words
+    const wordCount = 4;
+    const resultDiv = document.getElementById('passwordResult');
+    const passwordList = resultDiv.querySelector('.password-list');
+    
+    passwordList.innerHTML = '<div class="loading">Generating passphrase...</div>';
+    resultDiv.style.display = 'block';
+    
+    try {
+        // Use lorem ipsum API to get random words
+        const response = await fetch('/api/v1/tools/lorem/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                count: wordCount,
+                type: 'words',
+                format: 'plain',
+                startWithLorem: false
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            const words = data.data.text.split(' ');
+            const passphrase = words.map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join('-') + Math.floor(Math.random() * 100);
+            
+            passwordList.innerHTML = `
+                <div class="password-item">
+                    <span class="password-text" onclick="selectPassword(this)">${passphrase}</span>
+                    <div class="password-actions">
+                        <button class="btn btn-sm copy-password" onclick="copyPassword('${passphrase}', this)">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <p class="text-muted mt-2">Passphrase generated from random words</p>
+            `;
+            
+            document.getElementById('plural').style.display = 'none';
+        }
+    } catch (error) {
+        passwordList.innerHTML = `<div class="error">Error generating passphrase</div>`;
+    }
+}
+
+function showError(message) {
+    const passwordList = document.querySelector('.password-list');
+    passwordList.innerHTML = `<div class="error">${message}</div>`;
+    document.getElementById('passwordResult').style.display = 'block';
+}
+</script>
+
 <style>
-.api-form {
-    max-width: 600px;
-    margin: 0 auto;
+.length-input {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
-.form-group {
-    margin-bottom: var(--space-4);
-}
-
-.form-label {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.form-control {
-    width: 100%;
-    padding: var(--space-3);
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-    transition: all 0.2s ease;
-}
-
-.form-control:focus {
+.form-range {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
     outline: none;
-    border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
+    cursor: pointer;
+}
+
+.form-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--purple);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.form-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--purple);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.length-number {
+    width: 80px;
+    text-align: center;
 }
 
 .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 0.75rem;
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 0.5rem;
     cursor: pointer;
     color: var(--text-primary);
 }
 
 .checkbox-label input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
     cursor: pointer;
-}
-
-.result-container {
-    background-color: var(--bg-secondary);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
 }
 
 .password-item {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3);
+    gap: 1rem;
+    padding: 1rem;
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
-    margin-bottom: var(--space-2);
+    margin-bottom: 0.75rem;
     border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.password-item:hover {
+    border-color: var(--purple);
 }
 
 .password-text {
     flex: 1;
     font-family: 'Monaco', 'Consolas', monospace;
-    font-size: var(--text-lg);
+    font-size: 1.1rem;
     color: var(--yellow);
     word-break: break-all;
     cursor: pointer;
@@ -164,22 +463,24 @@
 
 .password-actions {
     display: flex;
-    gap: var(--space-2);
+    gap: 0.5rem;
 }
 
 .copy-password {
     background-color: var(--cyan);
     color: var(--background);
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--text-xs);
 }
 
 .copy-password:hover {
     background-color: var(--green);
 }
 
+.copy-password.btn-success {
+    background-color: var(--green);
+}
+
 .password-strength {
-    padding: var(--space-3);
+    padding: 1rem;
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
@@ -190,7 +491,7 @@
     background-color: var(--bg-secondary);
     border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-top: var(--space-2);
+    margin-top: 0.5rem;
 }
 
 .strength-bar {
@@ -198,10 +499,48 @@
     transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.strength-weak { background-color: var(--red); width: 33%; }
-.strength-medium { background-color: var(--orange); width: 66%; }
-.strength-strong { background-color: var(--green); width: 100%; }
+.strength-weak { 
+    color: var(--red);
+}
+
+.strength-bar.strength-weak { 
+    background-color: var(--red); 
+    width: 33%; 
+}
+
+.strength-medium { 
+    color: var(--orange);
+}
+
+.strength-bar.strength-medium { 
+    background-color: var(--orange); 
+    width: 66%; 
+}
+
+.strength-strong { 
+    color: var(--green);
+}
+
+.strength-bar.strength-strong { 
+    background-color: var(--green); 
+    width: 100%; 
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--cyan);
+}
+
+.error {
+    padding: 2rem;
+    color: var(--red);
+    text-align: center;
+}
 </style>
-
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
-

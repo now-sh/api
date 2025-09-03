@@ -1,72 +1,351 @@
-<div class="v-100">
-  <h1 class="text-danger">📊 GitHub Repository Data</h1>
-  <p class="lead">View GitHub user information and repositories</p>
-
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card border border-danger">
-        <div class="card-header">
-          <h5 class="mb-0">GitHub User Lookup</h5>
-        </div>
-        <div class="card-body">
-          <form id="gitForm">
-            <div class="mb-3">
-              <label for="username" class="form-label">GitHub Username</label>
-              <input type="text" class="form-control" id="username" name="username" value="casjay" placeholder="Enter GitHub username...">
-            </div>
-            
-            <div class="mb-3">
-              <label for="dataType" class="form-label">Data Type</label>
-              <select class="form-control" id="dataType" name="dataType">
-                <option value="user">User Profile</option>
-                <option value="repos">Repositories</option>
-                <option value="orgs">Organizations</option>
-              </select>
-            </div>
-            
-            <button type="submit" class="btn btn-danger">
-              <i class="bi bi-github"></i> Get GitHub Data
-            </button>
-          </form>
-        </div>
-      </div>
-      
-      <div id="gitForm-result" class="mt-4" style="display: none;">
-        <div class="card border border-success">
-          <div class="card-header">
-            <h5 class="mb-0">GitHub Data</h5>
-          </div>
-          <div class="card-body">
-            <div class="result-output bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.875rem;"></div>
-            <button class="btn btn-outline-success btn-sm mt-2" onclick="copyToClipboard('.result-output')">
-              <i class="bi bi-clipboard"></i> Copy JSON
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row justify-content-center mt-5">
-    <div class="col-md-8">
-      <div class="card border-info">
-        <div class="card-header">
-          <h5 class="mb-0">API Endpoints</h5>
-        </div>
-        <div class="card-body">
-          <ul class="list-unstyled">
-            <li><strong>User Info:</strong> <code>/api/v1/social/github/user/:username</code></li>
-            <li><strong>My Profile:</strong> <code>/api/v1/me/info/github</code></li>
-            <li><strong>Repositories:</strong> <code>/api/v1/social/github/user/:username/repos</code></li>
-            <li><strong>Organizations:</strong> <code>/api/v1/social/github/user/:username/orgs</code></li>
-          </ul>
-          <a href="/api/v1/me/info/github" class="btn btn-info btn-sm" target="_blank">
-            <i class="bi bi-box-arrow-up-right"></i> View Casjay Profile
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="hero fade-in">
+    <h1>GitHub Repository Data</h1>
+    <p class="lead">View GitHub user information, repositories, and organizations</p>
 </div>
 
-<%- locals.customScripts = '<script src="/js/data-forms.js"></script>' %>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">GitHub User Lookup</h2>
+            <p class="card-text">Search for any GitHub user or view my profile</p>
+            
+            <form id="gitForm" class="api-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">GitHub Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-control" 
+                        value="casjay" 
+                        placeholder="Enter GitHub username..."
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="dataType" class="form-label">Data Type</label>
+                    <select id="dataType" name="dataType" class="form-control">
+                        <option value="user">User Profile</option>
+                        <option value="repos">Repositories</option>
+                        <option value="orgs">Organizations</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-github"></i> Get GitHub Data
+                </button>
+            </form>
+            
+            <div id="gitForm-result" class="result-container mt-6" style="display: none;">
+                <h3 class="mb-3">Results:</h3>
+                <div class="result-output"></div>
+            </div>
+        </div>
+
+        <!-- Quick access buttons -->
+        <div class="card mt-4">
+            <h3 class="card-title">Quick Access</h3>
+            <div class="btn-group">
+                <button class="btn btn-info btn-sm" onclick="loadMyProfile()">
+                    <i class="bi bi-person"></i> My Profile
+                </button>
+                <button class="btn btn-success btn-sm" onclick="loadMyRepos()">
+                    <i class="bi bi-folder"></i> My Repos
+                </button>
+                <button class="btn btn-warning btn-sm" onclick="loadMyOrgs()">
+                    <i class="bi bi-building"></i> My Orgs
+                </button>
+            </div>
+        </div>
+
+        <!-- API endpoints info -->
+        <div class="card mt-4">
+            <h3 class="card-title">API Endpoints</h3>
+            <div class="code-block">
+                <h4>Get user profile:</h4>
+                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/user/:username</code></pre>
+            </div>
+            <div class="code-block">
+                <h4>Get user repositories:</h4>
+                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/user/:username/repos</code></pre>
+            </div>
+            <div class="code-block">
+                <h4>My GitHub data:</h4>
+                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/me/info/github</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('gitForm');
+    const resultDiv = document.getElementById('gitForm-result');
+    const resultOutput = resultDiv.querySelector('.result-output');
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = form.username.value || 'casjay';
+        const dataType = form.dataType.value;
+        
+        await fetchGitHubData(username, dataType);
+    });
+    
+    // Fetch GitHub data
+    async function fetchGitHubData(username, dataType) {
+        resultOutput.innerHTML = '<div class="loading">Loading GitHub data...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            let url;
+            if (username === 'casjay') {
+                // Use personal endpoints
+                if (dataType === 'repos') {
+                    url = '/api/v1/me/info/github/repos';
+                } else if (dataType === 'orgs') {
+                    url = '/api/v1/me/info/github/orgs';
+                } else {
+                    url = '/api/v1/me/info/github';
+                }
+            } else {
+                // Use social endpoints
+                if (dataType === 'repos') {
+                    url = `/api/v1/social/github/user/${username}/repos`;
+                } else if (dataType === 'orgs') {
+                    url = `/api/v1/social/github/user/${username}/orgs`;
+                } else {
+                    url = `/api/v1/social/github/user/${username}`;
+                }
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (response.ok) {
+                displayGitHubData(data, dataType);
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to fetch data'}</div>`;
+            }
+        } catch (error) {
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    }
+    
+    // Display GitHub data
+    function displayGitHubData(data, dataType) {
+        let html = '';
+        
+        if (dataType === 'user') {
+            // User profile
+            const user = data.success ? data.data : data;
+            html = `
+                <div class="github-profile">
+                    <div class="profile-header">
+                        <img src="${user.avatar_url}" alt="${user.login}" class="avatar">
+                        <div class="profile-info">
+                            <h4>${user.name || user.login}</h4>
+                            <p class="text-muted">@${user.login}</p>
+                            ${user.bio ? `<p>${user.bio}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <strong>${user.public_repos}</strong>
+                            <span>Repositories</span>
+                        </div>
+                        <div class="stat">
+                            <strong>${user.followers}</strong>
+                            <span>Followers</span>
+                        </div>
+                        <div class="stat">
+                            <strong>${user.following}</strong>
+                            <span>Following</span>
+                        </div>
+                    </div>
+                    ${user.location ? `<p><i class="bi bi-geo-alt"></i> ${user.location}</p>` : ''}
+                    ${user.company ? `<p><i class="bi bi-building"></i> ${user.company}</p>` : ''}
+                    ${user.blog ? `<p><i class="bi bi-link"></i> <a href="${user.blog}" target="_blank">${user.blog}</a></p>` : ''}
+                    <p><a href="${user.html_url}" target="_blank" class="btn btn-sm btn-primary">View on GitHub</a></p>
+                </div>
+            `;
+        } else if (dataType === 'repos') {
+            // Repositories
+            const repos = data.success ? data.data : data;
+            if (Array.isArray(repos) && repos.length > 0) {
+                html = '<div class="repos-list">';
+                repos.slice(0, 10).forEach(repo => {
+                    html += `
+                        <div class="repo-item">
+                            <h5><a href="${repo.html_url}" target="_blank">${repo.name}</a></h5>
+                            ${repo.description ? `<p class="text-muted">${repo.description}</p>` : ''}
+                            <div class="repo-meta">
+                                ${repo.language ? `<span class="badge bg-primary">${repo.language}</span>` : ''}
+                                <span><i class="bi bi-star"></i> ${repo.stargazers_count}</span>
+                                <span><i class="bi bi-diagram-2"></i> ${repo.forks_count}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                if (repos.length > 10) {
+                    html += '<p class="text-muted">Showing first 10 repositories...</p>';
+                }
+            } else {
+                html = '<p>No repositories found.</p>';
+            }
+        } else if (dataType === 'orgs') {
+            // Organizations
+            const orgs = data.success ? data.data : data;
+            if (Array.isArray(orgs) && orgs.length > 0) {
+                html = '<div class="orgs-list">';
+                orgs.forEach(org => {
+                    html += `
+                        <div class="org-item">
+                            <img src="${org.avatar_url}" alt="${org.login}" class="org-avatar">
+                            <div class="org-info">
+                                <h5><a href="https://github.com/${org.login}" target="_blank">${org.login}</a></h5>
+                                ${org.description ? `<p class="text-muted">${org.description}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html = '<p>No organizations found.</p>';
+            }
+        }
+        
+        resultOutput.innerHTML = html;
+    }
+    
+    // Load my profile by default
+    loadMyProfile();
+});
+
+// Quick access functions
+function loadMyProfile() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'user';
+    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+}
+
+function loadMyRepos() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'repos';
+    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+}
+
+function loadMyOrgs() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'orgs';
+    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+}
+</script>
+
+<style>
+.github-profile {
+    padding: 1rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--purple);
+}
+
+.profile-info h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin: 1.5rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--purple);
+}
+
+.stat span {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.repos-list, .orgs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.repo-item {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.repo-item h5 {
+    margin: 0 0 0.5rem 0;
+}
+
+.repo-item a {
+    color: var(--purple);
+    text-decoration: none;
+}
+
+.repo-item a:hover {
+    text-decoration: underline;
+}
+
+.repo-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.org-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.org-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-md);
+}
+
+.org-info h5 {
+    margin: 0 0 0.25rem 0;
+}
+
+.org-info a {
+    color: var(--purple);
+    text-decoration: none;
+}
+</style>

@@ -3,35 +3,214 @@
     <p class="lead">Generate MD5, SHA1, SHA256, and SHA512 hashes</p>
 </div>
 
-<%- include('../../partials/endpoint-form', {
-    title: 'Hash Generator',
-    description: 'Enter text to generate various hash types',
-    formId: 'hashForm',
-    submitText: 'Generate Hashes',
-    formContent: `
+<div class="card">
+    <h2 class="card-title">Hash Generator</h2>
+    <p class="card-text mb-4">Enter text to generate various hash types</p>
+    
+    <form id="hashForm" class="api-form">
         <div class="form-group">
-            <label for="input" class="form-label">Input Text</label>
+            <label for="text" class="form-label">Input Text</label>
             <textarea 
-                id="input" 
+                id="text" 
                 name="text" 
                 class="form-control" 
                 placeholder="Enter text to hash..."
                 required
+                rows="4"
             ></textarea>
         </div>
         
         <div class="form-group">
-            <label for="hashType" class="form-label">Hash Type</label>
-            <select id="hashType" name="type" class="form-control">
-                <option value="all">All Hash Types</option>
+            <label for="algorithm" class="form-label">Hash Algorithm</label>
+            <select id="algorithm" name="algorithm" class="form-control">
+                <option value="sha256" selected>SHA256 (Recommended)</option>
                 <option value="md5">MD5</option>
                 <option value="sha1">SHA1</option>
-                <option value="sha256">SHA256</option>
                 <option value="sha512">SHA512</option>
+                <option value="all">All Hash Types</option>
             </select>
         </div>
-    `
-}) %>
+        
+        <div class="btn-group mt-4">
+            <button type="submit" class="btn btn-primary">
+                Generate Hash
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                Clear
+            </button>
+        </div>
+    </form>
+    
+    <div id="hashForm-result" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Result:</h3>
+        <pre class="result-output"></pre>
+        <button class="btn btn-sm copy-btn mt-2" data-form-id="hashForm">Copy Result</button>
+    </div>
+</div>
 
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
+<div class="card mt-4">
+    <h3 class="card-title">Password Strength Check</h3>
+    <p class="card-text mb-4">Check the strength of a password</p>
+    
+    <form id="passwordCheckForm" class="api-form">
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-control" 
+                placeholder="Enter password to check..."
+                required
+            />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Check Strength</button>
+    </form>
+    
+    <div id="passwordCheckForm-result" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Password Strength:</h3>
+        <div class="result-output"></div>
+    </div>
+</div>
 
+<div class="card mt-4">
+    <h3 class="card-title">API Usage</h3>
+    <div class="code-block">
+        <h4>Generate SHA256 hash:</h4>
+        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/hash/sha256 \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello World"}'</code></pre>
+    </div>
+    
+    <div class="code-block">
+        <h4>Verify a hash:</h4>
+        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/hash/sha256/verify \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello World", "hash": "a591a6..."}'</code></pre>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Hash form
+    const hashForm = document.getElementById('hashForm');
+    if (hashForm) {
+        hashForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const text = formData.get('text');
+            const algorithm = formData.get('algorithm');
+            const resultDiv = document.getElementById('hashForm-result');
+            const resultOutput = resultDiv.querySelector('.result-output');
+            
+            resultOutput.innerHTML = '<div class="loading">Processing...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                if (algorithm === 'all') {
+                    // Generate all hashes
+                    const algorithms = ['md5', 'sha1', 'sha256', 'sha512'];
+                    const results = [];
+                    
+                    for (const algo of algorithms) {
+                        const response = await fetch(`/api/v1/tools/hash/${algo}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text })
+                        });
+                        
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            results.push(`${algo.toUpperCase()}: ${data.data.hash}`);
+                        }
+                    }
+                    
+                    resultOutput.textContent = results.join('\n');
+                } else {
+                    // Generate single hash
+                    const response = await fetch(`/api/v1/tools/hash/${algorithm}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text })
+                    });
+                    
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        resultOutput.textContent = `${algorithm.toUpperCase()}: ${data.data.hash}`;
+                    } else {
+                        resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate hash'}</div>`;
+                    }
+                }
+                
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (error) {
+                resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    }
+    
+    // Password check form
+    const passwordForm = document.getElementById('passwordCheckForm');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const password = formData.get('password');
+            const resultDiv = document.getElementById('passwordCheckForm-result');
+            const resultOutput = resultDiv.querySelector('.result-output');
+            
+            resultOutput.innerHTML = '<div class="loading">Checking...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/v1/tools/passwd/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const strength = data.data;
+                    const strengthColor = strength.score >= 4 ? 'green' : strength.score >= 3 ? 'yellow' : 'red';
+                    
+                    resultOutput.innerHTML = `
+                        <div class="strength-result">
+                            <div>Strength: <span style="color: var(--${strengthColor})">${strength.strength}</span></div>
+                            <div>Score: ${strength.score}/5</div>
+                            ${strength.feedback ? `<div class="mt-2">Suggestions: ${strength.feedback}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to check password'}</div>`;
+                }
+            } catch (error) {
+                resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    }
+    
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const formId = this.dataset.formId;
+            const resultDiv = document.getElementById(formId + '-result');
+            const output = resultDiv.querySelector('.result-output');
+            const text = output.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                this.textContent = 'Copied!';
+                this.classList.add('copied');
+                
+                setTimeout(() => {
+                    this.textContent = 'Copy Result';
+                    this.classList.remove('copied');
+                }, 2000);
+            });
+        });
+    });
+});
+</script>

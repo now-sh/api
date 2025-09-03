@@ -3,51 +3,347 @@
     <p class="lead">Generate placeholder text for your designs and mockups</p>
 </div>
 
-<%- include('../../partials/endpoint-form', {
-    title: 'Lorem Ipsum Generator',
-    description: 'Generate placeholder text in various formats',
-    formId: 'loremForm',
-    submitText: 'Generate Text',
-    formContent: `
-        <div class="form-group">
-            <label for="count" class="form-label">Number of Items</label>
-            <input 
-                type="number" 
-                id="count" 
-                name="count" 
-                class="form-control" 
-                min="1"
-                max="100"
-                value="3"
-                required
-            />
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Lorem Ipsum Generator</h2>
+            <p class="card-text mb-4">Generate placeholder text in various formats</p>
+            
+            <form id="loremForm" class="api-form">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="count" class="form-label">Number of Items</label>
+                            <input 
+                                type="number" 
+                                id="count" 
+                                name="count" 
+                                class="form-control" 
+                                min="1"
+                                max="100"
+                                value="3"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="type" class="form-label">Type</label>
+                            <select id="type" name="type" class="form-control" required>
+                                <option value="paragraphs" selected>Paragraphs</option>
+                                <option value="sentences">Sentences</option>
+                                <option value="words">Words</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="format" class="form-label">Output Format</label>
+                    <select id="format" name="format" class="form-control">
+                        <option value="plain">Plain Text</option>
+                        <option value="html">HTML</option>
+                    </select>
+                </div>
+                
+                <div class="form-check mb-4">
+                    <input type="checkbox" id="startWithLorem" name="startWithLorem" class="form-check-input" checked>
+                    <label class="form-check-label" for="startWithLorem">
+                        Start with "Lorem ipsum dolor sit amet..."
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Generate Text
+                </button>
+            </form>
+            
+            <div id="loremResult" class="result-container mt-6" style="display: none;">
+                <h3 class="mb-3">Generated Text:</h3>
+                <div class="result-output"></div>
+                <div class="btn-group mt-4">
+                    <button class="btn btn-sm btn-primary" onclick="copyText()">
+                        <i class="bi bi-clipboard"></i> Copy Text
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadText()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+                
+                <div class="text-stats mt-3">
+                    <span class="stat-item">Words: <strong id="wordCount">0</strong></span>
+                    <span class="stat-item">Characters: <strong id="charCount">0</strong></span>
+                </div>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="type" class="form-label">Type</label>
-            <select id="type" name="type" class="form-control" required>
-                <option value="paragraphs">Paragraphs</option>
-                <option value="sentences">Sentences</option>
-                <option value="words">Words</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="format" class="form-label">Output Format</label>
-            <select id="format" name="format" class="form-control">
-                <option value="plain">Plain Text</option>
-                <option value="html">HTML</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">
-                <input type="checkbox" id="startWithLorem" name="startWithLorem" checked>
-                Start with "Lorem ipsum dolor sit amet..."
-            </label>
-        </div>
-    `
-}) %>
 
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
+        <div class="card mt-4">
+            <h3 class="card-title">Quick Generate</h3>
+            <p class="card-text">Common lorem ipsum configurations</p>
+            <div class="quick-actions">
+                <button class="btn btn-info btn-sm" onclick="quickGenerate(1, 'paragraphs')">
+                    1 Paragraph
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickGenerate(3, 'paragraphs')">
+                    3 Paragraphs
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickGenerate(5, 'sentences')">
+                    5 Sentences
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickGenerate(10, 'words')">
+                    10 Words
+                </button>
+                <button class="btn btn-info btn-sm" onclick="quickGenerate(50, 'words')">
+                    50 Words
+                </button>
+            </div>
+        </div>
 
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Generate lorem ipsum:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/lorem/generate \
+  -H "Content-Type: application/json" \
+  -d '{"count": 3, "type": "paragraphs", "format": "plain"}'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loremForm');
+    const resultDiv = document.getElementById('loremResult');
+    const resultOutput = resultDiv.querySelector('.result-output');
+    let generatedText = '';
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const count = parseInt(formData.get('count'));
+        const type = formData.get('type');
+        const format = formData.get('format');
+        const startWithLorem = formData.get('startWithLorem') === 'on';
+        
+        await generateLorem(count, type, format, startWithLorem);
+    });
+    
+    async function generateLorem(count, type, format, startWithLorem) {
+        resultOutput.innerHTML = '<div class="loading">Generating lorem ipsum...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const response = await fetch('/api/v1/tools/lorem/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    count,
+                    type,
+                    format,
+                    startWithLorem
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                generatedText = data.data.text;
+                displayText(generatedText, format);
+                updateStats(generatedText);
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate text'}</div>`;
+            }
+        } catch (error) {
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    }
+    
+    function displayText(text, format) {
+        if (format === 'html') {
+            // Display HTML with syntax highlighting
+            resultOutput.innerHTML = `
+                <div class="html-preview mb-3">
+                    ${text}
+                </div>
+                <div class="html-code">
+                    <h4>HTML Code:</h4>
+                    <pre><code>${escapeHtml(text)}</code></pre>
+                </div>
+            `;
+        } else {
+            // Display plain text
+            resultOutput.innerHTML = `<pre class="lorem-text">${text}</pre>`;
+        }
+    }
+    
+    function updateStats(text) {
+        // Remove HTML tags for counting
+        const plainText = text.replace(/<[^>]*>/g, '');
+        const words = plainText.trim().split(/\s+/).filter(word => word.length > 0);
+        const chars = plainText.length;
+        
+        document.getElementById('wordCount').textContent = words.length;
+        document.getElementById('charCount').textContent = chars;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
+
+// Quick generate function
+function quickGenerate(count, type) {
+    document.getElementById('count').value = count;
+    document.getElementById('type').value = type;
+    document.getElementById('loremForm').dispatchEvent(new Event('submit'));
+}
+
+// Copy text function
+function copyText() {
+    const output = document.querySelector('.result-output');
+    const text = output.textContent || output.innerText;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+        }, 2000);
+    });
+}
+
+// Download text function
+function downloadText() {
+    const output = document.querySelector('.result-output');
+    const text = output.textContent || output.innerText;
+    const format = document.getElementById('format').value;
+    
+    const blob = new Blob([text], { type: format === 'html' ? 'text/html' : 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lorem-ipsum.${format === 'html' ? 'html' : 'txt'}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+
+<style>
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.result-output pre.lorem-text {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.6;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.html-preview {
+    background: white;
+    color: #333;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.html-preview p {
+    margin-bottom: 1em;
+    color: #333;
+}
+
+.html-code pre {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.html-code code {
+    color: var(--cyan);
+}
+
+.text-stats {
+    display: flex;
+    gap: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stat-item {
+    color: var(--text-secondary);
+}
+
+.stat-item strong {
+    color: var(--purple);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+.loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--cyan);
+}
+
+.error {
+    padding: 2rem;
+    color: var(--red);
+    text-align: center;
+}
+
+/* Custom scrollbar for text areas */
+.lorem-text::-webkit-scrollbar,
+.html-code pre::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lorem-text::-webkit-scrollbar-track,
+.html-code pre::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.lorem-text::-webkit-scrollbar-thumb,
+.html-code pre::-webkit-scrollbar-thumb {
+    background: var(--purple);
+    border-radius: 4px;
+}
+
+.lorem-text::-webkit-scrollbar-thumb:hover,
+.html-code pre::-webkit-scrollbar-thumb:hover {
+    background: var(--cyan);
+}
+</style>

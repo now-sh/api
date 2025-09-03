@@ -4,12 +4,12 @@
 </div>
 
 <div class="card">
-    <h2 class="card-title">Generate UUID</h2>
+    <h2 class="card-title">Generate UUID v4</h2>
     <p class="card-text mb-4">Click the button to generate a new UUID v4</p>
     
     <div class="text-center">
         <div id="uuid-display" class="mb-4">
-            <code class="uuid-result" style="font-size: var(--text-xl); padding: var(--space-4);">
+            <code class="uuid-result">
                 Click generate to create a UUID
             </code>
         </div>
@@ -25,18 +25,66 @@
         
         <div class="mt-6">
             <h3 class="mb-3">Batch Generation</h3>
-            <div class="form-group" style="max-width: 300px; margin: 0 auto;">
-                <label for="count" class="form-label">Number of UUIDs</label>
-                <input type="number" id="count" min="1" max="100" value="5" class="form-control">
-            </div>
-            <button id="batchBtn" class="btn btn-primary mt-3">Generate Batch</button>
+            <form id="batchForm" class="form-inline" style="max-width: 400px; margin: 0 auto;">
+                <div class="form-group">
+                    <label for="count" class="form-label">Number of UUIDs</label>
+                    <input type="number" id="count" name="count" min="1" max="100" value="5" class="form-control" required>
+                </div>
+                <div class="form-check mt-3">
+                    <input type="checkbox" id="uppercase" name="uppercase" class="form-check-input">
+                    <label for="uppercase" class="form-check-label">Uppercase</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Generate Batch</button>
+            </form>
         </div>
     </div>
     
     <div id="batch-result" class="result-container mt-6" style="display: none;">
         <h3 class="mb-3">Generated UUIDs:</h3>
         <pre class="result-output"></pre>
-        <button class="btn btn-sm copy-btn mt-2">Copy All</button>
+        <button class="btn btn-sm copy-btn mt-2" onclick="copyBatchResults()">Copy All</button>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <h3 class="card-title">UUID Validation</h3>
+    <p class="card-text mb-4">Check if a string is a valid UUID</p>
+    
+    <form id="validateForm" class="api-form">
+        <div class="form-group">
+            <label for="uuidInput" class="form-label">UUID to Validate</label>
+            <input 
+                type="text" 
+                id="uuidInput" 
+                name="uuid" 
+                class="form-control" 
+                placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000"
+                required
+            >
+        </div>
+        <button type="submit" class="btn btn-primary">Validate UUID</button>
+    </form>
+    
+    <div id="validate-result" class="result-container mt-4" style="display: none;">
+        <div class="result-output"></div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <h3 class="card-title">API Usage</h3>
+    <div class="code-block">
+        <h4>Generate UUID v4:</h4>
+        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/v4</code></pre>
+    </div>
+    
+    <div class="code-block">
+        <h4>Generate multiple UUIDs:</h4>
+        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/generate/5</code></pre>
+    </div>
+    
+    <div class="code-block">
+        <h4>Validate UUID:</h4>
+        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/validate/550e8400-e29b-41d4-a716-446655440000</code></pre>
     </div>
 </div>
 
@@ -45,56 +93,240 @@
     display: inline-block;
     background-color: var(--bg-secondary);
     color: var(--yellow);
-    padding: var(--space-4);
+    padding: 1rem 2rem;
     border-radius: var(--radius-md);
     font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.25rem;
     user-select: all;
     cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
-.form-group {
-    margin-bottom: var(--space-4);
+.uuid-result:hover {
+    border-color: var(--yellow);
+    transform: translateY(-1px);
 }
 
-.form-label {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-weight: 500;
-    color: var(--text-primary);
+.uuid-result.success {
+    color: var(--green);
+    border-color: var(--green);
+    animation: fadeIn 0.3s ease;
 }
 
-.form-control {
-    width: 100%;
-    padding: var(--space-3);
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--text-base);
+.form-inline {
     text-align: center;
 }
 
-.result-container {
-    background-color: var(--bg-secondary);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+.form-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.result-output {
-    background-color: var(--bg-primary);
-    padding: var(--space-4);
+.form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+.validation-result {
+    padding: 1rem;
     border-radius: var(--radius-md);
-    overflow-x: auto;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    text-align: center;
+    font-weight: 600;
 }
 
-.copy-btn {
-    background-color: var(--cyan);
-    color: var(--background);
+.validation-result.valid {
+    background: rgba(80, 250, 123, 0.1);
+    color: var(--green);
+    border: 1px solid var(--green);
+}
+
+.validation-result.invalid {
+    background: rgba(255, 85, 85, 0.1);
+    color: var(--red);
+    border: 1px solid var(--red);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const uuidDisplay = document.querySelector('.uuid-result');
+    const batchForm = document.getElementById('batchForm');
+    const validateForm = document.getElementById('validateForm');
+    let currentUuid = '';
+    
+    // Generate single UUID
+    generateBtn.addEventListener('click', async () => {
+        generateBtn.disabled = true;
+        uuidDisplay.textContent = 'Generating...';
+        
+        try {
+            const response = await fetch('/api/v1/tools/uuid/v4');
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentUuid = data.data.uuid;
+                uuidDisplay.textContent = currentUuid;
+                uuidDisplay.classList.add('success');
+                copyBtn.disabled = false;
+                
+                // Remove success class after animation
+                setTimeout(() => uuidDisplay.classList.remove('success'), 500);
+            } else {
+                uuidDisplay.textContent = 'Error generating UUID';
+            }
+        } catch (error) {
+            uuidDisplay.textContent = 'Error: ' + error.message;
+        } finally {
+            generateBtn.disabled = false;
+        }
+    });
+    
+    // Copy single UUID
+    copyBtn.addEventListener('click', () => {
+        if (currentUuid) {
+            navigator.clipboard.writeText(currentUuid).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.classList.remove('btn-success');
+                }, 2000);
+            });
+        }
+    });
+    
+    // Click to copy UUID
+    uuidDisplay.addEventListener('click', () => {
+        if (currentUuid) {
+            navigator.clipboard.writeText(currentUuid);
+            showToast('UUID copied to clipboard!');
+        }
+    });
+    
+    // Batch generation
+    batchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const count = document.getElementById('count').value;
+        const uppercase = document.getElementById('uppercase').checked;
+        const resultDiv = document.getElementById('batch-result');
+        const resultOutput = resultDiv.querySelector('.result-output');
+        
+        resultOutput.textContent = 'Generating...';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const response = await fetch(`/api/v1/tools/uuid/generate/${count}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                let uuids = data.data.uuids;
+                if (uppercase) {
+                    uuids = uuids.map(uuid => uuid.toUpperCase());
+                }
+                resultOutput.textContent = uuids.join('\n');
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate UUIDs'}</div>`;
+            }
+        } catch (error) {
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+    
+    // UUID validation
+    validateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const uuid = document.getElementById('uuidInput').value.trim();
+        const resultDiv = document.getElementById('validate-result');
+        const resultOutput = resultDiv.querySelector('.result-output');
+        
+        resultOutput.innerHTML = '<div class="loading">Validating...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const response = await fetch(`/api/v1/tools/uuid/validate/${encodeURIComponent(uuid)}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                const isValid = data.data.valid;
+                resultOutput.innerHTML = `
+                    <div class="validation-result ${isValid ? 'valid' : 'invalid'}">
+                        ${isValid ? '✓ Valid UUID' : '✗ Invalid UUID'}
+                        ${data.data.version ? `<br><small>Version: ${data.data.version}</small>` : ''}
+                    </div>
+                `;
+            } else {
+                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Validation failed'}</div>`;
+            }
+        } catch (error) {
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+});
+
+// Copy batch results
+function copyBatchResults() {
+    const output = document.querySelector('#batch-result .result-output');
+    const text = output.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('#batch-result .copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.textContent = 'Copy All';
+            btn.classList.remove('btn-success');
+        }, 2000);
+    });
+}
+
+// Toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
+<style>
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
 

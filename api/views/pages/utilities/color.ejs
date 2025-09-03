@@ -3,130 +3,372 @@
     <p class="lead">Convert between HEX, RGB, and HSL color formats</p>
 </div>
 
-<div class="card">
-    <h2 class="card-title">Color Converter</h2>
-    <p class="card-text mb-4">Enter a color in any format to see all conversions</p>
-    
-    <form id="colorForm" class="api-form">
-        <div class="form-group">
-            <label for="color" class="form-label">Color Value</label>
-            <input 
-                type="text" 
-                id="color" 
-                name="color" 
-                class="form-control" 
-                placeholder="#FF5733, rgb(255, 87, 51), hsl(9, 100%, 60%)"
-                required
-            />
-            <small class="text-secondary">Supports HEX, RGB, RGBA, HSL, HSLA formats</small>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Color Converter</h2>
+            <p class="card-text mb-4">Enter a color in any format to see all conversions</p>
+            
+            <form id="colorForm" class="api-form">
+                <div class="form-group">
+                    <label for="color" class="form-label">Color Value</label>
+                    <input 
+                        type="text" 
+                        id="color" 
+                        name="color" 
+                        class="form-control" 
+                        placeholder="#FF5733, rgb(255, 87, 51), hsl(9, 100%, 60%)"
+                        required
+                    >
+                    <small class="text-secondary">Supports HEX, RGB, RGBA, HSL, HSLA formats</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="colorPicker" class="form-label">Or Pick a Color</label>
+                    <input 
+                        type="color" 
+                        id="colorPicker" 
+                        class="form-control color-picker"
+                        value="#FF5733"
+                    >
+                </div>
+                
+                <div class="btn-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Convert Color
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        Clear
+                    </button>
+                </div>
+            </form>
+            
+            <div id="colorResult" class="result-container mt-6" style="display: none;">
+                <h3 class="mb-3">Color Information:</h3>
+                
+                <div class="color-preview mb-4"></div>
+                
+                <div class="color-formats">
+                    <div class="format-row">
+                        <strong>HEX:</strong>
+                        <code class="color-value" data-format="hex">#000000</code>
+                        <button class="btn btn-sm copy-format" data-format="hex">Copy</button>
+                    </div>
+                    <div class="format-row">
+                        <strong>RGB:</strong>
+                        <code class="color-value" data-format="rgb">rgb(0, 0, 0)</code>
+                        <button class="btn btn-sm copy-format" data-format="rgb">Copy</button>
+                    </div>
+                    <div class="format-row">
+                        <strong>RGBA:</strong>
+                        <code class="color-value" data-format="rgba">rgba(0, 0, 0, 1)</code>
+                        <button class="btn btn-sm copy-format" data-format="rgba">Copy</button>
+                    </div>
+                    <div class="format-row">
+                        <strong>HSL:</strong>
+                        <code class="color-value" data-format="hsl">hsl(0, 0%, 0%)</code>
+                        <button class="btn btn-sm copy-format" data-format="hsl">Copy</button>
+                    </div>
+                    <div class="format-row">
+                        <strong>HSLA:</strong>
+                        <code class="color-value" data-format="hsla">hsla(0, 0%, 0%, 1)</code>
+                        <button class="btn btn-sm copy-format" data-format="hsla">Copy</button>
+                    </div>
+                </div>
+                
+                <div id="colorPalette" class="color-palette mt-4" style="display: none;">
+                    <h4>Color Palette</h4>
+                    <div class="palette-colors"></div>
+                </div>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="colorPicker" class="form-label">Or Pick a Color</label>
-            <input 
-                type="color" 
-                id="colorPicker" 
-                class="form-control"
-                style="height: 60px; cursor: pointer;"
-            />
-        </div>
-        
-        <div class="btn-group mt-4">
-            <button type="submit" class="btn btn-primary">
-                Convert Color
-            </button>
-            <button type="reset" class="btn btn-secondary">
-                Clear
-            </button>
-        </div>
-    </form>
-    
-    <div id="colorResult" class="result-container mt-6" style="display: none;">
-        <h3 class="mb-3">Color Information:</h3>
-        
-        <div class="color-preview mb-4" style="height: 100px; border-radius: var(--radius-md); border: 2px solid var(--border-color);"></div>
-        
-        <div class="color-formats">
-            <div class="format-row">
-                <strong>HEX:</strong>
-                <code class="color-value" data-format="hex">#000000</code>
-                <button class="btn btn-sm copy-format" data-format="hex">Copy</button>
-            </div>
-            <div class="format-row">
-                <strong>RGB:</strong>
-                <code class="color-value" data-format="rgb">rgb(0, 0, 0)</code>
-                <button class="btn btn-sm copy-format" data-format="rgb">Copy</button>
-            </div>
-            <div class="format-row">
-                <strong>RGBA:</strong>
-                <code class="color-value" data-format="rgba">rgba(0, 0, 0, 1)</code>
-                <button class="btn btn-sm copy-format" data-format="rgba">Copy</button>
-            </div>
-            <div class="format-row">
-                <strong>HSL:</strong>
-                <code class="color-value" data-format="hsl">hsl(0, 0%, 0%)</code>
-                <button class="btn btn-sm copy-format" data-format="hsl">Copy</button>
-            </div>
-            <div class="format-row">
-                <strong>HSLA:</strong>
-                <code class="color-value" data-format="hsla">hsla(0, 0%, 0%, 1)</code>
-                <button class="btn btn-sm copy-format" data-format="hsla">Copy</button>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Color Palette Generator</h3>
+            <p class="card-text">Generate harmonious color palettes</p>
+            
+            <form id="paletteForm" class="api-form">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="baseColor" class="form-label">Base Color</label>
+                            <input 
+                                type="text" 
+                                id="baseColor" 
+                                name="baseColor" 
+                                class="form-control" 
+                                placeholder="#FF5733"
+                                value="#FF5733"
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="paletteCount" class="form-label">Colors</label>
+                            <input 
+                                type="number" 
+                                id="paletteCount" 
+                                name="count" 
+                                class="form-control" 
+                                min="3" 
+                                max="10" 
+                                value="5"
+                            >
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Palette</button>
+            </form>
+            
+            <div id="paletteResult" class="mt-4" style="display: none;">
+                <div class="generated-palette"></div>
             </div>
         </div>
-        
-        <div class="color-info mt-4">
-            <h4>Additional Information:</h4>
-            <div id="additionalInfo"></div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Convert color:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/color/convert \
+  -H "Content-Type: application/json" \
+  -d '{"color": "#FF5733", "from": "hex", "to": "rgb"}'</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Generate palette:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/color/palette \
+  -H "Content-Type: application/json" \
+  -d '{"baseColor": "#FF5733", "count": 5}'</code></pre>
+            </div>
         </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorForm = document.getElementById('colorForm');
+    const colorPicker = document.getElementById('colorPicker');
+    const colorInput = document.getElementById('color');
+    const paletteForm = document.getElementById('paletteForm');
+    
+    // Sync color picker with input
+    colorPicker.addEventListener('change', function() {
+        colorInput.value = this.value;
+    });
+    
+    colorInput.addEventListener('input', function() {
+        if (this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+            colorPicker.value = this.value;
+        }
+    });
+    
+    // Color conversion form
+    colorForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const color = colorInput.value.trim();
+        if (!color) return;
+        
+        const resultDiv = document.getElementById('colorResult');
+        const preview = resultDiv.querySelector('.color-preview');
+        
+        // Show result area
+        resultDiv.style.display = 'block';
+        
+        try {
+            // Determine color format
+            let from = 'hex';
+            if (color.startsWith('rgb')) from = 'rgb';
+            else if (color.startsWith('hsl')) from = 'hsl';
+            
+            const response = await fetch('/api/v1/tools/color/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ color, from, to: 'all' })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                const colors = data.data;
+                
+                // Update preview
+                preview.style.backgroundColor = colors.hex || color;
+                
+                // Update all format displays
+                updateColorDisplay('hex', colors.hex || color);
+                updateColorDisplay('rgb', colors.rgb || `rgb(${colors.r}, ${colors.g}, ${colors.b})`);
+                updateColorDisplay('rgba', colors.rgba || `rgba(${colors.r}, ${colors.g}, ${colors.b}, 1)`);
+                updateColorDisplay('hsl', colors.hsl || `hsl(${colors.h}, ${colors.s}%, ${colors.l}%)`);
+                updateColorDisplay('hsla', colors.hsla || `hsla(${colors.h}, ${colors.s}%, ${colors.l}%, 1)`);
+                
+                // Generate complementary palette
+                generatePalette(colors.hex || color);
+                
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError('Invalid color format');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    });
+    
+    // Palette generator form
+    paletteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const baseColor = document.getElementById('baseColor').value.trim();
+        const count = document.getElementById('paletteCount').value;
+        const resultDiv = document.getElementById('paletteResult');
+        const paletteContainer = resultDiv.querySelector('.generated-palette');
+        
+        paletteContainer.innerHTML = '<div class="loading">Generating palette...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            const response = await fetch('/api/v1/tools/color/palette', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ baseColor, count: parseInt(count) })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayPalette(data.data.palette, paletteContainer);
+            } else {
+                paletteContainer.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate palette'}</div>`;
+            }
+        } catch (error) {
+            paletteContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+    
+    // Copy format buttons
+    document.querySelectorAll('.copy-format').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const format = this.dataset.format;
+            const value = document.querySelector(`.color-value[data-format="${format}"]`).textContent;
+            
+            navigator.clipboard.writeText(value).then(() => {
+                this.textContent = 'Copied!';
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.textContent = 'Copy';
+                    this.classList.remove('btn-success');
+                }, 2000);
+            });
+        });
+    });
+});
+
+function updateColorDisplay(format, value) {
+    const element = document.querySelector(`.color-value[data-format="${format}"]`);
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function generatePalette(baseColor) {
+    const paletteDiv = document.getElementById('colorPalette');
+    const paletteColors = paletteDiv.querySelector('.palette-colors');
+    
+    // Generate simple complementary colors
+    const colors = [
+        baseColor,
+        adjustBrightness(baseColor, 20),
+        adjustBrightness(baseColor, -20),
+        adjustBrightness(baseColor, 40),
+        adjustBrightness(baseColor, -40)
+    ];
+    
+    paletteColors.innerHTML = colors.map(color => `
+        <div class="palette-color" style="background-color: ${color}" onclick="copyColor('${color}')">
+            <span class="color-label">${color}</span>
+        </div>
+    `).join('');
+    
+    paletteDiv.style.display = 'block';
+}
+
+function displayPalette(palette, container) {
+    container.innerHTML = `
+        <div class="palette-grid">
+            ${palette.map(color => `
+                <div class="palette-item">
+                    <div class="palette-swatch" style="background-color: ${color}" onclick="copyColor('${color}')"></div>
+                    <code class="palette-code">${color}</code>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function adjustBrightness(hex, percent) {
+    // Simple brightness adjustment
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    
+    return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255))
+        .toString(16).slice(1).toUpperCase();
+}
+
+function copyColor(color) {
+    navigator.clipboard.writeText(color).then(() => {
+        showToast(`Color ${color} copied to clipboard!`);
+    });
+}
+
+function showError(message) {
+    const preview = document.querySelector('.color-preview');
+    preview.style.backgroundColor = 'transparent';
+    preview.innerHTML = `<div class="error" style="padding: 2rem;">${message}</div>`;
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
 <style>
-.api-form {
-    max-width: 600px;
-    margin: 0 auto;
+.color-picker {
+    height: 60px;
+    cursor: pointer;
+    padding: 0.25rem;
 }
 
-.form-group {
-    margin-bottom: var(--space-4);
-}
-
-.form-label {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.form-control {
-    width: 100%;
-    padding: var(--space-3);
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+.color-preview {
+    height: 100px;
     border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--text-base);
-    transition: all 0.2s ease;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
-}
-
-.result-container {
-    background-color: var(--bg-secondary);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
+    transition: background-color 0.3s ease;
 }
 
 .format-row {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-2) 0;
+    gap: 1rem;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -142,7 +384,7 @@
 .format-row code {
     flex: 1;
     background-color: var(--bg-primary);
-    padding: var(--space-2) var(--space-3);
+    padding: 0.5rem 1rem;
     border-radius: var(--radius-sm);
     font-family: 'Monaco', 'Consolas', monospace;
     color: var(--yellow);
@@ -151,24 +393,104 @@
 .copy-format {
     background-color: var(--cyan);
     color: var(--background);
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--text-xs);
+    border: none;
 }
 
 .copy-format:hover {
     background-color: var(--green);
 }
 
-.color-info {
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-color);
+.copy-format.btn-success {
+    background-color: var(--green);
 }
 
-#additionalInfo {
-    font-size: var(--text-sm);
+.palette-colors {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.palette-color {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease;
+    border: 2px solid var(--border-color);
+}
+
+.palette-color:hover {
+    transform: scale(1.1);
+}
+
+.color-label {
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.palette-item {
+    text-align: center;
+}
+
+.palette-swatch {
+    width: 100%;
+    height: 80px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: 2px solid var(--border-color);
+}
+
+.palette-swatch:hover {
+    transform: scale(1.05);
+}
+
+.palette-code {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--cyan);
+}
+
+.error {
+    color: var(--red);
+}
 </style>
-
-<%- locals.customScripts = '<script src="/js/utility-forms.js"></script>' %>
-
