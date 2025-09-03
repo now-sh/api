@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const response = await fetch(`/api/v1/base64/${action}`, {
+                const response = await fetch(`/api/v1/tools/base64/${action}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const response = await fetch('/api/v1/global');
+                const response = await fetch('/api/v1/world/covid');
                 const data = await response.json();
                 
                 if (response.ok) {
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const response = await fetch('/api/v1/anime/quote');
+                const response = await fetch('/api/v1/fun/anime/quote');
                 const data = await response.json();
                 
                 if (response.ok) {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             try {
-                const endpoint = username === 'casjay' ? '/api/v1/reddit/jason' : `/api/v1/reddit/u/${username}`;
+                const endpoint = username === 'casjay' ? '/api/v1/me/info/reddit' : `/api/v1/social/reddit/u/${username}`;
                 const response = await fetch(endpoint);
                 const data = await response.json();
                 
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const endpoint = tld === 'all' ? '/api/v1/domains' : `/api/v1/domains/${tld}`;
+                const endpoint = tld === 'all' ? '/api/v1/me/info/domains' : `/api/v1/me/info/domains/${tld}`;
                 const response = await fetch(endpoint);
                 const data = await response.json();
                 
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const response = await fetch('/api/v1/closings');
+                const response = await fetch('/api/v1/world/closings');
                 const data = await response.json();
                 
                 if (response.ok) {
@@ -189,11 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 let endpoint;
                 if (dataType === 'repos') {
-                    endpoint = `/api/v1/git/repos/${username}`;
+                    endpoint = username === 'casjay' ? '/api/v1/me/info/github/repos' : `/api/v1/social/github/user/${username}/repos`;
                 } else if (dataType === 'orgs') {
-                    endpoint = `/api/v1/git/orgs/${username}`;
+                    endpoint = username === 'casjay' ? '/api/v1/me/info/github/orgs' : `/api/v1/social/github/user/${username}/orgs`;
                 } else {
-                    endpoint = `/api/v1/git/user/${username}`;
+                    endpoint = username === 'casjay' ? '/api/v1/me/info/github' : `/api/v1/social/github/user/${username}`;
                 }
                 
                 const response = await fetch(endpoint);

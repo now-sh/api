@@ -55,12 +55,12 @@
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li><strong>User Info:</strong> <code>/api/v1/git/user/:username</code></li>
-            <li><strong>My Profile:</strong> <code>/api/v1/git/jason</code></li>
-            <li><strong>Repositories:</strong> <code>/api/v1/git/repos/:username</code></li>
-            <li><strong>Organizations:</strong> <code>/api/v1/git/orgs/:username</code></li>
+            <li><strong>User Info:</strong> <code>/api/v1/social/github/user/:username</code></li>
+            <li><strong>My Profile:</strong> <code>/api/v1/me/info/github</code></li>
+            <li><strong>Repositories:</strong> <code>/api/v1/social/github/user/:username/repos</code></li>
+            <li><strong>Organizations:</strong> <code>/api/v1/social/github/user/:username/orgs</code></li>
           </ul>
-          <a href="/api/v1/git/jason" class="btn btn-info btn-sm" target="_blank">
+          <a href="/api/v1/me/info/github" class="btn btn-info btn-sm" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i> View Casjay Profile
           </a>
         </div>
@@ -70,53 +70,3 @@
 </div>
 
 <%- locals.customScripts = '<script src="/js/data-forms.js"></script>' %>
-
-<script>
-function copyToClipboard(selector) {
-  const element = document.querySelector(selector);
-  if (element) {
-    navigator.clipboard.writeText(element.textContent);
-  }
-}
-
-document.getElementById('gitForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  
-  const formData = new FormData(e.target);
-  const username = formData.get('username');
-  const dataType = formData.get('dataType');
-  const resultDiv = document.getElementById('gitForm-result');
-  const resultOutput = resultDiv.querySelector('.result-output');
-  
-  if (!username) {
-    alert('Please enter a username');
-    return;
-  }
-  
-  try {
-    let endpoint;
-    if (dataType === 'user') {
-      endpoint = username === 'casjay' ? '/api/v1/git/jason' : `/api/v1/git/user/${username}`;
-    } else if (dataType === 'repos') {
-      endpoint = `/api/v1/git/repos/${username}`;
-    } else if (dataType === 'orgs') {
-      endpoint = `/api/v1/git/orgs/${username}`;
-    }
-    
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    
-    if (response.ok) {
-      resultOutput.textContent = JSON.stringify(data, null, 2);
-      resultDiv.style.display = 'block';
-      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-      resultOutput.textContent = `Error: ${data.message || 'Failed to fetch data'}`;
-      resultDiv.style.display = 'block';
-    }
-  } catch (error) {
-    resultOutput.textContent = `Error: ${error.message}`;
-    resultDiv.style.display = 'block';
-  }
-});
-</script>

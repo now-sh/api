@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         await handleAllHashTypes(data.text, resultOutput, resultDiv);
                         return;
                     } else {
-                        endpoint = `/api/v1/utilities/hash/${hashType}?json=true`;
+                        endpoint = `/api/v1/tools/hash/${hashType}?json=true`;
                         requestOptions = {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (formId === 'loremForm') {
                     const type = data.type || 'sentences';
                     const count = data.count || 3;
-                    endpoint = `/api/v1/utilities/lorem/${type}/${count}`;
+                    endpoint = `/api/v1/tools/lorem/${type}/${count}`;
                     requestOptions = {
                         method: 'GET'
                     };
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         for (const hashType of hashTypes) {
             try {
-                const response = await fetch(`/api/v1/utilities/hash/${hashType}?json=true`, {
+                const response = await fetch(`/api/v1/tools/hash/${hashType}?json=true`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `text=${encodeURIComponent(text)}`
@@ -136,20 +136,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function getEndpointForForm(formId) {
         const endpoints = {
-            'hashForm': '/api/v1/utilities/hash',
-            'uuidForm': '/api/v1/utilities/uuid/generate',
-            'jwtForm': '/api/v1/utilities/jwt/decode',
-            'qrForm': '/api/v1/utilities/qr/generate',
-            'colorForm': '/api/v1/utilities/color/convert',
-            'loremForm': '/api/v1/utilities/lorem',
-            'passwdForm': '/api/v1/utilities/passwd/generate',
-            'commitForm': '/api/v1/commit',
-            'domainsForm': '/api/v1/domains',
-            'timezonesForm': '/api/v1/timezones',
-            'closingsForm': '/api/v1/closings',
-            'notesForm': '/api/v1/personal/notes',
+            'hashForm': '/api/v1/tools/hash',
+            'uuidForm': '/api/v1/tools/uuid/v4',
+            'jwtForm': '/api/v1/tools/jwt/decode',
+            'qrForm': '/api/v1/tools/qr/generate',
+            'colorForm': '/api/v1/tools/color/convert',
+            'loremForm': '/api/v1/tools/lorem',
+            'passwdForm': '/api/v1/tools/passwd',
+            'commitForm': '/api/v1/tools/commit',
+            'domainsForm': '/api/v1/me/info/domains',
+            'timezonesForm': '/api/v1/world/timezones',
+            'closingsForm': '/api/v1/world/closings',
+            'notesForm': '/api/v1/data/notes',
             'authForm': '/api/v1/auth',
-            'urlForm': '/api/v1/services/url'
+            'urlForm': '/api/v1/data/urls'
         };
         
         return endpoints[formId];

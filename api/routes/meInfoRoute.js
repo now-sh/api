@@ -116,22 +116,68 @@ meInfoRoute.get('/domains/text', cors(), async (req, res) => {
 });
 
 /**
- * Get resume - JSON response with PDF info
+ * Get resume - JSON data from GitHub
  */
 meInfoRoute.get('/resume', cors(), async (req, res) => {
   try {
-    // For PDFs, we'll return metadata and a link
-    const pdfUrl = URLS.resume;
-    
-    res.json({
-      type: 'pdf',
-      url: pdfUrl,
-      message: 'Resume is available as PDF',
-      viewUrl: `${req.protocol}://${req.headers.host}/api/v1/me/info/resume/view`,
-      downloadUrl: `${req.protocol}://${req.headers.host}/api/v1/me/info/resume/download`
+    const response = await axios.get('https://raw.githubusercontent.com/casjay/public/refs/heads/main/resume.json', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Node.js API Client',
+        'Accept': 'application/json'
+      }
     });
+    res.json(response.data);
   } catch (error) {
-    res.status(503).json({ error: error.message });
+    res.status(503).json({ error: `Failed to fetch resume data: ${error.message}` });
+  }
+});
+
+/**
+ * Get resume - Text format
+ */
+meInfoRoute.get('/resume/text', cors(), async (req, res) => {
+  try {
+    const response = await axios.get('https://raw.githubusercontent.com/casjay/public/refs/heads/main/resume.json', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Node.js API Client',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const data = response.data;
+    const output = [];
+    
+    // Personal Info
+    output.push(`${data.personalInfo.name}`);
+    output.push(`${data.personalInfo.location}`);
+    output.push(`Email: ${data.personalInfo.email}`);
+    output.push(`Phone: ${data.personalInfo.phone}`);
+    output.push('');
+    
+    // Summary
+    output.push('SUMMARY');
+    data.summary.highlights.forEach(item => output.push(`• ${item}`));
+    output.push('');
+    
+    // Work Experience
+    output.push('WORK EXPERIENCE');
+    data.workExperience.forEach(job => {
+      output.push(`${job.title} - ${job.company}, ${job.location}`);
+      output.push(`${job.startDate} - ${job.endDate}`);
+      job.responsibilities.forEach(resp => output.push(`• ${resp}`));
+      output.push('');
+    });
+    
+    // Skills
+    output.push('TECHNICAL SKILLS');
+    output.push(data.skills.technical.join(', '));
+    output.push('');
+    
+    sendText(res, output.join('\n'));
+  } catch (error) {
+    sendText(res, `Error: ${error.message}`);
   }
 });
 

@@ -32,19 +32,19 @@
     
     <div class="code-block">
         <h4>Get a random commit message:</h4>
-        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt</code></pre>
+        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/tools/commit/text</code></pre>
     </div>
     
     <div class="code-block">
         <h4>Create a git alias:</h4>
-        <pre><code>git config --global alias.random-commit '!f() { git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt)"; }; f'</code></pre>
+        <pre><code>git config --global alias.random-commit '!f() { git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/tools/commit/text)"; }; f'</code></pre>
         <p class="text-secondary">Then use: <code>git random-commit</code></p>
     </div>
     
     <div class="code-block">
         <h4>Bash function:</h4>
         <pre><code>commit_random() {
-    git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/commit/txt)" "$@"
+    git commit -m "$(curl -s <%= typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:1919' %>/api/v1/tools/commit/text)" "$@"
 }</code></pre>
         <p class="text-secondary">Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code></p>
     </div>
@@ -161,11 +161,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate random message
     generateBtn.addEventListener('click', async () => {
         try {
-            const response = await fetch('/api/v1/commit/json');
+            const response = await fetch('/api/v1/tools/commit');
             const data = await response.json();
             
-            if (response.ok) {
-                commitMessage.textContent = data.message;
+            if (response.ok && data.success && data.data) {
+                commitMessage.textContent = data.data.message;
                 messageDisplay.style.display = 'block';
                 
                 // Auto-select for easy copying
@@ -193,11 +193,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch('/api/v1/commit/all');
+            const response = await fetch('/api/v1/tools/commit/batch/100');
             const data = await response.json();
             
-            if (response.ok && data.messages) {
-                const messagesHtml = data.messages.map((msg, index) => `
+            if (response.ok && data.success && data.data) {
+                const messagesHtml = data.data.messages.map((msg, index) => `
                     <div class="message-item" data-message="${msg.replace(/"/g, '&quot;')}">
                         ${msg}
                         <span class="copy-icon">📋</span>

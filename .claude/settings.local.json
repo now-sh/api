@@ -50,7 +50,9 @@
       "Bash(npx eslint:*)",
       "Bash(rm:*)",
       "Bash(vercel logs:*)",
-      "Bash(vercel ls:*)"
+      "Bash(vercel ls:*)",
+      "Bash(# Test base64 endpoint directly with updated route\ncurl -s http://localhost:1919/api/v1/tools/base64/encode -H \"\"Content-Type: application/json\"\" -d ''{\"\"text\"\":\"\"Hello World\"\"}'' | jq -c)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

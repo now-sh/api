@@ -46,7 +46,7 @@ document.getElementById('todoForm').addEventListener('submit', async (e) => {
     };
     
     try {
-        const response = await fetch('/api/v1/personal/todos', {
+        const response = await fetch('/api/v1/data/todos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ async function loadTodos() {
     }
     
     try {
-        const response = await fetch('/api/v1/personal/todos', {
+        const response = await fetch('/api/v1/data/todos', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -175,7 +175,7 @@ async function toggleTodo(id) {
     if (!todo) return;
     
     try {
-        const response = await fetch(`/api/v1/personal/todos/${id}`, {
+        const response = await fetch(`/api/v1/data/todos/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ async function deleteTodo(id) {
     if (!confirm('Are you sure you want to delete this todo?')) return;
     
     try {
-        const response = await fetch(`/api/v1/personal/todos/${id}`, {
+        const response = await fetch(`/api/v1/data/todos/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
