@@ -11,15 +11,15 @@ const { authLimiter } = require('../middleware/rateLimiter');
 // Controllers
 const todoController = require('../controllers/todo');
 const authController = require('../controllers/auth');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const todoRoute = express.Router();
 
 
 todoRoute.get(['/', '/help'], cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'Todo API',
       message: `The current api endpoint is ${host}/api/v1/todos`,
       endpoints: {
@@ -41,9 +41,13 @@ todoRoute.get(['/', '/help'], cors(), async (req, res) => {
         public_todos: 'Visible to everyone',
         private_todos: 'Visible only to owner'
       }
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const data = { error: err.message };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -59,16 +63,20 @@ todoRoute.get('/list', cors(), optionalAuth, async (req, res) => {
     
     const todos = await todoController.getTodos(req.user, filters);
     
-    res.json({
+    const data = {
       success: true,
       data: todos,
       authenticated: req.isAuthenticated
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -81,15 +89,19 @@ todoRoute.get('/public', cors(), async (req, res) => {
     // Force unauthenticated query to get only public todos
     const todos = await todoController.getTodos(null, filters);
     
-    res.json({
+    const data = {
       success: true,
       data: todos
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -97,15 +109,19 @@ todoRoute.get('/stats', cors(), checkAuth, async (req, res) => {
   try {
     const stats = await todoController.getTodoStats(req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: stats
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -128,24 +144,30 @@ todoRoute.post(
         msg: error.msg,
         field: error.param
       }));
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const todo = await todoController.createTodo(req.user, req.body);
       
-      res.status(201).json({
+      const data = {
         success: true,
         data: todo
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(201).json(data);
     } catch (error) {
-      res.status(500).json({
+      const data = {
         success: false,
         error: error.message
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -154,19 +176,23 @@ todoRoute.get('/:id', cors(), optionalAuth, async (req, res) => {
   try {
     const todo = await todoController.getTodoById(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: todo
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('Authentication required') ? 401 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 
@@ -189,10 +215,12 @@ todoRoute.put(
         msg: error.msg,
         field: error.param
       }));
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
@@ -218,18 +246,22 @@ todoRoute.patch('/:id/toggle', cors(), checkAuth, async (req, res) => {
   try {
     const result = await todoController.toggleTodoComplete(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: result
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 
@@ -237,18 +269,22 @@ todoRoute.delete('/:id', cors(), checkAuth, async (req, res) => {
   try {
     const result = await todoController.deleteTodo(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: result
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 

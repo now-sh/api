@@ -3,12 +3,13 @@ const { body, validationResult } = require('express-validator');
 const cors = require('cors');
 const jwtController = require('../controllers/jwt');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const jwtRoute = express.Router();
 
 jwtRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'JWT Decoder & Validator',
     message: 'Decode and validate JSON Web Tokens',
     endpoints: {
@@ -25,7 +26,9 @@ jwtRoute.get(['/', '/help'], cors(), (req, res) => {
       decode: `POST ${host}/api/v1/jwt/decode with {"token": "eyJ..."}`,
       validate: `POST ${host}/api/v1/jwt/validate with {"token": "eyJ...", "secret": "your-secret"}`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 jwtRoute.post('/decode',
@@ -34,23 +37,29 @@ jwtRoute.post('/decode',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const result = jwtController.decodeJWT(req.body.token);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(400).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(400).json(data);
     }
   }
 );
@@ -62,25 +71,31 @@ jwtRoute.post('/validate',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const result = jwtController.decodeJWT(req.body.token, {
         secret: req.body.secret
       });
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(400).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(400).json(data);
     }
   }
 );

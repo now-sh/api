@@ -3,12 +3,13 @@ const { param, body, validationResult } = require('express-validator');
 const cors = require('cors');
 const loremController = require('../controllers/lorem');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const loremRoute = express.Router();
 
 loremRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'Lorem Ipsum Generator',
     message: 'Generate placeholder text',
     endpoints: {
@@ -22,7 +23,9 @@ loremRoute.get(['/', '/help'], cors(), (req, res) => {
       paragraphs: `GET ${host}/api/v1/lorem/paragraphs/3/5`,
       paragraphs_json: `GET ${host}/api/v1/lorem/paragraphs/3/5/json`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 loremRoute.get('/sentences/:number', 
@@ -31,19 +34,23 @@ loremRoute.get('/sentences/:number',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     const numberOfSentences = parseInt(req.params.number);
     const result = loremController.generateSentences(numberOfSentences);
     
-    res.json({
+    const data = {
       ...result,
       format: 'plain'
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 );
 
@@ -53,19 +60,23 @@ loremRoute.get('/sentences/:number/json',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     const numberOfSentences = parseInt(req.params.number);
     const result = loremController.generateSentences(numberOfSentences);
     
-    res.json({
+    const data = {
       ...result,
       format: 'json'
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 );
 
@@ -76,20 +87,24 @@ loremRoute.get('/paragraphs/:paragraphs/:sentences',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     const numberOfParagraphs = parseInt(req.params.paragraphs);
     const sentencesPerParagraph = parseInt(req.params.sentences);
     const result = loremController.generateParagraphs(numberOfParagraphs, sentencesPerParagraph);
     
-    res.json({
+    const data = {
       ...result,
       format: 'plain'
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 );
 
@@ -100,20 +115,24 @@ loremRoute.get('/paragraphs/:paragraphs/:sentences/json',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     const numberOfParagraphs = parseInt(req.params.paragraphs);
     const sentencesPerParagraph = parseInt(req.params.sentences);
     const result = loremController.generateParagraphs(numberOfParagraphs, sentencesPerParagraph);
     
-    res.json({
+    const data = {
       ...result,
       format: 'json'
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 );
 
@@ -125,39 +144,49 @@ loremRoute.post('/generate',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     const { sentences, paragraphs, sentencesPerParagraph = 5 } = req.body;
     
     if (!sentences && !paragraphs) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         error: 'Specify either sentences or paragraphs' 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
     
     if (sentences && paragraphs) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         error: 'Specify only one of sentences or paragraphs' 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
     
     try {
       const result = loremController.generateCustom({ sentences, paragraphs, sentencesPerParagraph });
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(400).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(400).json(data);
     }
   }
 );

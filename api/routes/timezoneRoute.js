@@ -3,6 +3,7 @@ const express = require('express');
 const tzRoute = express.Router();
 const cors = require('cors');
 const { getJson } = require('../utils/httpClient');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 // GitHub URLs for data
 const TIMEZONE_URL = process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/refs/heads/main/timezones.json';
@@ -38,33 +39,36 @@ async function fetchWithCache(url, cacheKey) {
 
 
 tzRoute.get('/', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const timezoneData = await fetchWithCache(TIMEZONE_URL, 'timezones');
+    setStandardHeaders(res, timezoneData);
     res.json(timezoneData);
   } catch (error) {
-    res.status(503).json({ 
+    const data = { 
       error: 'Timezone data service unavailable',
       message: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(503).json(data);
   }
 });
 
 tzRoute.get('/countries', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const countryData = await fetchWithCache(COUNTRIES_URL, 'countries');
+    setStandardHeaders(res, countryData);
     res.json(countryData);
   } catch (error) {
-    res.status(503).json({ 
+    const data = { 
       error: 'Country data service unavailable',
       message: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(503).json(data);
   }
 });
 
 tzRoute.get('/search/:query', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const query = req.params.query.toLowerCase();
     const timezoneData = await fetchWithCache(TIMEZONE_URL, 'timezones');
@@ -76,17 +80,19 @@ tzRoute.get('/search/:query', cors(), async (req, res) => {
       (tz.utc && tz.utc.some(u => u.toLowerCase().includes(query)))
     );
     
+    setStandardHeaders(res, results);
     res.json(results);
   } catch (error) {
-    res.status(503).json({ 
+    const data = { 
       error: 'Timezone search service unavailable',
       message: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(503).json(data);
   }
 });
 
 tzRoute.get('/country/:code', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const code = req.params.code.toUpperCase();
     const countryData = await fetchWithCache(COUNTRIES_URL, 'countries');
@@ -94,26 +100,30 @@ tzRoute.get('/country/:code', cors(), async (req, res) => {
     const country = countryData.find(c => c.country_code === code);
     
     if (!country) {
-      return res.status(404).json({ 
+      const data = { 
         error: 'Country not found',
         code: code 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(404).json(data);
     }
     
+    setStandardHeaders(res, country);
     res.json(country);
   } catch (error) {
-    res.status(503).json({ 
+    const data = { 
       error: 'Country lookup service unavailable',
       message: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(503).json(data);
   }
 });
 
 tzRoute.get('/help', cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'Timezone API Help',
       endpoints: {
         timezones: `${host}/api/v1/timezones`,
@@ -141,9 +151,13 @@ tzRoute.get('/help', cors(), async (req, res) => {
         timezones: TIMEZONE_URL,
         countries: COUNTRIES_URL
       }
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 

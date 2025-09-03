@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const commitRoute = express.Router();
 const cors = require('cors');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const { getJson } = require('../utils/httpClient');
 
 // GitHub URL for commit messages
@@ -38,30 +39,32 @@ async function fetchMessages() {
 
 
 commitRoute.get('/', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const messages = await fetchMessages();
     const index = Math.floor(Math.random() * messages.length);
     const commitMessage = messages[index];
     
-    res.json({
+    const data = {
       message: commitMessage
-    });
+    };
+    setStandardHeaders(res, data, { noCache: true });
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 commitRoute.get('/json', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const messages = await fetchMessages();
     const index = Math.floor(Math.random() * messages.length);
     const commitMessage = messages[index];
     
-    res.json({
+    const data = {
       message: commitMessage
-    });
+    };
+    setStandardHeaders(res, data, { noCache: true });
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -81,14 +84,15 @@ commitRoute.get('/txt', cors(), async (req, res) => {
 });
 
 commitRoute.get('/all', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
     const messages = await fetchMessages();
     
-    res.json({
+    const data = {
       messages: messages,
       count: messages.length
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -96,9 +100,8 @@ commitRoute.get('/all', cors(), async (req, res) => {
 
 commitRoute.get('/help', cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'Git Commit Message Generator',
       description: 'Generate random commit messages for your git commits',
       url: COMMIT_MESSAGES_URL,
@@ -114,9 +117,11 @@ commitRoute.get('/help', cors(), async (req, res) => {
         git_alias: `git config --global alias.random-commit '!f() { git commit -m "$(curl -s ${host}/api/v1/commit/txt)"; }; f'`,
         bash_function: `commit_random() { git commit -m "$(curl -s ${host}/api/v1/commit/txt)" "$@"; }`
       }
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

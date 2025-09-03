@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(pkill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(true)",
+      "Bash(npm restart)",
+      "Bash(npm start)",
+      "Bash(for i in 1 2 3)",
+      "Bash(do node:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

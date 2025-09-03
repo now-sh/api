@@ -25,7 +25,9 @@ function parseQuoteResponse(data, apiUrl) {
   if (apiUrl.includes('katanime.vercel.app')) {
     // Katanime returns an object with result array
     if (data.sukses && data.result && data.result.length > 0) {
-      const quote = data.result[0];
+      // Pick a random quote from the result array
+      const randomIndex = Math.floor(Math.random() * data.result.length);
+      const quote = data.result[randomIndex];
       return {
         quote: quote.english || quote.indo,
         character: quote.character,

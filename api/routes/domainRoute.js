@@ -3,6 +3,7 @@ const express = require('express');
 const domainRoute = express.Router();
 const cors = require('cors');
 const { getJson } = require('../utils/httpClient');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const domain_json = 'https://raw.githubusercontent.com/casjay/casjay/main/domains.json';
 const domain_file = process.env.DOMAIN_LIST || domain_json;
@@ -21,7 +22,9 @@ domainRoute.get('/', cors(), async (req, res) => {
   
   // Return cached data if still valid
   if (domainCache.data && (now - domainCache.timestamp) < CACHE_TTL) {
-    return res.json(domainCache.data);
+    const data = domainCache.data;
+    setStandardHeaders(res, data);
+    return res.json(data);
   }
   
   try {
@@ -33,30 +36,35 @@ domainRoute.get('/', cors(), async (req, res) => {
       timestamp: now
     };
     
-    res.setHeader('Content-Type', 'application/json');
+    setStandardHeaders(res, data);
     res.json(data);
   } catch (error) {
-    res.status(503).json({ 
+    const data = { 
       error: 'Domain data service unavailable',
       message: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(503).json(data);
   }
 });
 
 domainRoute.get('/help', cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'Domain List API',
       endpoint: `${host}/api/v1/domains`,
       description: 'Get list of CasJay\'s domains',
       data_source: domain_file,
       cli_example: `curl ${host}/api/v1/domains`,
       search_function: `domain_search() { curl -s "${host}/api/v1/domains" | jq -r '.[] | select(. | test($1; "i"))' --arg 1 "$1"; }`
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 

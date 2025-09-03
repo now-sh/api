@@ -1,23 +1,30 @@
 const express = require('express');
 const cors = require('cors');
 const os = require('os');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const healthRoute = express.Router();
 
 healthRoute.get('/', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.status(200).send(JSON.stringify({ Status: 'Ok' }));
+    const data = { Status: 'Ok' };
+    setStandardHeaders(res, data);
+    res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
 healthRoute.get('/json', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.status(200).send(JSON.stringify({ Status: 'Ok' }));
+    const data = { Status: 'Ok' };
+    setStandardHeaders(res, data);
+    res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -112,6 +119,7 @@ healthRoute.get('/healthz', cors(), async (req, res) => {
   // Set appropriate status code
   const statusCode = allDbsHealthy ? 200 : 503;
   
+  setStandardHeaders(res, healthStatus);
   res.status(statusCode).json(healthStatus);
 });
 

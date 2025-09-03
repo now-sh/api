@@ -6,15 +6,15 @@ const trafficRoute = express.Router();
 const cors = require('cors');
 
 const nysTraffic = require('../controllers/traffic');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 trafficRoute.get(['/', '/help'], cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   
   // Check if this is a help request
   if (req.path.endsWith('/help')) {
     try {
-      res.json({
+      const data = {
         title: 'New York State Traffic Data API',
         endpoint: `${host}/api/v1/traffic`,
         description: 'Get current traffic incidents and alerts for New York State from 511ny.org',
@@ -25,36 +25,43 @@ trafficRoute.get(['/', '/help'], cors(), async (req, res) => {
         },
         cli_example: `curl ${host}/api/v1/traffic/nys`,
         bash_function: `nys_traffic() { curl -s "${host}/api/v1/traffic/nys" | jq -r '.traffic | length as $count | "NYS Traffic Events: \\($count) incidents"'; }`
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.json({ error: error.message });
+      const data = { error: error.message };
+      setStandardHeaders(res, data);
+      res.json(data);
     }
     return;
   }
 
   // Regular endpoint listing
   try {
-    res.send(
-      JSON.stringify({
-        NYS: `${req.protocol}://${req.headers.host}/api/v1/traffic/nys`,
-      })
-    );
+    const data = {
+      NYS: `${req.protocol}://${req.headers.host}/api/v1/traffic/nys`,
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (err) {
-    res.json({ error: err.message });
+    const data = { error: err.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
 trafficRoute.get('/nys', cors(), async (req, res) => {
   const trafficAlert = await nysTraffic();
   try {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(
-      JSON.stringify({
-        traffic: trafficAlert,
-      })
-    );
+    const data = {
+      traffic: trafficAlert,
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (err) {
-    res.json({ error: err.message });
+    const data = { error: err.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 

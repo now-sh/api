@@ -5,6 +5,7 @@ const express = require('express');
 const diseaseRoute = express.Router();
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 diseaseRoute.use(
   '/',
@@ -18,10 +19,14 @@ diseaseRoute.use(
     // subscribe to http-proxy's proxyRes event
     onProxyRes: function (proxyRes, req, res) {
       if (proxyRes.statusCode === 404) {
-        return res.json({ Error: 'Page not found.' });
+        const data = { Error: 'Page not found.' };
+        setStandardHeaders(res, data);
+        return res.status(404).json(data);
       }
       if (proxyRes.statusCode === 500) {
-        return res.json({ Error: 'Something went horribly wrong.' });
+        const data = { Error: 'Something went horribly wrong.' };
+        setStandardHeaders(res, data);
+        return res.status(500).json(data);
       }
     },
     // subscribe to http-proxy's proxyReq event

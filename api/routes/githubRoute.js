@@ -6,6 +6,7 @@ const { getHeaders } = require('../middleware/headers');
 const { getJson } = require('../utils/httpClient');
 const httpClient = require('../utils/httpClient');
 const { fetchAllGitHubPages } = require('../utils/pagination');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const githubToken = process.env.GITHUB_API_KEY;
 
 // Cache for API responses by endpoint
@@ -35,35 +36,33 @@ const buildGitHubHeaders = () => {
 };
 
 githubRoute.get('', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        jason: `My github repo:                    ${req.protocol}://${req.headers.host}/api/v1/git/jason`,
-        org: `Get repos from a github org:       ${req.protocol}://${req.headers.host}/api/v1/git/org/:id`,
-        orgs: `Get orgs owned by a github user:   ${req.protocol}://${req.headers.host}/api/v1/git/orgs/:id`,
-        users: `Get user info from github:         ${req.protocol}://${req.headers.host}/api/v1/git/user/:id`,
-        repo: `List repos owned by a github user: ${req.protocol}://${req.headers.host}/api/v1/git/repos/:id`,
-      })
-    );
+    const helpData = {
+      jason: `My github repo:                    ${req.protocol}://${req.headers.host}/api/v1/git/jason`,
+      org: `Get repos from a github org:       ${req.protocol}://${req.headers.host}/api/v1/git/org/:id`,
+      orgs: `Get orgs owned by a github user:   ${req.protocol}://${req.headers.host}/api/v1/git/orgs/:id`,
+      users: `Get user info from github:         ${req.protocol}://${req.headers.host}/api/v1/git/user/:id`,
+      repo: `List repos owned by a github user: ${req.protocol}://${req.headers.host}/api/v1/git/repos/:id`,
+    };
+    setStandardHeaders(res, helpData);
+    res.send(helpData);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 githubRoute.get('/help', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        jason: `My github repo:                    ${req.protocol}://${req.headers.host}/api/v1/git/jason`,
-        org: `Get repos from a github org:       ${req.protocol}://${req.headers.host}/api/v1/git/org/:id`,
-        orgs: `Get orgs owned by a github user:   ${req.protocol}://${req.headers.host}/api/v1/git/orgs/:id`,
-        users: `Get user info from github:         ${req.protocol}://${req.headers.host}/api/v1/git/user/:id`,
-        repo: `List repos owned by a github user: ${req.protocol}://${req.headers.host}/api/v1/git/repos/:id`,
-      })
-    );
+    const helpData = {
+      jason: `My github repo:                    ${req.protocol}://${req.headers.host}/api/v1/git/jason`,
+      org: `Get repos from a github org:       ${req.protocol}://${req.headers.host}/api/v1/git/org/:id`,
+      orgs: `Get orgs owned by a github user:   ${req.protocol}://${req.headers.host}/api/v1/git/orgs/:id`,
+      users: `Get user info from github:         ${req.protocol}://${req.headers.host}/api/v1/git/user/:id`,
+      repo: `List repos owned by a github user: ${req.protocol}://${req.headers.host}/api/v1/git/repos/:id`,
+    };
+    setStandardHeaders(res, helpData);
+    res.send(helpData);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -98,19 +97,11 @@ async function fetchWithCache(url, cacheKey) {
   return result.data;
 }
 
+
 githubRoute.get('/jason', cors(), async (req, res) => {
   try {
     const result = await fetchWithCacheAndHeaders('https://api.github.com/users/casjay', 'user:casjay');
-    
-    // Add GitHub rate limit headers if available
-    if (result.headers['x-ratelimit-remaining']) {
-      res.setHeader('X-RateLimit-Remaining', result.headers['x-ratelimit-remaining']);
-    }
-    if (result.headers['x-ratelimit-limit']) {
-      res.setHeader('X-RateLimit-Limit', result.headers['x-ratelimit-limit']);
-    }
-    
-    res.setHeader('Content-Type', 'application/json');
+    setStandardHeaders(res, result.data, { headers: result.headers });
     res.send(result.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -120,16 +111,7 @@ githubRoute.get('/jason', cors(), async (req, res) => {
 githubRoute.get('/user/:id', cors(), async (req, res) => {
   try {
     const result = await fetchWithCacheAndHeaders(`https://api.github.com/users/${req.params.id}`, `user:${req.params.id}`);
-    
-    // Add GitHub rate limit headers if available
-    if (result.headers['x-ratelimit-remaining']) {
-      res.setHeader('X-RateLimit-Remaining', result.headers['x-ratelimit-remaining']);
-    }
-    if (result.headers['x-ratelimit-limit']) {
-      res.setHeader('X-RateLimit-Limit', result.headers['x-ratelimit-limit']);
-    }
-    
-    res.setHeader('Content-Type', 'application/json');
+    setStandardHeaders(res, result.data, { headers: result.headers });
     res.send(result.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -165,20 +147,37 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
     // Sort by name to ensure consistent ordering across pages
     allRepos.sort((a, b) => a.name.localeCompare(b.name));
     
-    // Add GitHub rate limit headers if available
-    if (lastHeaders['x-ratelimit-remaining']) {
-      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
+    // If no repos, return link to GitHub profile
+    if (allRepos.length === 0) {
+      const profileLink = {
+        message: 'No repositories found',
+        github_profile: `<a href="https://github.com/${req.params.id}" target="_blank" rel="noopener noreferrer">View ${req.params.id} on GitHub</a>`
+      };
+      setStandardHeaders(res, profileLink, {
+        headers: lastHeaders,
+        emptyMessage: 'No repositories found for this user'
+      });
+      res.send(profileLink);
+    } else {
+      setStandardHeaders(res, allRepos, {
+        headers: lastHeaders
+      });
+      res.send(allRepos);
     }
-    if (lastHeaders['x-ratelimit-limit']) {
-      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
-    }
-    
-    // Add total count header
-    res.setHeader('X-Total-Count', allRepos.length);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(allRepos);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // If user doesn't exist, return link to GitHub profile
+    if (error.response && error.response.status === 404) {
+      const profileLink = {
+        message: 'User not found',
+        github_profile: `<a href="https://github.com/${req.params.id}" target="_blank" rel="noopener noreferrer">View ${req.params.id} on GitHub</a>`
+      };
+      setStandardHeaders(res, profileLink, {
+        emptyMessage: 'User not found'
+      });
+      res.send(profileLink);
+    } else {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -211,17 +210,10 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
     // Sort by login name to ensure consistent ordering across pages
     allOrgs.sort((a, b) => a.login.localeCompare(b.login));
     
-    // Add GitHub rate limit headers if available
-    if (lastHeaders['x-ratelimit-remaining']) {
-      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
-    }
-    if (lastHeaders['x-ratelimit-limit']) {
-      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
-    }
-    
-    // Add total count header
-    res.setHeader('X-Total-Count', allOrgs.length);
-    res.setHeader('Content-Type', 'application/json');
+    setStandardHeaders(res, allOrgs, {
+      headers: lastHeaders,
+      emptyMessage: 'No organizations found for this user'
+    });
     res.send(allOrgs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -257,20 +249,37 @@ githubRoute.get('/org/:id', cors(), async (req, res) => {
     // Sort by name to ensure consistent ordering across pages
     allRepos.sort((a, b) => a.name.localeCompare(b.name));
     
-    // Add GitHub rate limit headers if available
-    if (lastHeaders['x-ratelimit-remaining']) {
-      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
+    // If no repos, return link to GitHub organization
+    if (allRepos.length === 0) {
+      const profileLink = {
+        message: 'No repositories found',
+        github_profile: `<a href="https://github.com/${req.params.id}" target="_blank" rel="noopener noreferrer">View ${req.params.id} on GitHub</a>`
+      };
+      setStandardHeaders(res, profileLink, {
+        headers: lastHeaders,
+        emptyMessage: 'No repositories found for this organization'
+      });
+      res.send(profileLink);
+    } else {
+      setStandardHeaders(res, allRepos, {
+        headers: lastHeaders
+      });
+      res.send(allRepos);
     }
-    if (lastHeaders['x-ratelimit-limit']) {
-      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
-    }
-    
-    // Add total count header
-    res.setHeader('X-Total-Count', allRepos.length);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(allRepos);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // If organization doesn't exist, return link to GitHub profile
+    if (error.response && error.response.status === 404) {
+      const profileLink = {
+        message: 'Organization not found',
+        github_profile: `<a href="https://github.com/${req.params.id}" target="_blank" rel="noopener noreferrer">View ${req.params.id} on GitHub</a>`
+      };
+      setStandardHeaders(res, profileLink, {
+        emptyMessage: 'Organization not found'
+      });
+      res.send(profileLink);
+    } else {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 

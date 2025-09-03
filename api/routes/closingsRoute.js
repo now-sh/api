@@ -1,5 +1,6 @@
 const express = require('express'); const { Request, Response } = require('express');
 const cors = require('cors');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const closingsRoute = express.Router();
 const closings = require('../controllers/closings');
@@ -7,7 +8,7 @@ const closings = require('../controllers/closings');
 closingsRoute.get('/', cors(), async (req, res) => {
   try {
     const closingsData = await closings();
-    res.setHeader('Content-Type', 'application/json');
+    setStandardHeaders(res, closingsData);
     res.json(closingsData);
   } catch (error) {
     res.status(500).json({ 
@@ -20,8 +21,9 @@ closingsRoute.get('/', cors(), async (req, res) => {
 closingsRoute.get('/albany', cors(), async (req, res) => {
   try {
     const closingsData = await closings();
-    res.setHeader('Content-Type', 'application/json');
-    res.json(closingsData.regions.albany);
+    const data = closingsData.regions.albany;
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to fetch Albany closings',
@@ -33,8 +35,9 @@ closingsRoute.get('/albany', cors(), async (req, res) => {
 closingsRoute.get('/utica', cors(), async (req, res) => {
   try {
     const closingsData = await closings();
-    res.setHeader('Content-Type', 'application/json');
-    res.json(closingsData.regions.utica);
+    const data = closingsData.regions.utica;
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to fetch Utica closings',

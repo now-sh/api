@@ -6,6 +6,7 @@ const defaultRoute = express.Router();
 const datetime = require('node-datetime');
 const cors = require('cors');
 const utilitiesController = require('../controllers/utilities');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 defaultRoute.get('/', cors(), (req, res) => {
   try {
@@ -15,7 +16,9 @@ defaultRoute.get('/', cors(), (req, res) => {
       activePage: 'home'
     });
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
@@ -82,7 +85,9 @@ defaultRoute.get('/health/:service', cors(), (req, res) => {
       res.send(generateCategorizedEndpointPage('health', req.params.service));
     }
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
@@ -131,7 +136,9 @@ defaultRoute.get('/auth', cors(), (req, res) => {
       activePage: 'auth'
     });
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
@@ -156,7 +163,9 @@ defaultRoute.get('/:endpoint', cors(), (req, res) => {
       res.send(generateGenericEndpointPage(req.params.endpoint));
     }
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 

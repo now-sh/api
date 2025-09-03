@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const base64Controller = require('../controllers/base64');
 const { formatValidationErrors } = require('../utils/validationHelper');
 
@@ -8,7 +9,7 @@ const base64Route = express.Router();
 
 base64Route.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const helpData = {
     title: 'Base64 Encode/Decode Utility',
     endpoints: {
       encode: `${host}/api/v1/base64/encode`,
@@ -20,7 +21,9 @@ base64Route.get(['/', '/help'], cors(), (req, res) => {
       encode_file: `curl -X POST ${host}/api/v1/base64/encode -d "text=$(cat file.txt)"`,
       pipe: `echo "Hello" | curl -X POST ${host}/api/v1/base64/encode -d @-`
     }
-  });
+  };
+  setStandardHeaders(res, helpData);
+  res.json(helpData);
 });
 
 base64Route.post('/encode',
@@ -37,10 +40,12 @@ base64Route.post('/encode',
 
     try {
       const result = base64Controller.encode(req.body.text);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
       res.status(500).json({ 
         success: false,
@@ -64,10 +69,12 @@ base64Route.post('/decode',
 
     try {
       const result = base64Controller.decode(req.body.text);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
       res.status(400).json({ 
         success: false,
@@ -82,10 +89,12 @@ base64Route.get('/encode/:text', cors(), (req, res) => {
   try {
     const text = decodeURIComponent(req.params.text);
     const result = base64Controller.encode(text);
-    res.json({ 
+    const data = { 
       success: true,
       data: result 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     res.status(400).json({ 
       success: false,
@@ -97,10 +106,12 @@ base64Route.get('/encode/:text', cors(), (req, res) => {
 base64Route.get('/decode/:text', cors(), (req, res) => {
   try {
     const result = base64Controller.decode(req.params.text);
-    res.json({ 
+    const data = { 
       success: true,
       data: result 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     res.status(400).json({ 
       success: false,

@@ -3,12 +3,13 @@ const { body, param, validationResult } = require('express-validator');
 const cors = require('cors');
 const passwordController = require('../controllers/password');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const genpasswdRoute = express.Router();
 
 genpasswdRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'Password Generator',
     message: 'Generate secure passwords with customizable options',
     endpoints: {
@@ -28,7 +29,9 @@ genpasswdRoute.get(['/', '/help'], cors(), (req, res) => {
       simple: `GET ${host}/api/v1/passwd/20`,
       custom: `POST ${host}/api/v1/passwd/generate with options`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 genpasswdRoute.get('/:length',
@@ -37,25 +40,31 @@ genpasswdRoute.get('/:length',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const result = passwordController.generatePassword({
         length: parseInt(req.params.length)
       });
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -72,23 +81,29 @@ genpasswdRoute.post('/generate',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const result = passwordController.generatePassword(req.body);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -100,26 +115,32 @@ genpasswdRoute.post('/',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const length = parseInt(req.body.length) || 16;
       const result = passwordController.generatePassword({ length });
-      res.json({
+      const data = {
         title: 'Generate Passwords',
         password: result.password,
         passwordLength: length,
         ...result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );

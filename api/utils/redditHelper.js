@@ -1,52 +1,65 @@
-const { getJson } = require('./httpClient');
-const { getHeaders } = require('../middleware/headers');
+const axios = require('axios');
 
 // Try multiple methods to fetch Reddit data
 async function fetchRedditData(username, subreddit = null, limit = 100) {
   const methods = [
-    // Method 1: Direct JSON with better headers
+    // Method 1: Use proper Reddit API headers
     async () => {
       const url = subreddit 
-        ? `https://www.reddit.com/r/${subreddit}.json?limit=${limit}`
-        : `https://www.reddit.com/user/${username}.json?limit=${limit}`;
+        ? `https://www.reddit.com/r/${subreddit}.json?limit=${limit}&raw_json=1`
+        : `https://www.reddit.com/user/${username}/about.json`;
       
-      return await getJson(url, {
-        headers: getHeaders({
-          'Accept': 'application/json, text/plain, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Referer': 'https://www.reddit.com/'
-        })
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1',
+          'Cache-Control': 'max-age=0'
+        },
+        timeout: 10000
       });
+      
+      return response.data;
     },
     
-    // Method 2: Use old.reddit.com
+    // Method 2: Use old.reddit.com with browser headers
     async () => {
       const url = subreddit 
-        ? `https://old.reddit.com/r/${subreddit}.json?limit=${limit}`
+        ? `https://old.reddit.com/r/${subreddit}.json?limit=${limit}&raw_json=1`
         : `https://old.reddit.com/user/${username}.json?limit=${limit}`;
       
-      return await getJson(url, {
-        headers: getHeaders({
-          'Accept': '*/*'
-        })
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+          'Accept-Language': 'en-US,en;q=0.9'
+        },
+        timeout: 10000
       });
+      
+      return response.data;
     },
     
-    // Method 3: Use a public Reddit JSON proxy
+    // Method 3: Try Reddit RSS feed converted to JSON
     async () => {
-      // Using a public Reddit viewer API
-      const baseUrl = subreddit 
-        ? `https://www.reddit.com/r/${subreddit}.json`
-        : `https://www.reddit.com/user/${username}.json`;
-      
-      // Try through a CORS proxy
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(baseUrl + `?limit=${limit}`)}`;
-      
-      return await getJson(proxyUrl, {
-        headers: getHeaders()
-      });
+      try {
+        const url = subreddit 
+          ? `https://www.reddit.com/r/${subreddit}.rss`
+          : `https://www.reddit.com/user/${username}.rss`;
+        
+        // Note: This would need an RSS to JSON converter
+        // For now, fallback to returning empty data
+        throw new Error('RSS method not implemented');
+      } catch (error) {
+        throw error;
+      }
     }
   ];
   

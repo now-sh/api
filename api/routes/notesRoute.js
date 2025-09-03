@@ -10,15 +10,15 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 // Controller
 const notesController = require('../controllers/notes');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const notesRoute = express.Router();
 
 
 notesRoute.get(['/', '/help'], cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'Notes API',
       message: `The current api endpoint is ${host}/api/v1/notes`,
       endpoints: {
@@ -46,9 +46,13 @@ notesRoute.get(['/', '/help'], cors(), async (req, res) => {
         search: 'Full text search across notes',
         visibility: 'Public/private notes and gists'
       }
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const data = { error: err.message };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -65,26 +69,32 @@ notesRoute.get('/list', cors(), optionalAuth, async (req, res) => {
     
     const notes = await notesController.getNotes(req.user, options);
     
-    res.json({
+    const data = {
       success: true,
       data: notes,
       authenticated: req.isAuthenticated
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
 notesRoute.get('/search', cors(), optionalAuth, async (req, res) => {
   try {
     if (!req.query.q) {
-      return res.status(400).json({
+      const data = {
         success: false,
         error: 'Search query (q) is required'
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
     
     const options = {
@@ -94,16 +104,20 @@ notesRoute.get('/search', cors(), optionalAuth, async (req, res) => {
     
     const notes = await notesController.getNotes(req.user, options);
     
-    res.json({
+    const data = {
       success: true,
       data: notes,
       query: req.query.q
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -118,15 +132,19 @@ notesRoute.get('/gists', cors(), async (req, res) => {
     // Force unauthenticated query for public gists only
     const notes = await notesController.getNotes(null, options);
     
-    res.json({
+    const data = {
       success: true,
       data: notes
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -139,15 +157,19 @@ notesRoute.get('/popular', cors(), async (req, res) => {
     
     const notes = await notesController.getPopularNotes(options);
     
-    res.json({
+    const data = {
       success: true,
       data: notes
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -155,15 +177,19 @@ notesRoute.get('/stats', cors(), checkAuth, async (req, res) => {
   try {
     const stats = await notesController.getNoteStats(req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: stats
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ 
+    const data = { 
       success: false,
       error: error.message 
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
   }
 });
 
@@ -189,24 +215,30 @@ notesRoute.post(
         msg: error.msg,
         field: error.param
       }));
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const note = await notesController.createNote(req.user, req.body);
       
-      res.status(201).json({
+      const data = {
         success: true,
         data: note
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(201).json(data);
     } catch (error) {
-      res.status(500).json({
+      const data = {
         success: false,
         error: error.message
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -215,18 +247,22 @@ notesRoute.get('/:id', cors(), optionalAuth, async (req, res) => {
   try {
     const note = await notesController.getNoteById(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: note
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 
@@ -251,10 +287,12 @@ notesRoute.put(
         msg: error.msg,
         field: error.param
       }));
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
@@ -280,18 +318,22 @@ notesRoute.patch('/:id/pin', cors(), checkAuth, async (req, res) => {
   try {
     const result = await notesController.toggleNotePinned(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: result
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 
@@ -309,10 +351,12 @@ notesRoute.post(
         msg: error.msg,
         field: error.param
       }));
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors 
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
@@ -347,18 +391,22 @@ notesRoute.delete('/:id/collaborators/:email', cors(), checkAuth, async (req, re
       req.params.email
     );
     
-    res.json({
+    const data = {
       success: true,
       data: note
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 
@@ -366,18 +414,22 @@ notesRoute.delete('/:id', cors(), checkAuth, async (req, res) => {
   try {
     const result = await notesController.deleteNote(req.params.id, req.user);
     
-    res.json({
+    const data = {
       success: true,
       data: result
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
     const statusCode = error.message.includes('not found') ? 404 :
                       error.message.includes('permission') ? 403 : 500;
     
-    res.status(statusCode).json({
+    const data = {
       success: false,
       error: error.message
-    });
+    };
+    setStandardHeaders(res, data);
+    res.status(statusCode).json(data);
   }
 });
 

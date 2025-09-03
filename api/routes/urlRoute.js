@@ -7,12 +7,13 @@ const optionalAuth = require('../middleware/optionalAuth');
 const checkAuth = require('../middleware/checkAuth');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const urlRoute = express.Router();
 
 urlRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'URL Shortener',
     message: 'Create and manage short URLs',
     endpoints: {
@@ -33,7 +34,9 @@ urlRoute.get(['/', '/help'], cors(), (req, res) => {
       custom: `POST ${host}/api/v1/url/shorten with {"url": "https://example.com", "customAlias": "mylink"}`,
       expiring: `POST ${host}/api/v1/url/shorten with {"url": "https://example.com", "expiresIn": 86400000}`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 urlRoute.post('/shorten',
@@ -48,10 +51,12 @@ urlRoute.post('/shorten',
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
@@ -68,17 +73,21 @@ urlRoute.post('/shorten',
       
       const result = await urlController.createShortUrl(req.body.url, options);
       
-      res.status(201).json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(201).json(data);
     } catch (error) {
       const statusCode = error instanceof Error && error.message.includes('already taken') ? 409 : 
                         error instanceof Error && error.message.includes('Invalid') ? 400 : 500;
-      res.status(statusCode).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(statusCode).json(data);
     }
   }
 );
@@ -90,10 +99,12 @@ urlRoute.get('/stats/:code',
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
@@ -102,17 +113,21 @@ urlRoute.get('/stats/:code',
       
       const stats = await urlController.getUrlStats(req.params.code, userId);
       
-      res.json({
+      const data = {
         success: true,
         data: stats
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
       const statusCode = error instanceof Error && error.message.includes('not found') ? 404 :
                         error instanceof Error && error.message.includes('access') ? 403 : 500;
-      res.status(statusCode).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(statusCode).json(data);
     }
   }
 );
@@ -125,15 +140,19 @@ urlRoute.get('/list',
       const userId = await authController.getUserId(req.user);
       const urls = await urlController.getUserUrls(userId);
       
-      res.json({
+      const data = {
         success: true,
         data: urls
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -145,30 +164,36 @@ urlRoute.get('/redirect/:code',
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const url = await urlController.getUrlByCode(req.params.code);
       
       // For API endpoint, return the URL instead of redirecting
-      res.json({
+      const data = {
         success: true,
         data: {
           originalUrl: url.originalUrl,
           clicks: url.clicks
         }
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
       const statusCode = error instanceof Error && error.message.includes('not found') ? 404 :
                         error instanceof Error && error.message.includes('expired') ? 410 : 500;
-      res.status(statusCode).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(statusCode).json(data);
     }
   }
 );

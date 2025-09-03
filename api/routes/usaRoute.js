@@ -5,6 +5,7 @@ const cors = require('cors');
 const usa = require('../controllers/usa');
 const { getHeaders } = require('../middleware/headers');
 const { getJson } = require('../utils/httpClient');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const default_route = ['/', '/help'];
 const states = [
   'Alabama',
@@ -62,9 +63,8 @@ const states = [
 
 usaRoute.get(default_route, cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const data = {
       title: 'USA COVID-19 Data API by State',
       endpoint: `${host}/api/v1/usa`,
       description: 'Get COVID-19 statistics by US state from disease.sh API',
@@ -78,9 +78,13 @@ usaRoute.get(default_route, cors(), async (req, res) => {
       cli_example: `curl ${host}/api/v1/usa/California`,
       bash_function: `usa_covid() { state="\${1:-California}"; curl -s "${host}/api/v1/usa/\$state" | jq -r '\"\\(.state): Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)\"'; }`,
       available_states: states
-    });
+    };
+    setStandardHeaders(res, data);
+    res.json(data);
   } catch (error) {
-    res.json({ error: 'An error has occurred' });
+    const data = { error: 'An error has occurred' };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
@@ -91,10 +95,12 @@ usaRoute.get('/nys', cors(), async (req, res) => {
     const json = await getJson(proto + hostname + '/api/v1/nys', {
       headers: getHeaders(),
     });
-    res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    setStandardHeaders(res, json);
+    res.json(json);
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 
@@ -103,10 +109,12 @@ usaRoute.get('/:id', cors(), async (req, res) => {
     const json = await getJson(`https://disease.sh/v3/covid-19/states/${req.params.id}`, {
       headers: getHeaders(),
     });
-    res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    setStandardHeaders(res, json);
+    res.json(json);
   } catch (error) {
-    res.json({ error: error.message });
+    const data = { error: error.message };
+    setStandardHeaders(res, data);
+    res.json(data);
   }
 });
 

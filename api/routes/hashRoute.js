@@ -3,12 +3,13 @@ const { body, param, validationResult } = require('express-validator');
 const cors = require('cors');
 const hashController = require('../controllers/hash');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const hashRoute = express.Router();
 
 hashRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'Hash Utility',
     message: 'Generate hashes using various algorithms',
     endpoints: {
@@ -19,7 +20,9 @@ hashRoute.get(['/', '/help'], cors(), (req, res) => {
       sha256: `POST ${host}/api/v1/hash/sha256 with {"text": "Hello World"}`,
       md5: `POST ${host}/api/v1/hash/md5 with {"text": "password123"}`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 hashRoute.post('/:algorithm',
@@ -29,23 +32,29 @@ hashRoute.post('/:algorithm',
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const result = hashController.hashText(req.body.text, req.params.algorithm);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );

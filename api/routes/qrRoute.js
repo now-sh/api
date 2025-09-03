@@ -3,12 +3,13 @@ const { body, param, validationResult } = require('express-validator');
 const cors = require('cors');
 const qrController = require('../controllers/qr');
 const { formatValidationErrors } = require('../utils/validationHelper');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const qrRoute = express.Router();
 
 qrRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const data = {
     title: 'QR Code Generator',
     message: 'Generate QR codes in various formats',
     endpoints: {
@@ -32,7 +33,9 @@ qrRoute.get(['/', '/help'], cors(), (req, res) => {
       simple: `GET ${host}/api/v1/qr/text/Hello%20World`,
       custom: `POST ${host}/api/v1/qr/generate with options`
     }
-  });
+  };
+  setStandardHeaders(res, data);
+  res.json(data);
 });
 
 qrRoute.get('/text/:text',
@@ -41,24 +44,30 @@ qrRoute.get('/text/:text',
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const text = decodeURIComponent(req.params.text);
       const result = await qrController.generateQRCode(text);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );
@@ -74,24 +83,30 @@ qrRoute.post('/generate',
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      const data = { 
         success: false,
         errors: formatValidationErrors(errors.array())
-      });
+      };
+      setStandardHeaders(res, data);
+      return res.status(400).json(data);
     }
 
     try {
       const { text, ...options } = req.body;
       const result = await qrController.generateQRCode(text, options);
-      res.json({
+      const data = {
         success: true,
         data: result
-      });
+      };
+      setStandardHeaders(res, data);
+      res.json(data);
     } catch (error) {
-      res.status(500).json({ 
+      const data = { 
         success: false,
         error: error instanceof Error ? error.message : 'An error occurred'
-      });
+      };
+      setStandardHeaders(res, data);
+      res.status(500).json(data);
     }
   }
 );

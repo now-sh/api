@@ -1,6 +1,7 @@
 const express = require('express'); const { Request, Response } = require('express');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 
 // Middleware
 const checkAuth = require('../middleware/checkAuth');
@@ -14,9 +15,8 @@ const authRoute = express.Router();
 
 authRoute.get(['/', '/help'], cors(), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.json({
+    const helpData = {
       title: 'Authentication API',
       message: `The current api endpoint is ${host}/api/v1/auth`,
       endpoints: {
@@ -46,7 +46,9 @@ authRoute.get(['/', '/help'], cors(), async (req, res) => {
         expiry: 'Never expires',
         format: 'JWT (JSON Web Token)'
       }
-    });
+    };
+    setStandardHeaders(res, helpData);
+    res.json(helpData);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'An error occurred' });
   }

@@ -5,6 +5,8 @@ const express = require('express');
 const datetime = require('node-datetime');
 const cors = require('cors');
 
+const { setStandardHeaders } = require('../utils/standardHeaders');
+
 const apiRoute = express.Router();
 const dttoday = datetime.create();
 const dtyester = datetime.create();
@@ -24,112 +26,107 @@ const isValidToken = githubToken &&
 const githubHeader = isValidToken ? 'Token is set' : 'Token is NOT set';
 
 apiRoute.get('', cors(), (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
-        Version: version,
-        TimeZone: timeZone,
-        Time: curtime,
-        Today: today,
-        Yesterday: yesterday,
-      })
-    );
+    const data = {
+      Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
+      Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
+      Version: version,
+      TimeZone: timeZone,
+      Time: curtime,
+      Today: today,
+      Yesterday: yesterday,
+    };
+    setStandardHeaders(res, data);
+    res.send(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 apiRoute.get('/v1', cors(), (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
-        Help: `${req.protocol}://${req.headers.host}/api/help`,
-        Version: version,
-        TimeZone: timeZone,
-        Time: curtime,
-        Today: today,
-        Yesterday: yesterday,
-      })
-    );
+    const data = {
+      Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
+      Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
+      Help: `${req.protocol}://${req.headers.host}/api/help`,
+      Version: version,
+      TimeZone: timeZone,
+      Time: curtime,
+      Today: today,
+      Yesterday: yesterday,
+    };
+    setStandardHeaders(res, data);
+    res.send(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 apiRoute.get('/help', cors(), async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        Version: `${req.protocol}://${req.headers.host}/api/v1/version`,
-        Domains: `${req.protocol}://${req.headers.host}/api/v1/domains`,
-        Commit: `${req.protocol}://${req.headers.host}/api/v1/commit`,
-        Covid: `${req.protocol}://${req.headers.host}/api/v1/disease`,
-        Arcgis: `${req.protocol}://${req.headers.host}/api/v1/arcgis`,
-        Global: `${req.protocol}://${req.headers.host}/api/v1/global`,
-        USA: `${req.protocol}://${req.headers.host}/api/v1/usa`,
-        NYS: `${req.protocol}://${req.headers.host}/api/v1/nys`,
-        Closings: `${req.protocol}://${req.headers.host}/api/v1/closings`,
-        Git: `${req.protocol}://${req.headers.host}/api/v1/git`,
-        Reddit: `${req.protocol}://${req.headers.host}/api/v1/reddit`,
-        Traffic: `${req.protocol}://${req.headers.host}/api/v1/traffic`,
-        Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
-        Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
-        TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/help`,
-        PassGen: `${req.protocol}://${req.headers.host}/api/v1/passwd`,
-        Documentation: `${req.protocol}://${req.headers.host}/api/docs`,
-      })
-    );
+    const data = {
+      Version: `${req.protocol}://${req.headers.host}/api/v1/version`,
+      Domains: `${req.protocol}://${req.headers.host}/api/v1/domains`,
+      Commit: `${req.protocol}://${req.headers.host}/api/v1/commit`,
+      Covid: `${req.protocol}://${req.headers.host}/api/v1/disease`,
+      Arcgis: `${req.protocol}://${req.headers.host}/api/v1/arcgis`,
+      Global: `${req.protocol}://${req.headers.host}/api/v1/global`,
+      USA: `${req.protocol}://${req.headers.host}/api/v1/usa`,
+      NYS: `${req.protocol}://${req.headers.host}/api/v1/nys`,
+      Closings: `${req.protocol}://${req.headers.host}/api/v1/closings`,
+      Git: `${req.protocol}://${req.headers.host}/api/v1/git`,
+      Reddit: `${req.protocol}://${req.headers.host}/api/v1/reddit`,
+      Traffic: `${req.protocol}://${req.headers.host}/api/v1/traffic`,
+      Profile: `${req.protocol}://${req.headers.host}/api/v1/profile`,
+      Blog: `${req.protocol}://${req.headers.host}/api/v1/blogs`,
+      TimeZone: `${req.protocol}://${req.headers.host}/api/v1/timezones/help`,
+      PassGen: `${req.protocol}://${req.headers.host}/api/v1/passwd`,
+      Documentation: `${req.protocol}://${req.headers.host}/api/docs`,
+    };
+    setStandardHeaders(res, data);
+    res.send(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 apiRoute.get('/v1/version', cors(), async (req, res) => {
   const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Version: version,
-        TimeZone: timeZone,
-        Yesterday: yesterday,
-        Today: today,
-        Time: curtime,
-        GitHubToken: githubHeader,
-        Auth: auth,
-      })
-    );
+    const data = {
+      Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
+      Version: version,
+      TimeZone: timeZone,
+      Yesterday: yesterday,
+      Today: today,
+      Time: curtime,
+      GitHubToken: githubHeader,
+      Auth: auth,
+    };
+    setStandardHeaders(res, data);
+    res.send(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 apiRoute.post('/v1/version', cors(), async (req, res) => {
   const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
-  res.setHeader('Content-Type', 'application/json');
   try {
-    res.send(
-      JSON.stringify({
-        Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-        Version: version,
-        TimeZone: timeZone,
-        Yesterday: yesterday,
-        Today: today,
-        Time: curtime,
-        GitHubToken: githubHeader,
-        Auth: auth,
-      })
-    );
+    const data = {
+      Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
+      Version: version,
+      TimeZone: timeZone,
+      Yesterday: yesterday,
+      Today: today,
+      Time: curtime,
+      GitHubToken: githubHeader,
+      Auth: auth,
+    };
+    setStandardHeaders(res, data);
+    res.send(data);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

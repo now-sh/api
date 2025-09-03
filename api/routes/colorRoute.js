@@ -1,6 +1,7 @@
 const express = require('express'); const { Request, Response } = require('express');
 const { body, param, validationResult } = require('express-validator');
 const cors = require('cors');
+const { setStandardHeaders } = require('../utils/standardHeaders');
 const colorController = require('../controllers/color');
 const { formatValidationErrors } = require('../utils/validationHelper');
 
@@ -8,7 +9,7 @@ const colorRoute = express.Router();
 
 colorRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
-  res.json({
+  const helpData = {
     title: 'Color Converter',
     message: 'Convert colors between different formats',
     endpoints: {
@@ -25,7 +26,9 @@ colorRoute.get(['/', '/help'], cors(), (req, res) => {
       rgb_to_hsl: `POST ${host}/api/v1/color/convert with {"color": "rgb(255, 0, 0)", "from": "rgb", "to": "hsl"}`,
       hsl_to_hex: `POST ${host}/api/v1/color/convert with {"color": "hsl(120, 100%, 50%)", "from": "hsl", "to": "hex"}`
     }
-  });
+  };
+  setStandardHeaders(res, helpData);
+  res.json(helpData);
 });
 
 colorRoute.get('/:from/:to/:color',
