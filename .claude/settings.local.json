@@ -41,7 +41,16 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(# Test the new /me/info/github and /me/info/reddit endpoints\necho \"\"=== Testing /me/info endpoints ===\"\"\necho \"\"1. GitHub (casjay):\"\"\ncurl -s http://amd.amd64.us:1919/api/v1/me/info/github | jq -c ''.login,.name,.public_repos'' | head -3\n\necho -e \"\"\\n2. Reddit (casjay):\"\"\ncurl -s http://amd.amd64.us:1919/api/v1/me/info/reddit | jq -c ''.data.name'' 2>/dev/null || echo \"\"(Reddit API error)\"\"\n\n# Test the social endpoints\necho -e \"\"\\n\\n=== Testing /social endpoints ===\"\"\necho \"\"3. GitHub user (any user):\"\"\ncurl -s http://amd.amd64.us:1919/api/v1/social/github/user/octocat | jq -c ''.login,.name'' | head -2\n\necho -e \"\"\\n4. Reddit user (any user):\"\"\ncurl -s http://amd.amd64.us:1919/api/v1/social/reddit/u/spez | jq -c ''.user.data.name'' 2>/dev/null || echo \"\"(Reddit API error)\"\")",
       "Bash(grep:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:api.casjay.coffee)",
+      "Bash(npm run build:*)",
+      "Bash(vercel dev:*)",
+      "Bash(npm test)",
+      "Bash(npm run:*)",
+      "Bash(npx eslint:*)",
+      "Bash(rm:*)",
+      "Bash(vercel logs:*)",
+      "Bash(vercel ls:*)"
     ],
     "deny": [],
     "ask": []

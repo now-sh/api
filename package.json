@@ -38,7 +38,7 @@
     "http-proxy-middleware": "^2.0.1",
     "isomorphic-dompurify": "^2.26.0",
     "jsonwebtoken": "^9.0.0",
-    "marked": "^16.2.1",
+    "marked": "^4.3.0",
     "mongoose": "^6.0.13",
     "morgan": "^1.10.0",
     "node-datetime": "^2.1.2",
