@@ -4,6 +4,7 @@ const githubRoute = express.Router();
 const cors = require('cors');
 const { getHeaders } = require('../middleware/headers');
 const { getJson } = require('../utils/httpClient');
+const httpClient = require('../utils/httpClient');
 const { fetchAllGitHubPages } = require('../utils/pagination');
 const githubToken = process.env.GITHUB_API_KEY;
 
@@ -66,33 +67,51 @@ githubRoute.get('/help', cors(), async (req, res) => {
   }
 });
 
-// Helper function to fetch with cache
-async function fetchWithCache(url, cacheKey) {
+// Helper function to fetch with cache and headers
+async function fetchWithCacheAndHeaders(url, cacheKey) {
   const now = Date.now();
   const cached = apiCache.get(cacheKey);
   
   if (cached && (now - cached.timestamp) < CACHE_TTL) {
-    return cached.data;
+    return { data: cached.data, headers: cached.headers || {} };
   }
   
-  const data = await getJson(url, {
+  // Use axios directly to get both data and headers
+  const axios = require('axios');
+  const response = await axios.get(url, {
     headers: buildGitHubHeaders(),
     timeout: 10000
   });
   
   apiCache.set(cacheKey, {
-    data: data,
+    data: response.data,
+    headers: response.headers,
     timestamp: now
   });
   
-  return data;
+  return { data: response.data, headers: response.headers };
+}
+
+// Helper function to fetch with cache (backward compatibility)
+async function fetchWithCache(url, cacheKey) {
+  const result = await fetchWithCacheAndHeaders(url, cacheKey);
+  return result.data;
 }
 
 githubRoute.get('/jason', cors(), async (req, res) => {
   try {
-    const json = await fetchWithCache('https://api.github.com/users/casjay', 'user:casjay');
+    const result = await fetchWithCacheAndHeaders('https://api.github.com/users/casjay', 'user:casjay');
+    
+    // Add GitHub rate limit headers if available
+    if (result.headers['x-ratelimit-remaining']) {
+      res.setHeader('X-RateLimit-Remaining', result.headers['x-ratelimit-remaining']);
+    }
+    if (result.headers['x-ratelimit-limit']) {
+      res.setHeader('X-RateLimit-Limit', result.headers['x-ratelimit-limit']);
+    }
+    
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(result.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -100,11 +119,18 @@ githubRoute.get('/jason', cors(), async (req, res) => {
 
 githubRoute.get('/user/:id', cors(), async (req, res) => {
   try {
-    const json = await getJson(`https://api.github.com/users/${req.params.id}`, {
-      headers: buildGitHubHeaders()
-    });
+    const result = await fetchWithCacheAndHeaders(`https://api.github.com/users/${req.params.id}`, `user:${req.params.id}`);
+    
+    // Add GitHub rate limit headers if available
+    if (result.headers['x-ratelimit-remaining']) {
+      res.setHeader('X-RateLimit-Remaining', result.headers['x-ratelimit-remaining']);
+    }
+    if (result.headers['x-ratelimit-limit']) {
+      res.setHeader('X-RateLimit-Limit', result.headers['x-ratelimit-limit']);
+    }
+    
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(result.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -115,16 +141,18 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
     let allRepos = [];
     let page = 1;
     let hasMorePages = true;
+    let lastHeaders = {};
     
     while (hasMorePages) {
-      const repos = await getJson(`https://api.github.com/users/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
-        headers: buildGitHubHeaders()
-      });
+      const cacheKey = `repos:${req.params.id}:page:${page}`;
+      const result = await fetchWithCacheAndHeaders(`https://api.github.com/users/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, cacheKey);
       
-      if (repos.length === 0) {
+      lastHeaders = result.headers; // Keep the latest headers for rate limit info
+      
+      if (result.data.length === 0) {
         hasMorePages = false;
       } else {
-        allRepos = allRepos.concat(repos);
+        allRepos = allRepos.concat(result.data);
         page++;
         
         // Safety limit to prevent infinite loops
@@ -134,6 +162,19 @@ githubRoute.get('/repos/:id', cors(), async (req, res) => {
       }
     }
     
+    // Sort by name to ensure consistent ordering across pages
+    allRepos.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add GitHub rate limit headers if available
+    if (lastHeaders['x-ratelimit-remaining']) {
+      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
+    }
+    if (lastHeaders['x-ratelimit-limit']) {
+      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
+    }
+    
+    // Add total count header
+    res.setHeader('X-Total-Count', allRepos.length);
     res.setHeader('Content-Type', 'application/json');
     res.send(allRepos);
   } catch (error) {
@@ -146,16 +187,18 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
     let allOrgs = [];
     let page = 1;
     let hasMorePages = true;
+    let lastHeaders = {};
     
     while (hasMorePages) {
-      const orgs = await getJson(`https://api.github.com/users/${req.params.id}/orgs?sort=name&per_page=100&page=${page}`, {
-        headers: buildGitHubHeaders()
-      });
+      const cacheKey = `orgs:${req.params.id}:page:${page}`;
+      const result = await fetchWithCacheAndHeaders(`https://api.github.com/users/${req.params.id}/orgs?sort=name&per_page=100&page=${page}`, cacheKey);
       
-      if (orgs.length === 0) {
+      lastHeaders = result.headers; // Keep the latest headers for rate limit info
+      
+      if (result.data.length === 0) {
         hasMorePages = false;
       } else {
-        allOrgs = allOrgs.concat(orgs);
+        allOrgs = allOrgs.concat(result.data);
         page++;
         
         // Safety limit to prevent infinite loops
@@ -165,6 +208,19 @@ githubRoute.get('/orgs/:id', cors(), async (req, res) => {
       }
     }
     
+    // Sort by login name to ensure consistent ordering across pages
+    allOrgs.sort((a, b) => a.login.localeCompare(b.login));
+    
+    // Add GitHub rate limit headers if available
+    if (lastHeaders['x-ratelimit-remaining']) {
+      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
+    }
+    if (lastHeaders['x-ratelimit-limit']) {
+      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
+    }
+    
+    // Add total count header
+    res.setHeader('X-Total-Count', allOrgs.length);
     res.setHeader('Content-Type', 'application/json');
     res.send(allOrgs);
   } catch (error) {
@@ -177,16 +233,18 @@ githubRoute.get('/org/:id', cors(), async (req, res) => {
     let allRepos = [];
     let page = 1;
     let hasMorePages = true;
+    let lastHeaders = {};
     
     while (hasMorePages) {
-      const repos = await getJson(`https://api.github.com/orgs/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, {
-        headers: buildGitHubHeaders()
-      });
+      const cacheKey = `org:${req.params.id}:repos:page:${page}`;
+      const result = await fetchWithCacheAndHeaders(`https://api.github.com/orgs/${req.params.id}/repos?sort=name&per_page=100&page=${page}`, cacheKey);
       
-      if (repos.length === 0) {
+      lastHeaders = result.headers; // Keep the latest headers for rate limit info
+      
+      if (result.data.length === 0) {
         hasMorePages = false;
       } else {
-        allRepos = allRepos.concat(repos);
+        allRepos = allRepos.concat(result.data);
         page++;
         
         // Safety limit to prevent infinite loops
@@ -196,6 +254,19 @@ githubRoute.get('/org/:id', cors(), async (req, res) => {
       }
     }
     
+    // Sort by name to ensure consistent ordering across pages
+    allRepos.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add GitHub rate limit headers if available
+    if (lastHeaders['x-ratelimit-remaining']) {
+      res.setHeader('X-RateLimit-Remaining', lastHeaders['x-ratelimit-remaining']);
+    }
+    if (lastHeaders['x-ratelimit-limit']) {
+      res.setHeader('X-RateLimit-Limit', lastHeaders['x-ratelimit-limit']);
+    }
+    
+    // Add total count header
+    res.setHeader('X-Total-Count', allRepos.length);
     res.setHeader('Content-Type', 'application/json');
     res.send(allRepos);
   } catch (error) {
