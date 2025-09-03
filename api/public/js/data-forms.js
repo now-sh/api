@@ -189,11 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 let endpoint;
                 if (dataType === 'repos') {
-                    endpoint = `/api/v1/git/${username}/repos`;
+                    endpoint = `/api/v1/git/repos/${username}`;
                 } else if (dataType === 'orgs') {
-                    endpoint = `/api/v1/git/${username}/orgs`;
+                    endpoint = `/api/v1/git/orgs/${username}`;
                 } else {
-                    endpoint = `/api/v1/git/${username}`;
+                    endpoint = `/api/v1/git/user/${username}`;
                 }
                 
                 const response = await fetch(endpoint);

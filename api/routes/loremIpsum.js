@@ -13,15 +13,15 @@ loremRoute.get(['/', '/help'], cors(), (req, res) => {
     title: 'Lorem Ipsum Generator',
     message: 'Generate placeholder text',
     endpoints: {
-      sentences: `${host}/api/v1/lorem/sentences/:number`,
-      paragraphs: `${host}/api/v1/lorem/paragraphs/:paragraphs/:sentences`,
-      json: 'Add /json to any endpoint for JSON format'
+      sentences: `${host}/api/v1/utilities/lorem/sentences/:number`,
+      paragraphs: `${host}/api/v1/utilities/lorem/paragraphs/:paragraphs/:sentences`,
+      json: 'Add ?format=json to any endpoint for JSON format'
     },
     examples: {
-      sentences: `GET ${host}/api/v1/lorem/sentences/4`,
-      sentences_json: `GET ${host}/api/v1/lorem/sentences/4/json`,
-      paragraphs: `GET ${host}/api/v1/lorem/paragraphs/3/5`,
-      paragraphs_json: `GET ${host}/api/v1/lorem/paragraphs/3/5/json`
+      sentences: `GET ${host}/api/v1/utilities/lorem/sentences/4`,
+      sentences_json: `GET ${host}/api/v1/utilities/lorem/sentences/4?format=json`,
+      paragraphs: `GET ${host}/api/v1/utilities/lorem/paragraphs/3/5`,
+      paragraphs_json: `GET ${host}/api/v1/utilities/lorem/paragraphs/3/5?format=json`
     }
   };
   setStandardHeaders(res, data);
@@ -30,7 +30,7 @@ loremRoute.get(['/', '/help'], cors(), (req, res) => {
 
 loremRoute.get('/sentences/:number', 
   cors(),
-  param('number').isInt({ min: 1, max: 50 }).withMessage('Number must be between 1 and 50'),
+  param('number').isInt({ min: 1, max: 999 }).withMessage('Number must be between 1 and 999'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -43,47 +43,27 @@ loremRoute.get('/sentences/:number',
     }
 
     const numberOfSentences = parseInt(req.params.number);
+    const jsonFormat = req.query.format === 'json';
     const result = loremController.generateSentences(numberOfSentences);
     
-    const data = {
-      ...result,
-      format: 'plain'
-    };
-    setStandardHeaders(res, data);
-    res.json(data);
-  }
-);
-
-loremRoute.get('/sentences/:number/json', 
-  cors(),
-  param('number').isInt({ min: 1, max: 50 }).withMessage('Number must be between 1 and 50'),
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const data = { 
-        success: false,
-        errors: formatValidationErrors(errors.array())
+    if (jsonFormat) {
+      const data = {
+        text: result.text
       };
       setStandardHeaders(res, data);
-      return res.status(400).json(data);
+      res.json(data);
+    } else {
+      res.setHeader('Content-Type', 'text/plain');
+      res.send(result.text);
     }
-
-    const numberOfSentences = parseInt(req.params.number);
-    const result = loremController.generateSentences(numberOfSentences);
-    
-    const data = {
-      ...result,
-      format: 'json'
-    };
-    setStandardHeaders(res, data);
-    res.json(data);
   }
 );
 
-loremRoute.get('/paragraphs/:paragraphs/:sentences',
+
+loremRoute.get('/paragraphs/:paragraphs/:sentences?',
   cors(),
   param('paragraphs').isInt({ min: 1, max: 20 }).withMessage('Paragraphs must be between 1 and 20'),
-  param('sentences').isInt({ min: 1, max: 10 }).withMessage('Sentences must be between 1 and 10'),
+  param('sentences').optional().isInt({ min: 1, max: 50 }).withMessage('Sentences must be between 1 and 50'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -96,45 +76,28 @@ loremRoute.get('/paragraphs/:paragraphs/:sentences',
     }
 
     const numberOfParagraphs = parseInt(req.params.paragraphs);
-    const sentencesPerParagraph = parseInt(req.params.sentences);
+    const sentencesPerParagraph = req.params.sentences ? parseInt(req.params.sentences) : null;
+    const jsonFormat = req.query.format === 'json';
+    const pTags = !!req.query.p;
     const result = loremController.generateParagraphs(numberOfParagraphs, sentencesPerParagraph);
     
-    const data = {
-      ...result,
-      format: 'plain'
-    };
-    setStandardHeaders(res, data);
-    res.json(data);
-  }
-);
-
-loremRoute.get('/paragraphs/:paragraphs/:sentences/json',
-  cors(),
-  param('paragraphs').isInt({ min: 1, max: 20 }).withMessage('Paragraphs must be between 1 and 20'),
-  param('sentences').isInt({ min: 1, max: 10 }).withMessage('Sentences must be between 1 and 10'),
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const data = { 
-        success: false,
-        errors: formatValidationErrors(errors.array())
+    if (jsonFormat) {
+      const data = {
+        text: result.text
       };
       setStandardHeaders(res, data);
-      return res.status(400).json(data);
+      res.json(data);
+    } else {
+      res.setHeader('Content-Type', 'text/plain');
+      let text = result.text;
+      if (pTags) {
+        text = result.paragraphs.map(p => `<p>${p}</p>`).join('\n\n');
+      }
+      res.send(text);
     }
-
-    const numberOfParagraphs = parseInt(req.params.paragraphs);
-    const sentencesPerParagraph = parseInt(req.params.sentences);
-    const result = loremController.generateParagraphs(numberOfParagraphs, sentencesPerParagraph);
-    
-    const data = {
-      ...result,
-      format: 'json'
-    };
-    setStandardHeaders(res, data);
-    res.json(data);
   }
 );
+
 
 loremRoute.post('/generate',
   cors(),

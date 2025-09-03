@@ -61,47 +61,76 @@
             </li>
             
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="utilitiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-tools"></i> Utilities
+              <a class="nav-link dropdown-toggle" href="#" id="devToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-code-slash"></i> Developer Tools
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/utilities/base64"><i class="bi bi-code"></i> Base64</a></li>
+                <li><a class="dropdown-item" href="/utilities/base64"><i class="bi bi-code"></i> Base64 Encoder/Decoder</a></li>
                 <li><a class="dropdown-item" href="/utilities/hash"><i class="bi bi-shield-lock"></i> Hash Generator</a></li>
                 <li><a class="dropdown-item" href="/utilities/uuid"><i class="bi bi-dice-6"></i> UUID Generator</a></li>
                 <li><a class="dropdown-item" href="/utilities/jwt"><i class="bi bi-key"></i> JWT Decoder</a></li>
-                <li><a class="dropdown-item" href="/utilities/qr"><i class="bi bi-qr-code"></i> QR Code</a></li>
-                <li><a class="dropdown-item" href="/utilities/color"><i class="bi bi-palette"></i> Color Tools</a></li>
+                <li><a class="dropdown-item" href="/utilities/qr"><i class="bi bi-qr-code"></i> QR Code Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/color"><i class="bi bi-palette"></i> Color Converter</a></li>
                 <li><a class="dropdown-item" href="/utilities/lorem"><i class="bi bi-text-paragraph"></i> Lorem Ipsum</a></li>
                 <li><a class="dropdown-item" href="/utilities/passwd"><i class="bi bi-shield-check"></i> Password Generator</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/tools/commit"><i class="bi bi-git"></i> Git Commit Messages</a></li>
               </ul>
             </li>
             
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-database"></i> Data & APIs
+              <a class="nav-link dropdown-toggle" href="#" id="myDataDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle"></i> My Data
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/data/git"><i class="bi bi-github"></i> GitHub Data</a></li>
-                <li><a class="dropdown-item" href="/data/reddit"><i class="bi bi-reddit"></i> Reddit Data</a></li>
-                <li><a class="dropdown-item" href="/data/covid"><i class="bi bi-virus"></i> COVID-19 Data</a></li>
-                <li><a class="dropdown-item" href="/data/anime"><i class="bi bi-chat-quote"></i> Anime Quotes</a></li>
-                <li><a class="dropdown-item" href="/data/domains"><i class="bi bi-globe"></i> Domain Checker</a></li>
-                <li><a class="dropdown-item" href="/data/timezones"><i class="bi bi-clock"></i> Timezones</a></li>
-                <li><a class="dropdown-item" href="/data/closings"><i class="bi bi-building"></i> School Closings</a></li>
+                <li><h6 class="dropdown-header">My External Profiles</h6></li>
+                <li><a class="dropdown-item" href="/data/git"><i class="bi bi-github"></i> My GitHub Data</a></li>
+                <li><a class="dropdown-item" href="/data/reddit"><i class="bi bi-reddit"></i> My Reddit Activity</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">My Content</h6></li>
+                <li><a class="dropdown-item" href="/data/blogs"><i class="bi bi-journal-richtext"></i> My Blog Posts</a></li>
+                <li><a class="dropdown-item" href="/data/domains"><i class="bi bi-globe"></i> My Domains</a></li>
               </ul>
             </li>
             
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-gear"></i> Tools & Services
+              <a class="nav-link dropdown-toggle" href="#" id="personalToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tools"></i> Personal Tools
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/tools/commit"><i class="bi bi-git"></i> Git Commit Generator</a></li>
-                <li><a class="dropdown-item" href="/services/url"><i class="bi bi-link"></i> URL Shortener</a></li>
                 <li><a class="dropdown-item" href="/personal/todos"><i class="bi bi-check-square"></i> Todo Manager</a></li>
-                <li><a class="dropdown-item" href="/personal/notes"><i class="bi bi-journal-text"></i> Notes Manager</a></li>
-                <li><a class="dropdown-item" href="/auth"><i class="bi bi-person-lock"></i> Authentication</a></li>
+                <li><a class="dropdown-item" href="/personal/notes"><i class="bi bi-journal-text"></i> Note Manager</a></li>
+                <li><a class="dropdown-item" href="/services/url"><i class="bi bi-link"></i> URL Shortener</a></li>
               </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="externalAPIsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-cloud-download"></i> External APIs
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/data/anime"><i class="bi bi-chat-quote"></i> Anime Quotes</a></li>
+              </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="informationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-info-circle"></i> Information
+              </a>
+              <ul class="dropdown-menu">
+                <li><h6 class="dropdown-header">Statistics & Data</h6></li>
+                <li><a class="dropdown-item" href="/data/covid"><i class="bi bi-virus"></i> COVID-19 Statistics</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Local Information</h6></li>
+                <li><a class="dropdown-item" href="/data/closings"><i class="bi bi-building"></i> School Closings</a></li>
+                <li><a class="dropdown-item" href="/data/timezones"><i class="bi bi-clock"></i> World Time Zones</a></li>
+              </ul>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="/auth">
+                <i class="bi bi-person-lock"></i> Account
+              </a>
             </li>
           </ul>
           

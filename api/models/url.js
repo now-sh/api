@@ -42,11 +42,9 @@ const urlSchema = new mongoose.Schema({
   lastAccessed: {
     type: Date,
     default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 // TTL index for automatic deletion of expired URLs
@@ -55,22 +53,4 @@ urlSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 // Compound index for owner queries
 urlSchema.index({ owner: 1, createdAt: -1 });
 
-// Function that returns the model using the correct connection
-const getUrlModel = () => {
-  // If connections are available, use the shrtnr connection
-  if (global.mongoConnections && global.mongoConnections.shrtnr) {
-    try {
-      return global.mongoConnections.shrtnr.model('Url');
-    } catch (e) {
-      return global.mongoConnections.shrtnr.model('Url', urlSchema);
-    }
-  }
-  // Fallback to default mongoose connection
-  try {
-    return mongoose.model('Url');
-  } catch (e) {
-    return mongoose.model('Url', urlSchema);
-  }
-};
-
-module.exports = getUrlModel;
+module.exports = mongoose.model('Url', urlSchema);

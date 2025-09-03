@@ -12,7 +12,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-const startdb = require('./controllers/mongodb');
+const { connectToDatabase } = require('./db/connection');
 
 const middlewares = require('./middleware/errorHandler');
 const handlers = require('./middleware/defaultHandler');
@@ -41,48 +41,81 @@ app.use('/api/docs', require('./routes/docsRoute'));
 // Health check alias at root
 app.get('/healthz', (req, res) => res.redirect('/api/health/healthz'));
 
-// ==== NEW CATEGORIZED ROUTES (PREFERRED) ====
+// ==== API ROUTES ORGANIZED BY CATEGORY ====
 
-// 🔧 Utilities - Encoding, Conversion, Generation
-app.use('/api/v1/utilities/base64', require('./routes/base64Route'));
-app.use('/api/v1/utilities/hash', require('./routes/hashRoute'));
-app.use('/api/v1/utilities/uuid', require('./routes/uuidRoute'));
-app.use('/api/v1/utilities/jwt', require('./routes/jwtRoute'));
-app.use('/api/v1/utilities/qr', require('./routes/qrRoute'));
-app.use('/api/v1/utilities/color', require('./routes/colorRoute'));
-app.use('/api/v1/utilities/lorem', require('./routes/loremIpsum'));
-app.use('/api/v1/utilities/passwd', require('./routes/genpasswdRoute'));
-
-// 🛠️ Tools - Development & Productivity
+// 🛠️ TOOLS - Developer Tools & Utilities
+app.use('/api/v1/tools/base64', require('./routes/base64Route'));
+app.use('/api/v1/tools/hash', require('./routes/hashRoute'));
+app.use('/api/v1/tools/uuid', require('./routes/uuidRoute'));
+app.use('/api/v1/tools/jwt', require('./routes/jwtRoute'));
+app.use('/api/v1/tools/qr', require('./routes/qrRoute'));
+app.use('/api/v1/tools/color', require('./routes/colorRoute'));
+app.use('/api/v1/tools/lorem', require('./routes/loremRoute'));
+app.use('/api/v1/tools/passwd', require('./routes/genpasswdRoute'));
 app.use('/api/v1/tools/commit', require('./routes/commitRoute'));
+app.use('/api/v1/tools/markdown', require('./routes/markdownRoute'));
+app.use('/api/v1/tools/cron', require('./routes/cronRoute'));
+app.use('/api/v1/tools/regex', require('./routes/regexRoute'));
+app.use('/api/v1/tools/diff', require('./routes/diffRoute'));
+app.use('/api/v1/tools/dictionary', require('./routes/dictionaryRoute'));
 
-// 📊 Data - External Data Sources
-app.use('/api/v1/data/domains', require('./routes/domainRoute'));
-app.use('/api/v1/data/timezones', require('./routes/timezoneRoute'));
-app.use('/api/v1/data/closings', require('./routes/closingsRoute'));
-app.use('/api/v1/data/git', require('./routes/githubRoute'));
-app.use('/api/v1/data/reddit', require('./routes/redditRoute'));
-app.use('/api/v1/data/blogs', require('./routes/blogRoute'));
-app.use('/api/v1/data/anime', require('./routes/animeRoute'));
+// 👤 ME - Your Personal Data
+app.use('/api/v1/me/blog', require('./routes/blogRoute'));
+app.use('/api/v1/me/domains', require('./routes/domainRoute'));
+app.use('/api/v1/me/info', require('./routes/meInfoRoute'));
 
-// 🏥 Health - Health & Location Services
-app.use('/api/v1/health/global', require('./routes/covidRoute'));
-app.use('/api/v1/health/arcgis', require('./routes/arcgisRoute'));
-app.use('/api/v1/health/usa', require('./routes/usaRoute'));
-app.use('/api/v1/health/nys', require('./routes/nysRoute'));
-app.use('/api/v1/health/disease', require('./routes/diseaseRoute'));
-app.use('/api/v1/health/closings', require('./routes/closingsRoute'));
-app.use('/api/v1/health/traffic', require('./routes/TrafficRoutes'));
+// 📊 DATA - Data Storage & Management
+app.use('/api/v1/data/todos', require('./routes/todoRoute'));
+app.use('/api/v1/data/notes', require('./routes/notesRoute'));
+app.use('/api/v1/data/urls', require('./routes/urlRoute'));
 
-// 👤 Personal - User Data Management  
+// 🎮 FUN - Entertainment APIs
+app.use('/api/v1/fun/jokes', require('./routes/jokesRoute'));
+app.use('/api/v1/fun/facts', require('./routes/factsRoute'));
+app.use('/api/v1/fun/trivia', require('./routes/triviaRoute'));
+app.use('/api/v1/fun/anime', require('./routes/animeRoute'));
+
+// 🌐 SOCIAL - Social Media APIs (any user)
+app.use('/api/v1/social/blogs', require('./routes/blogsRoute'));
+app.use('/api/v1/social/github', require('./routes/githubRoute'));
+app.use('/api/v1/social/reddit', require('./routes/redditRoute'));
+
+// 🌍 WORLD - World Information
+app.use('/api/v1/world/covid', require('./routes/covidRoute'));
+app.use('/api/v1/world/disease', require('./routes/diseaseRoute'));
+app.use('/api/v1/world/closings', require('./routes/closingsRoute'));
+app.use('/api/v1/world/timezones', require('./routes/timezoneRoute'));
+app.use('/api/v1/world/usa', require('./routes/usaRoute'));
+app.use('/api/v1/world/usa/nys', require('./routes/nysRoute'));
+app.use('/api/v1/world/arcgis', require('./routes/arcgisRoute'));
+
+// 🔐 AUTH - Authentication & Profile
+app.use('/api/v1/auth', require('./routes/authRoute'));
+app.use('/api/v1/profile', require('./routes/profileRoute'));
+
+// 🏥 SYSTEM - System Health & Info
+app.use('/api/health', require('./routes/healthRoute'));
+app.use('/api/v1/version', require('./routes/apiRoute'));
+
+// ==== LEGACY ROUTES (For backward compatibility) ====
+app.use('/api/v1/utilities/base64', require('./routes/base64Route'));
+app.use('/api/v1/utilities/lorem', require('./routes/loremRoute'));
+app.use('/api/v1/git', require('./routes/gitLegacyRoute'));
+app.use('/api/v1/reddit', require('./routes/redditRoute'));
+app.use('/api/v1/blog', require('./routes/blogRoute'));
+app.use('/api/v1/domains', require('./routes/domainRoute'));
+app.use('/api/v1/anime', require('./routes/animeRoute'));
+app.use('/api/v1/anime/quote', require('./routes/animeRoute'));
+app.use('/api/v1/commit', require('./routes/commitRoute'));
+app.use('/api/v1/shrtnr', require('./routes/urlRoute'));
+app.use('/api/v1/closings', require('./routes/closingsRoute'));
+app.use('/api/v1/timezones', require('./routes/timezoneRoute'));
+app.use('/api/v1/global', require('./routes/covidRoute'));
+app.use('/api/v1/usa/nys', require('./routes/nysRoute'));
 app.use('/api/v1/personal/todos', require('./routes/todoRoute'));
-app.use('/api/v1/personal/notes', require('./routes/notesRoute'));
-app.use('/api/v1/personal/profile', require('./routes/profileRoute'));
-
-// 🌐 Services - System & Utility Services
-app.use('/api/v1/services/timezones', require('./routes/timezoneRoute'));
-app.use('/api/v1/services/url', require('./routes/urlRoute'));
-app.use('/api/health', require('./routes/healthRoute')); // Keep unversioned
+app.use('/api/v1/disease', require('./routes/diseaseRoute'));
+app.use('/api/v1/arcgis', require('./routes/arcgisRoute'));
+app.use('/api/v1/usa', require('./routes/usaRoute'));
 
 // Add healthz at v1 level
 const healthRoute = require('./routes/healthRoute');
@@ -116,7 +149,7 @@ app.use('/api/v1/commit', require('./routes/commitRoute'));
 
 // Legacy data routes
 app.use('/api/v1/domains', require('./routes/domainRoute'));
-app.use('/api/v1/git', require('./routes/githubRoute'));
+app.use('/api/v1/git', require('./routes/gitLegacyRoute'));
 app.use('/api/v1/reddit', require('./routes/redditRoute'));
 app.use('/api/v1/blogs', require('./routes/blogRoute'));
 app.use('/api/v1/anime', require('./routes/animeRoute'));
@@ -182,6 +215,6 @@ const port = process.env.PORT || 2000;
 const hostname = process.env.HOSTNAME;
 
 app.listen(port, async () => {
-  await startdb();
+  await connectToDatabase();
   console.log(`🚀 Server started: http://${hostname}:${port}`);
 });

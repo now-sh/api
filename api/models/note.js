@@ -31,7 +31,7 @@ const noteSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    default: null
   },
   tags: [{
     type: String,
@@ -70,21 +70,9 @@ const noteSchema = new mongoose.Schema({
   },
   lastViewedAt: {
     type: Date
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
-});
-
-// Update the updatedAt timestamp on save
-noteSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
+}, {
+  timestamps: true
 });
 
 // Indexes for efficient queries
@@ -100,22 +88,4 @@ noteSchema.virtual('snippet').get(function() {
   return this.content.substring(0, 200) + '...';
 });
 
-// Function that returns the model using the correct connection
-const getNoteModel = () => {
-  // If connections are available, use the notes connection
-  if (global.mongoConnections && global.mongoConnections.notes) {
-    try {
-      return global.mongoConnections.notes.model('Note');
-    } catch (e) {
-      return global.mongoConnections.notes.model('Note', noteSchema);
-    }
-  }
-  // Fallback to default mongoose connection
-  try {
-    return mongoose.model('Note');
-  } catch (e) {
-    return mongoose.model('Note', noteSchema);
-  }
-};
-
-module.exports = getNoteModel;
+module.exports = mongoose.model('Note', noteSchema);

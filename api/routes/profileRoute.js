@@ -1,42 +1,95 @@
 require('dotenv').config();
 const express = require('express');
-const profileRoute = express.Router();
 const cors = require('cors');
-
+const { param, validationResult } = require('express-validator');
 const profileData = require('../controllers/profile');
-const { setStandardHeaders } = require('../utils/standardHeaders');
+const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatValidationErrors } = require('../utils/validationHelper');
 
-profileRoute.get(['/', '/help'], cors(), async (req, res) => {
-  const host = `${req.protocol}://${req.headers.host}`;
-  
-  if (req.path === '/help') {
-    try {
-      const data = {
-        title: 'Profile API',
-        endpoint: `${host}/api/v1/profile`,
-        description: 'Get CasJay\'s profile information from GitHub',
-        cli_example: `curl ${host}/api/v1/profile`,
-        bash_function: `get_profile() { curl -s "${host}/api/v1/profile" | jq -r '.profile | "Name: \\(.name) Company: \\(.company) Bio: \\(.bio)"'; }`
-      };
-      setStandardHeaders(res, data);
-      return res.json(data);
-    } catch (error) {
-      const data = { error: error.message };
-      setStandardHeaders(res, data);
-      return res.status(500).json(data);
-    }
+const profileRoute = express.Router();
+
+/**
+ * Validation middleware
+ */
+function validateRequest(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    sendJSON(res, formatError('Validation failed', {
+      details: formatValidationErrors(errors.array())
+    }), { status: 400 });
+    return;
   }
-  
+  next();
+}
+
+/**
+ * Get profile - JSON response
+ */
+profileRoute.get('/', cors(), async (req, res) => {
   try {
     const profile = await profileData();
-    const data = { profile };
-    setStandardHeaders(res, data);
-    res.json(data);
+    
+    sendJSON(res, formatSuccess({
+      profile: {
+        name: profile.name,
+        username: profile.login,
+        bio: profile.bio,
+        company: profile.company,
+        location: profile.location,
+        email: profile.email,
+        blog: profile.blog,
+        followers: profile.followers,
+        following: profile.following,
+        publicRepos: profile.public_repos,
+        avatarUrl: profile.avatar_url,
+        githubUrl: profile.html_url,
+        createdAt: profile.created_at,
+        updatedAt: profile.updated_at
+      }
+    }));
   } catch (error) {
-    const data = { error: error.message };
-    setStandardHeaders(res, data);
-    res.status(503).json(data);
+    sendJSON(res, formatError(error.message), { status: 503 });
   }
+});
+
+/**
+ * Get profile - Text response
+ */
+profileRoute.get('/text', cors(), async (req, res) => {
+  try {
+    const profile = await profileData();
+    const output = `Name: ${profile.name}\nUsername: ${profile.login}\nBio: ${profile.bio}\nCompany: ${profile.company}\nLocation: ${profile.location}\nFollowers: ${profile.followers}\nFollowing: ${profile.following}\nPublic Repos: ${profile.public_repos}`;
+    sendText(res, output);
+  } catch (error) {
+    sendText(res, `Error: ${error.message}`);
+  }
+});
+
+/**
+ * Help endpoint
+ */
+profileRoute.get('/help', cors(), (req, res) => {
+  const host = `${req.protocol}://${req.headers.host}`;
+  
+  const data = formatSuccess({
+    title: 'Profile API',
+    message: 'Get CasJay\'s profile information from GitHub',
+    endpoints: {
+      json: `GET ${host}/api/v1/auth/profile`,
+      text: `GET ${host}/api/v1/auth/profile/text`
+    },
+    examples: {
+      json: `GET ${host}/api/v1/auth/profile`,
+      text: `GET ${host}/api/v1/auth/profile/text`
+    },
+    cli_examples: {
+      basic: `curl ${host}/api/v1/auth/profile`,
+      text: `curl ${host}/api/v1/auth/profile/text`,
+      formatted: `curl -s "${host}/api/v1/auth/profile" | jq -r '.data.profile | "Name: \\(.name) Company: \\(.company) Bio: \\(.bio)"'`
+    }
+  });
+  
+  sendJSON(res, data);
 });
 
 module.exports = profileRoute;

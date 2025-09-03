@@ -64,6 +64,106 @@ const generatePassword = (options = {}) => {
   };
 };
 
+/**
+ * Check password strength
+ */
+const checkPasswordStrength = (password) => {
+  if (!password || typeof password !== 'string') {
+    throw new Error('Invalid password');
+  }
+  
+  const length = password.length;
+  let charset = 0;
+  let score = 0;
+  
+  // Check character types
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumbers = /[0-9]/.test(password);
+  const hasSymbols = /[^a-zA-Z0-9]/.test(password);
+  
+  // Calculate charset size
+  if (hasLowercase) charset += 26;
+  if (hasUppercase) charset += 26;
+  if (hasNumbers) charset += 10;
+  if (hasSymbols) charset += 32;
+  
+  // Calculate score based on complexity
+  if (hasLowercase) score += 1;
+  if (hasUppercase) score += 1;
+  if (hasNumbers) score += 1;
+  if (hasSymbols) score += 2;
+  
+  // Length bonus
+  if (length >= 12) score += 1;
+  if (length >= 16) score += 1;
+  if (length >= 20) score += 1;
+  
+  // Calculate entropy
+  const entropy = charset > 0 ? Math.log2(Math.pow(charset, length)) : 0;
+  
+  // Determine strength
+  let strength;
+  if (score <= 2 || length < 8) {
+    strength = 'weak';
+  } else if (score <= 4) {
+    strength = 'fair';
+  } else if (score <= 6) {
+    strength = 'good';
+  } else {
+    strength = 'strong';
+  }
+  
+  return {
+    strength,
+    score: Math.min(score, 10), // Cap at 10
+    entropy: Math.round(entropy * 100) / 100,
+    length,
+    complexity: {
+      hasLowercase,
+      hasUppercase,
+      hasNumbers,
+      hasSymbols
+    },
+    suggestions: getPasswordSuggestions(password, score)
+  };
+};
+
+/**
+ * Get password improvement suggestions
+ */
+const getPasswordSuggestions = (password, score) => {
+  const suggestions = [];
+  
+  if (password.length < 8) {
+    suggestions.push('Use at least 8 characters');
+  }
+  if (password.length < 12) {
+    suggestions.push('Consider using 12+ characters for better security');
+  }
+  if (!/[a-z]/.test(password)) {
+    suggestions.push('Add lowercase letters');
+  }
+  if (!/[A-Z]/.test(password)) {
+    suggestions.push('Add uppercase letters');
+  }
+  if (!/[0-9]/.test(password)) {
+    suggestions.push('Add numbers');
+  }
+  if (!/[^a-zA-Z0-9]/.test(password)) {
+    suggestions.push('Add special characters');
+  }
+  if (/(.)\1{2,}/.test(password)) {
+    suggestions.push('Avoid repeating characters');
+  }
+  if (/^(123|abc|qwe)/i.test(password) || /(123|abc|qwe)$/i.test(password)) {
+    suggestions.push('Avoid common patterns');
+  }
+  
+  return suggestions;
+};
+
 module.exports = {
-  generatePassword
+  generatePassword,
+  checkPasswordStrength
 };

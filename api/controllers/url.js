@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const getUrlModel = require('../models/url');
+const Url = require('../models/url');
 
 /**
  * Generate short code for URL
@@ -35,8 +35,7 @@ const createShortUrl = async (originalUrl, options = {}) => {
     }
     
     // Check if alias already exists
-    const Url = getUrlModel();
-    const existing = await Url.findOne({ 
+        const existing = await Url.findOne({ 
       $or: [
         { shortCode: options.customAlias },
         { customAlias: options.customAlias }
@@ -55,8 +54,7 @@ const createShortUrl = async (originalUrl, options = {}) => {
   
   do {
     shortCode = options.customAlias || generateShortCode(options.length || 6);
-    const Url = getUrlModel();
-    const exists = await Url.findOne({ shortCode });
+        const exists = await Url.findOne({ shortCode });
     if (!exists) break;
     attempts++;
   } while (attempts < maxAttempts && !options.customAlias);
@@ -100,8 +98,7 @@ const createShortUrl = async (originalUrl, options = {}) => {
  * Get URL by short code
  */
 const getUrlByCode = async (shortCode) => {
-  const Url = getUrlModel();
-  const url = await Url.findOne({
+    const url = await Url.findOne({
     $or: [
       { shortCode },
       { customAlias: shortCode }
@@ -130,8 +127,7 @@ const getUrlByCode = async (shortCode) => {
  * Get URL statistics
  */
 const getUrlStats = async (shortCode, userId = null) => {
-  const Url = getUrlModel();
-  const url = await Url.findOne({
+    const url = await Url.findOne({
     $or: [
       { shortCode },
       { customAlias: shortCode }
@@ -169,8 +165,7 @@ const getUserUrls = async (userId, options = {}) => {
     isActive: true
   };
   
-  const Url = getUrlModel();
-  const urls = await Url.find(query)
+    const urls = await Url.find(query)
     .sort({ createdAt: -1 })
     .limit(Math.min(options.limit || 50, 100))
     .select('-__v');

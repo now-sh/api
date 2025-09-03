@@ -1,4 +1,4 @@
-const getTodoModel = require('../models/todo');
+const Todo = require('../models/todo');
 const authController = require('./auth');
 
 /**
@@ -6,8 +6,6 @@ const authController = require('./auth');
  */
 const createTodo = async (userEmail, todoData) => {
   const userId = await authController.getUserId(userEmail);
-  
-  const Todo = getTodoModel();
   const todo = new Todo({
     ...todoData,
     owner: userId
@@ -34,8 +32,7 @@ const createTodo = async (userEmail, todoData) => {
  */
 const getTodos = async (userEmail = null, filters = {}) => {
   try {
-    const Todo = getTodoModel();
-    
+        
     // Simple query for public todos only
     const todos = await Todo.find({ isPublic: true })
       .sort({ createdAt: -1 })
@@ -64,8 +61,7 @@ const getTodos = async (userEmail = null, filters = {}) => {
  * Get a single todo by ID
  */
 const getTodoById = async (todoId, userEmail = null) => {
-  const Todo = getTodoModel();
-  const todo = await Todo.findById(todoId);
+    const todo = await Todo.findById(todoId);
   
   if (!todo) {
     throw new Error('Todo not found');
@@ -104,8 +100,7 @@ const getTodoById = async (todoId, userEmail = null) => {
  * Update a todo
  */
 const updateTodo = async (todoId, userEmail, updates) => {
-  const Todo = getTodoModel();
-  const todo = await Todo.findById(todoId);
+    const todo = await Todo.findById(todoId);
   
   if (!todo) {
     throw new Error('Todo not found');
@@ -145,8 +140,7 @@ const updateTodo = async (todoId, userEmail, updates) => {
  * Delete a todo
  */
 const deleteTodo = async (todoId, userEmail) => {
-  const Todo = getTodoModel();
-  const todo = await Todo.findById(todoId);
+    const todo = await Todo.findById(todoId);
   
   if (!todo) {
     throw new Error('Todo not found');
@@ -167,8 +161,7 @@ const deleteTodo = async (todoId, userEmail) => {
  * Toggle todo completion
  */
 const toggleTodoComplete = async (todoId, userEmail) => {
-  const Todo = getTodoModel();
-  const todo = await Todo.findById(todoId);
+    const todo = await Todo.findById(todoId);
   
   if (!todo) {
     throw new Error('Todo not found');
@@ -196,8 +189,7 @@ const toggleTodoComplete = async (todoId, userEmail) => {
 const getTodoStats = async (userEmail) => {
   const userId = await authController.getUserId(userEmail);
   
-  const Todo = getTodoModel();
-  const stats = await Todo.aggregate([
+    const stats = await Todo.aggregate([
     {
       $match: { owner: userId }
     },

@@ -107,22 +107,22 @@ const generateSentences = (count) => {
 /**
  * Generate paragraphs
  */
-const generateParagraphs = (paragraphCount, sentencesPerParagraph) => {
+const generateParagraphs = (paragraphCount, sentencesPerParagraph = null) => {
   const paragraphs = [];
 
   for (let p = 0; p < paragraphCount; p++) {
     const sentences = [];
-    for (let s = 0; s < sentencesPerParagraph; s++) {
+    // If sentences not specified, random between 3-6
+    const sentenceCount = sentencesPerParagraph || (3 + Math.floor(Math.random() * 4));
+    
+    for (let s = 0; s < sentenceCount; s++) {
       sentences.push(generateSentence());
     }
-    paragraphs.push({
-      text: sentences.join(' '),
-      sentences: sentences
-    });
+    paragraphs.push(sentences.join(' '));
   }
 
   return {
-    text: paragraphs.map(p => p.text).join('\n\n'),
+    text: paragraphs.join('\n\n'),
     paragraphs: paragraphs,
     count: {
       paragraphs: paragraphCount,

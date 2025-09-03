@@ -1,4 +1,4 @@
-const getNoteModel = require('../models/note');
+const Note = require('../models/note');
 const authController = require('./auth');
 
 /**
@@ -6,8 +6,6 @@ const authController = require('./auth');
  */
 const createNote = async (userEmail, noteData) => {
   const userId = await authController.getUserId(userEmail);
-  
-  const Note = getNoteModel();
   const note = new Note({
     ...noteData,
     owner: userId
@@ -77,8 +75,7 @@ const getNotes = async (userEmail = null, options = {}) => {
     sort = { isPinned: -1, createdAt: -1 }; // Default: pinned first, then newest
   }
   
-  const Note = getNoteModel();
-  const notes = await Note.find(query)
+    const notes = await Note.find(query)
     .sort(sort)
     .limit(Math.min(options.limit || 50, 100))
     .populate('owner', 'name email')
@@ -91,8 +88,7 @@ const getNotes = async (userEmail = null, options = {}) => {
  * Get a single note by ID
  */
 const getNoteById = async (noteId, userEmail = null) => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId)
+    const note = await Note.findById(noteId)
     .populate('owner', 'name email')
     .populate('collaborators.user', 'name email');
   
@@ -127,8 +123,7 @@ const getNoteById = async (noteId, userEmail = null) => {
  * Update a note
  */
 const updateNote = async (noteId, userEmail, updates) => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId);
   
   if (!note) {
     throw new Error('Note not found');
@@ -161,8 +156,7 @@ const updateNote = async (noteId, userEmail, updates) => {
  * Delete a note
  */
 const deleteNote = async (noteId, userEmail) => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId);
   
   if (!note) {
     throw new Error('Note not found');
@@ -183,8 +177,7 @@ const deleteNote = async (noteId, userEmail) => {
  * Toggle note pinned status
  */
 const toggleNotePinned = async (noteId, userEmail) => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId);
   
   if (!note) {
     throw new Error('Note not found');
@@ -209,8 +202,7 @@ const toggleNotePinned = async (noteId, userEmail) => {
  * Add collaborator to note
  */
 const addCollaborator = async (noteId, ownerEmail, collaboratorEmail, permission = 'view') => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId);
   
   if (!note) {
     throw new Error('Note not found');
@@ -249,8 +241,7 @@ const addCollaborator = async (noteId, ownerEmail, collaboratorEmail, permission
  * Remove collaborator from note
  */
 const removeCollaborator = async (noteId, ownerEmail, collaboratorEmail) => {
-  const Note = getNoteModel();
-  const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId);
   
   if (!note) {
     throw new Error('Note not found');
@@ -284,8 +275,7 @@ const getPopularNotes = async (options = {}) => {
     query.isGist = options.isGist;
   }
   
-  const Note = getNoteModel();
-  const notes = await Note.find(query)
+    const notes = await Note.find(query)
     .sort({ viewCount: -1 })
     .limit(Math.min(options.limit || 20, 50))
     .populate('owner', 'name email');
