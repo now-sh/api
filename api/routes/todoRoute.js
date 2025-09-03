@@ -57,8 +57,7 @@ todoRoute.get('/list', cors(), optionalAuth, async (req, res) => {
       completed: req.query.completed === 'true' ? true : req.query.completed === 'false' ? false : undefined,
       tags: req.query.tags ? (Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags]) : undefined,
       priority: req.query.priority,
-      limit: Math.min(parseInt(req.query.limit) || 50, 100),
-      userId: req.user ? await authController.getUserId(req.user).catch(() => null) : null
+      limit: Math.min(parseInt(req.query.limit) || 50, 100)
     };
     
     const todos = await todoController.getTodos(req.user, filters);

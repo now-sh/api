@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
-const User = require('../models/user');
-const Token = require('../models/token');
+const getUserModel = require('../models/user');
+const getTokenModel = require('../models/token');
 
 
 
@@ -24,6 +24,7 @@ const generateToken = (email) => {
  * Save token to database
  */
 const saveToken = async (token, userId, email, description) => {
+  const Token = getTokenModel();
   await Token.create({
     token,
     userId,
@@ -36,6 +37,7 @@ const saveToken = async (token, userId, email, description) => {
  * Validate token is active
  */
 const isTokenActive = async (token) => {
+  const Token = getTokenModel();
   const tokenDoc = await Token.findOne({ token, isActive: true });
   
   if (tokenDoc) {
@@ -52,6 +54,7 @@ const isTokenActive = async (token) => {
  * Revoke a token
  */
 const revokeToken = async (token) => {
+  const Token = getTokenModel();
   await Token.updateOne(
     { token },
     { 
@@ -66,6 +69,8 @@ const revokeToken = async (token) => {
  */
 const signup = async (email, password, name) => {
   // Check if user already exists
+  console.log('Checking for existing user:', email);
+  const User = getUserModel();
   const existingUser = await User.findOne({ email });
   
   if (existingUser) {
@@ -103,6 +108,7 @@ const signup = async (email, password, name) => {
  */
 const login = async (email, password) => {
   // Find user
+  const User = getUserModel();
   const user = await User.findOne({ email });
   
   if (!user) {
@@ -136,6 +142,7 @@ const login = async (email, password) => {
  * Get user info
  */
 const getUser = async (email) => {
+  const User = getUserModel();
   const user = await User.findOne({ email });
   
   if (!user) {
@@ -169,6 +176,7 @@ const verifyToken = async (token) => {
  * Update user profile
  */
 const updateProfile = async (email, updates) => {
+  const User = getUserModel();
   const user = await User.findOne({ email });
   
   if (!user) {
@@ -198,6 +206,7 @@ const updateProfile = async (email, updates) => {
  * Check if user owns a resource (for public/private functionality)
  */
 const checkOwnership = async (userEmail, resourceOwnerId) => {
+  const User = getUserModel();
   const user = await User.findOne({ email: userEmail });
   
   if (!user) {
@@ -211,6 +220,7 @@ const checkOwnership = async (userEmail, resourceOwnerId) => {
  * Get user ID from email (for resource ownership)
  */
 const getUserId = async (email) => {
+  const User = getUserModel();
   const user = await User.findOne({ email }).select('_id');
   
   if (!user) {
@@ -238,12 +248,14 @@ const rotateToken = async (oldToken, revokeOld = true) => {
   }
   
   // Check if token is active
+  const Token = getTokenModel();
   const tokenDoc = await Token.findOne({ token: oldToken, isActive: true });
   if (!tokenDoc) {
     throw new Error('Token is not active or does not exist');
   }
   
   // Get user info
+  const User = getUserModel();
   const user = await User.findOne({ email });
   if (!user) {
     throw new Error('User not found');
@@ -257,6 +269,8 @@ const rotateToken = async (oldToken, revokeOld = true) => {
   
   // Update token relationships
   if (revokeOld) {
+    const Token = getTokenModel();
+    
     // Revoke old token
     await Token.updateOne(
       { token: oldToken },
@@ -288,12 +302,14 @@ const rotateToken = async (oldToken, revokeOld = true) => {
  * Get user's active tokens
  */
 const getUserTokens = async (email) => {
+  const User = getUserModel();
   const user = await User.findOne({ email });
   
   if (!user) {
     throw new Error('User not found');
   }
   
+  const Token = getTokenModel();
   const tokens = await Token.find({ 
     userId: user._id,
     isActive: true 
@@ -312,12 +328,14 @@ const getUserTokens = async (email) => {
  * Revoke all user tokens
  */
 const revokeAllUserTokens = async (email) => {
+  const User = getUserModel();
   const user = await User.findOne({ email });
   
   if (!user) {
     throw new Error('User not found');
   }
   
+  const Token = getTokenModel();
   const result = await Token.updateMany(
     { userId: user._id, isActive: true },
     { 

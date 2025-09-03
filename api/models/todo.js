@@ -59,12 +59,22 @@ todoSchema.index({ owner: 1, createdAt: -1 });
 todoSchema.index({ isPublic: 1, createdAt: -1 });
 todoSchema.index({ tags: 1 });
 
-// Export a function that returns the model using the correct connection
-module.exports = (() => {
+// Function that returns the model using the correct connection
+const getTodoModel = () => {
   // If connections are available, use the todos connection
   if (global.mongoConnections && global.mongoConnections.todos) {
-    return global.mongoConnections.todos.model('Todo', todoSchema);
+    try {
+      return global.mongoConnections.todos.model('Todo');
+    } catch (e) {
+      return global.mongoConnections.todos.model('Todo', todoSchema);
+    }
   }
   // Fallback to default mongoose connection
-  return mongoose.model('Todo', todoSchema);
-})();
+  try {
+    return mongoose.model('Todo');
+  } catch (e) {
+    return mongoose.model('Todo', todoSchema);
+  }
+};
+
+module.exports = getTodoModel;

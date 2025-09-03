@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.matches('[data-action="copy-token"]')) {
             copyToken();
         }
+        
+        // Handle edit profile button
+        if (e.target.matches('[data-action="edit-profile"]')) {
+            showEditProfile();
+        }
+        
+        // Handle cancel edit button
+        if (e.target.matches('[data-action="cancel-edit"]')) {
+            showProfile();
+        }
     });
     
     // Handle login form
@@ -42,12 +52,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const result = await response.json();
                 
-                if (response.ok) {
-                    localStorage.setItem('authToken', result.token);
-                    showAuthenticatedState(result.token, result.user);
+                if (response.ok && result.success) {
+                    localStorage.setItem('authToken', result.data.token);
+                    showAuthenticatedState(result.data.token, result.data.user);
                     showMessage('Login successful!', 'success');
                 } else {
-                    showMessage(result.message || 'Login failed', 'error');
+                    const errorMessage = result.errors && result.errors.length > 0 
+                        ? result.errors.map(err => err.msg).join(', ')
+                        : result.message || 'Login failed';
+                    showMessage(errorMessage, 'error');
                 }
             } catch (error) {
                 showMessage('Network error. Please try again.', 'error');
@@ -80,12 +93,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const result = await response.json();
                 
-                if (response.ok) {
-                    localStorage.setItem('authToken', result.token);
-                    showAuthenticatedState(result.token, result.user);
+                if (response.ok && result.success) {
+                    localStorage.setItem('authToken', result.data.token);
+                    showAuthenticatedState(result.data.token, result.data.user);
                     showMessage('Registration successful!', 'success');
                 } else {
-                    showMessage(result.message || 'Registration failed', 'error');
+                    const errorMessage = result.errors && result.errors.length > 0 
+                        ? result.errors.map(err => err.msg).join(', ')
+                        : result.message || 'Registration failed';
+                    showMessage(errorMessage, 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        });
+    }
+    
+    // Handle edit profile form
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name')
+            };
+            
+            // Only include password if it's not empty
+            const password = formData.get('password');
+            if (password && password.trim() !== '') {
+                data.password = password;
+            }
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showMessage('No authentication token found', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/auth/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showProfile();
+                    showAuthenticatedState(token, result.data.user);
+                    showMessage('Profile updated successfully!', 'success');
+                } else {
+                    const errorMessage = result.errors && result.errors.length > 0 
+                        ? result.errors.map(err => err.msg).join(', ')
+                        : result.error || 'Profile update failed';
+                    showMessage(errorMessage, 'error');
                 }
             } catch (error) {
                 showMessage('Network error. Please try again.', 'error');
@@ -154,7 +222,12 @@ async function checkAuthState() {
             
             if (response.ok) {
                 const result = await response.json();
-                showAuthenticatedState(token, result.user);
+                if (result.success && result.data && result.data.user) {
+                    showAuthenticatedState(token, result.data.user);
+                } else {
+                    localStorage.removeItem('authToken');
+                    showUnauthenticatedState();
+                }
             } else {
                 localStorage.removeItem('authToken');
                 showUnauthenticatedState();
@@ -172,6 +245,7 @@ function showAuthenticatedState(token, user) {
     // Hide login/register forms
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('registerCard').style.display = 'none';
+    document.getElementById('editProfileCard').style.display = 'none';
     
     // Show profile card
     const profileCard = document.getElementById('profileCard');
@@ -221,6 +295,7 @@ function showUnauthenticatedState() {
     // Show login form
     document.getElementById('loginCard').style.display = 'block';
     document.getElementById('registerCard').style.display = 'none';
+    document.getElementById('editProfileCard').style.display = 'none';
     
     // Hide profile and token
     document.getElementById('profileCard').style.display = 'none';
@@ -229,6 +304,38 @@ function showUnauthenticatedState() {
     // Clear form inputs
     document.getElementById('loginForm').reset();
     document.getElementById('registerForm').reset();
+    const editForm = document.getElementById('editProfileForm');
+    if (editForm) editForm.reset();
+}
+
+function showEditProfile() {
+    // Hide other cards
+    document.getElementById('profileCard').style.display = 'none';
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('registerCard').style.display = 'none';
+    
+    // Show edit form
+    document.getElementById('editProfileCard').style.display = 'block';
+    
+    // Pre-fill form with current values
+    const currentName = document.getElementById('profileName').textContent;
+    if (currentName && currentName !== '-') {
+        document.getElementById('editName').value = currentName;
+    }
+    
+    hideMessages();
+}
+
+function showProfile() {
+    // Hide edit form
+    document.getElementById('editProfileCard').style.display = 'none';
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('registerCard').style.display = 'none';
+    
+    // Show profile
+    document.getElementById('profileCard').style.display = 'block';
+    
+    hideMessages();
 }
 
 function showMessage(message, type = 'info') {

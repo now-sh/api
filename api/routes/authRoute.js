@@ -62,11 +62,14 @@ authRoute.get('/me', cors(), checkAuth, async (req, res) => {
     
     const user = await authController.getUser(req.user);
     
-    res.json({
+    const responseData = {
       success: true,
       errors: [],
       data: { user }
-    });
+    };
+    
+    setStandardHeaders(res, responseData);
+    res.json(responseData);
   } catch (error) {
     res.status(404).json({ 
       success: false,
@@ -98,11 +101,14 @@ authRoute.post(
     try {
       const result = await authController.signup(email, password, name);
       
-      res.json({
+      const responseData = {
         success: true,
         errors: [],
         data: result
-      });
+      };
+      
+      setStandardHeaders(res, responseData);
+      res.json(responseData);
     } catch (error) {
       res.status(400).json({
         success: false,
@@ -137,11 +143,14 @@ authRoute.post(
     try {
       const result = await authController.login(email, password);
       
-      res.json({
+      const responseData = {
         success: true,
         errors: [],
         data: result
-      });
+      };
+      
+      setStandardHeaders(res, responseData);
+      res.json(responseData);
     } catch (error) {
       res.status(401).json({
         success: false,
@@ -177,10 +186,13 @@ authRoute.put(
       
       const user = await authController.updateProfile(req.user, req.body);
       
-      res.json({
+      const responseData = {
         success: true,
         data: { user }
-      });
+      };
+      
+      setStandardHeaders(res, responseData);
+      res.json(responseData);
     } catch (error) {
       res.status(400).json({
         success: false,

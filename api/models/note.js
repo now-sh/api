@@ -100,12 +100,22 @@ noteSchema.virtual('snippet').get(function() {
   return this.content.substring(0, 200) + '...';
 });
 
-// Export a function that returns the model using the correct connection
-module.exports = (() => {
+// Function that returns the model using the correct connection
+const getNoteModel = () => {
   // If connections are available, use the notes connection
   if (global.mongoConnections && global.mongoConnections.notes) {
-    return global.mongoConnections.notes.model('Note', noteSchema);
+    try {
+      return global.mongoConnections.notes.model('Note');
+    } catch (e) {
+      return global.mongoConnections.notes.model('Note', noteSchema);
+    }
   }
   // Fallback to default mongoose connection
-  return mongoose.model('Note', noteSchema);
-})();
+  try {
+    return mongoose.model('Note');
+  } catch (e) {
+    return mongoose.model('Note', noteSchema);
+  }
+};
+
+module.exports = getNoteModel;

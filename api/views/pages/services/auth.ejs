@@ -110,7 +110,46 @@
             </div>
         </div>
         
-        <button data-action="logout" class="btn btn-secondary btn-block mt-4">Sign Out</button>
+        <div class="profile-actions mt-4">
+            <button data-action="edit-profile" class="btn btn-primary btn-sm">Edit Profile</button>
+            <button data-action="logout" class="btn btn-secondary btn-sm">Sign Out</button>
+        </div>
+    </div>
+    
+    <!-- Profile Edit Form -->
+    <div class="card auth-card" id="editProfileCard" style="display: none;">
+        <h2>Edit Profile</h2>
+        <form id="editProfileForm" class="auth-form">
+            <div class="form-group">
+                <label for="editName" class="form-label">Name</label>
+                <input 
+                    type="text" 
+                    id="editName" 
+                    name="name" 
+                    class="form-control" 
+                    placeholder="John Doe"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="editPassword" class="form-label">New Password (optional)</label>
+                <input 
+                    type="password" 
+                    id="editPassword" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="••••••••"
+                    minlength="5"
+                />
+                <small class="text-secondary">Leave blank to keep current password</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+                <button type="button" data-action="cancel-edit" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -190,6 +229,18 @@ fetch('/api/v1/protected-endpoint', {
 .btn-block {
     width: 100%;
     margin-top: var(--space-2);
+}
+
+.profile-actions {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: space-between;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
 }
 
 .profile-info {

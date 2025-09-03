@@ -22,10 +22,11 @@ const connectToDatabase = async (name, uri) => {
 
   try {
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      bufferCommands: false,
+      maxPoolSize: 10,
     };
 
     // Mask connection string for security

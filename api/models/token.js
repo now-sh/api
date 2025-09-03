@@ -50,12 +50,22 @@ const tokenSchema = new mongoose.Schema({
 tokenSchema.index({ userId: 1, isActive: 1 });
 tokenSchema.index({ email: 1, isActive: 1 });
 
-// Export a function that returns the model using the correct connection
-module.exports = (() => {
+// Function that returns the model using the correct connection
+const getTokenModel = () => {
   // If connections are available, use the api connection (tokens are auth-related)
   if (global.mongoConnections && global.mongoConnections.api) {
-    return global.mongoConnections.api.model('Token', tokenSchema);
+    try {
+      return global.mongoConnections.api.model('Token');
+    } catch (e) {
+      return global.mongoConnections.api.model('Token', tokenSchema);
+    }
   }
   // Fallback to default mongoose connection
-  return mongoose.model('Token', tokenSchema);
-})();
+  try {
+    return mongoose.model('Token');
+  } catch (e) {
+    return mongoose.model('Token', tokenSchema);
+  }
+};
+
+module.exports = getTokenModel;

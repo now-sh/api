@@ -8,7 +8,9 @@
       "Bash(npm start)",
       "Bash(for i in 1 2 3)",
       "Bash(do node:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(mongo:*)",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []

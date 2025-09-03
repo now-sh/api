@@ -20,12 +20,38 @@ const userSchema = new Schema({
   },
 });
 
-// Export a function that returns the model using the correct connection
-module.exports = (() => {
-  // If connections are available, use the api connection
-  if (global.mongoConnections && global.mongoConnections.api) {
-    return global.mongoConnections.api.model('User', userSchema);
+// Function that returns the model using the correct connection
+const getUserModel = () => {
+  // Register User model on all connections to avoid cross-database issues
+  if (global.mongoConnections) {
+    // Register on all available connections
+    Object.keys(global.mongoConnections).forEach(connName => {
+      const conn = global.mongoConnections[connName];
+      if (conn) {
+        try {
+          conn.model('User');
+        } catch (e) {
+          conn.model('User', userSchema);
+        }
+      }
+    });
+    
+    // Return the api connection model
+    if (global.mongoConnections.api) {
+      try {
+        return global.mongoConnections.api.model('User');
+      } catch (e) {
+        return global.mongoConnections.api.model('User', userSchema);
+      }
+    }
   }
+  
   // Fallback to default mongoose connection
-  return mongoose.model('User', userSchema);
-})();
+  try {
+    return mongoose.model('User');
+  } catch (e) {
+    return mongoose.model('User', userSchema);
+  }
+};
+
+module.exports = getUserModel;
