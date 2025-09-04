@@ -92,7 +92,7 @@ usaRoute.get('/nys', cors(), async (req, res) => {
   const hostname = req.headers.host;
   const proto = req.protocol + '://';
   try {
-    const json = await getJson(proto + hostname + '/api/v1/nys', {
+    const json = await getJson(proto + hostname + '/api/v1/world/nys', {
       headers: getHeaders(),
     });
     setStandardHeaders(res, json);

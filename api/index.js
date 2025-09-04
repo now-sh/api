@@ -87,6 +87,7 @@ app.use('/api/v1/world/closings', require('./routes/closingsRoute'));
 app.use('/api/v1/world/timezones', require('./routes/timezoneRoute'));
 app.use('/api/v1/world/usa', require('./routes/usaRoute'));
 app.use('/api/v1/world/usa/nys', require('./routes/nysRoute'));
+app.use('/api/v1/world/nys', require('./routes/nysRoute'));
 app.use('/api/v1/world/arcgis', require('./routes/arcgisRoute'));
 
 // 🔐 AUTH - Authentication & Profile
