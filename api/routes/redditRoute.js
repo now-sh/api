@@ -70,16 +70,17 @@ redditRoute.get('/u/:id',
           message: "User info retrieved"
         });
       } else {
-        res.json({
+        res.status(404).json({
           user: null,
           message: "User not found"
         });
       }
     } catch (error) {
       console.error('Reddit API error:', error);
-      res.json({
+      res.status(503).json({
         user: null,
-        message: "Reddit API is currently unavailable"
+        error: "Reddit API unavailable",
+        message: "Reddit is blocking unauthenticated requests. Authentication required for real data."
       });
     }
   }
@@ -94,33 +95,29 @@ redditRoute.get('/r/:id',
   validateRequest,
   async (req, res) => {
     try {
-      const data = await fetchRedditData(null, req.params.id);
+      const limit = parseInt(req.query.limit) || 25;
+      const data = await fetchRedditData(null, req.params.id, limit);
       
       if (data && data.data && data.data.children) {
-        // Remove first 3 posts if we have enough
+        // Return the posts
         let posts = data.data.children;
-        if (posts.length > 3) {
-          posts = posts.slice(3);
-        }
         
-        // Return legacy format for existing site compatibility
-        res.json({
-          reddit: posts,
-          totalPosts: posts.length
-        });
+        // Map to simpler format
+        const simplePosts = posts.map(post => post.data);
+        
+        // Return simplified format
+        res.json(simplePosts);
       } else {
-        res.json({
-          reddit: [],
-          totalPosts: 0,
-          message: "No data available"
+        res.status(404).json({
+          error: "No posts found",
+          message: "Subreddit not found or no posts available"
         });
       }
     } catch (error) {
       console.error('Reddit API error:', error);
-      res.json({
-        reddit: [],
-        totalPosts: 0,
-        message: "Reddit API is currently unavailable"
+      res.status(503).json({
+        error: "Reddit API unavailable",
+        message: "Reddit is blocking unauthenticated requests. Authentication required for real data."
       });
     }
   }
@@ -150,18 +147,20 @@ redditRoute.get('/:id',
           totalPosts: posts.length
         });
       } else {
-        res.json({
+        res.status(404).json({
           reddit: [],
           totalPosts: 0,
-          message: "No data available"
+          error: "No data available",
+          message: "Subreddit not found or no posts available"
         });
       }
     } catch (error) {
       console.error('Reddit API error:', error);
-      res.json({
+      res.status(503).json({
         reddit: [],
         totalPosts: 0,
-        message: "Reddit API is currently unavailable"
+        error: "Reddit API unavailable",
+        message: "Reddit is blocking unauthenticated requests. Authentication required for real data."
       });
     }
   }

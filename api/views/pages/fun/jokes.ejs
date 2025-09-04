@@ -1,0 +1,469 @@
+<div class="hero fade-in">
+    <h1>Joke Generator</h1>
+    <p class="lead">Get random jokes to brighten your day</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Random Jokes</h2>
+            <p class="card-text">Click the button to get a random joke!</p>
+            
+            <div class="joke-controls">
+                <button id="getJoke" class="btn btn-primary btn-lg">
+                    <i class="bi bi-emoji-laughing"></i> Get a Joke
+                </button>
+                
+                <div class="joke-filters mt-3">
+                    <label class="form-label">Joke Type:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-type="any">Any</button>
+                        <button class="filter-btn" data-type="programming">Programming</button>
+                        <button class="filter-btn" data-type="dad">Dad Jokes</button>
+                        <button class="filter-btn" data-type="pun">Puns</button>
+                        <button class="filter-btn" data-type="knock-knock">Knock-knock</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="jokeResult" class="result-container mt-6" style="display: none;">
+                <div id="jokeDisplay" class="joke-display">
+                    <div id="jokeSetup" class="joke-setup"></div>
+                    <div id="jokePunchline" class="joke-punchline"></div>
+                </div>
+                
+                <div class="joke-actions">
+                    <button class="btn btn-sm btn-info" onclick="copyJoke()">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="shareJoke()">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                    <button id="rateUp" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-hand-thumbs-up"></i> <span class="rate-count">0</span>
+                    </button>
+                    <button id="rateDown" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-hand-thumbs-down"></i> <span class="rate-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Joke Collection</h3>
+            <p class="card-text">Get multiple jokes at once</p>
+            
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                        <label for="jokeCount" class="form-label">Number of jokes</label>
+                        <input 
+                            type="number" 
+                            id="jokeCount" 
+                            class="form-control" 
+                            min="1" 
+                            max="10" 
+                            value="5"
+                        >
+                    </div>
+                    <button id="getBatchJokes" class="btn btn-primary">
+                        Get Multiple Jokes
+                    </button>
+                </div>
+            </div>
+            
+            <div id="batchResult" class="mt-4" style="display: none;">
+                <h4>Your Joke Collection</h4>
+                <div id="batchJokesDisplay"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get a random joke:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/random</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get jokes by type:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/programming</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get multiple jokes:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/batch/5</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const getJokeBtn = document.getElementById('getJoke');
+    const getBatchBtn = document.getElementById('getBatchJokes');
+    const jokeResult = document.getElementById('jokeResult');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    let currentJoke = null;
+    let currentType = 'any';
+    
+    // Filter buttons
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = btn.getAttribute('data-type');
+        });
+    });
+    
+    // Get single joke
+    getJokeBtn.addEventListener('click', fetchJoke);
+    
+    // Get batch jokes
+    getBatchBtn.addEventListener('click', fetchBatchJokes);
+    
+    // Rating buttons
+    document.getElementById('rateUp').addEventListener('click', () => rateJoke(true));
+    document.getElementById('rateDown').addEventListener('click', () => rateJoke(false));
+    
+    async function fetchJoke() {
+        const button = getJokeBtn;
+        const originalText = button.innerHTML;
+        
+        // Show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        
+        try {
+            const endpoint = currentType === 'any' ? 
+                '/api/v1/fun/jokes/random' : 
+                `/api/v1/fun/jokes/${currentType}`;
+                
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentJoke = data.data;
+                displayJoke(currentJoke);
+                jokeResult.style.display = 'block';
+                jokeResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError('Failed to fetch joke. Please try again.');
+            }
+        } catch (error) {
+            showError(`Error: ${error.message}`);
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }
+    
+    async function fetchBatchJokes() {
+        const count = document.getElementById('jokeCount').value;
+        const button = getBatchBtn;
+        const originalText = button.innerHTML;
+        const batchResult = document.getElementById('batchResult');
+        const batchDisplay = document.getElementById('batchJokesDisplay');
+        
+        // Show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        batchDisplay.innerHTML = '<div class="loading">Fetching jokes...</div>';
+        batchResult.style.display = 'block';
+        
+        try {
+            const response = await fetch(`/api/v1/fun/jokes/batch/${count}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayBatchJokes(data.data.jokes || data.data);
+                batchResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                batchDisplay.innerHTML = '<div class="error">Failed to fetch jokes.</div>';
+            }
+        } catch (error) {
+            batchDisplay.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }
+    
+    function displayJoke(joke) {
+        const setupEl = document.getElementById('jokeSetup');
+        const punchlineEl = document.getElementById('jokePunchline');
+        
+        if (joke.setup && joke.punchline) {
+            // Two-part joke
+            setupEl.textContent = joke.setup;
+            setupEl.style.display = 'block';
+            punchlineEl.textContent = joke.punchline;
+            punchlineEl.style.display = 'block';
+            
+            // Animate punchline
+            punchlineEl.style.opacity = '0';
+            setTimeout(() => {
+                punchlineEl.style.opacity = '1';
+            }, 1000);
+        } else {
+            // Single line joke
+            setupEl.textContent = joke.joke || joke.text || joke;
+            setupEl.style.display = 'block';
+            punchlineEl.style.display = 'none';
+        }
+        
+        // Reset ratings
+        document.querySelectorAll('.rate-count').forEach(el => el.textContent = '0');
+    }
+    
+    function displayBatchJokes(jokes) {
+        if (!Array.isArray(jokes)) {
+            jokes = [jokes];
+        }
+        
+        const html = jokes.map((joke, index) => {
+            const jokeText = joke.setup && joke.punchline ? 
+                `${joke.setup}<br><em>${joke.punchline}</em>` : 
+                (joke.joke || joke.text || joke);
+                
+            return `
+                <div class="batch-joke-item">
+                    <span class="joke-number">${index + 1}</span>
+                    <div class="joke-content">${jokeText}</div>
+                    <button class="btn btn-sm btn-info" onclick="copySpecificJoke('${escapeQuotes(jokeText)}')">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('batchJokesDisplay').innerHTML = html;
+    }
+    
+    function showError(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification error';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    function rateJoke(isPositive) {
+        const btn = isPositive ? document.getElementById('rateUp') : document.getElementById('rateDown');
+        const count = btn.querySelector('.rate-count');
+        const currentCount = parseInt(count.textContent);
+        count.textContent = currentCount + 1;
+        
+        // Visual feedback
+        btn.classList.add('rated');
+        setTimeout(() => btn.classList.remove('rated'), 300);
+    }
+});
+
+function copyJoke() {
+    const setup = document.getElementById('jokeSetup').textContent;
+    const punchline = document.getElementById('jokePunchline').textContent;
+    const fullJoke = punchline ? `${setup}\n${punchline}` : setup;
+    
+    navigator.clipboard.writeText(fullJoke).then(() => {
+        showToast('Joke copied to clipboard!');
+    });
+}
+
+function copySpecificJoke(joke) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = joke;
+    const text = tempDiv.textContent || tempDiv.innerText;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Joke copied to clipboard!');
+    });
+}
+
+function shareJoke() {
+    const setup = document.getElementById('jokeSetup').textContent;
+    const punchline = document.getElementById('jokePunchline').textContent;
+    const fullJoke = punchline ? `${setup}\n${punchline}` : setup;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Check out this joke!',
+            text: fullJoke
+        });
+    } else {
+        copyJoke();
+        showToast('Link copied! Share functionality not available on this device.');
+    }
+}
+
+function escapeQuotes(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/<br>/g, '\\n');
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
+<style>
+.joke-controls {
+    text-align: center;
+}
+
+.joke-filters {
+    margin-top: 2rem;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.filter-btn.active {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+
+.joke-display {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.joke-setup {
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.joke-punchline {
+    font-size: 1.6rem;
+    color: var(--yellow);
+    font-weight: 600;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.joke-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.rated {
+    transform: scale(1.2);
+    transition: transform 0.2s ease;
+}
+
+.batch-joke-item {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.joke-number {
+    background-color: var(--purple);
+    color: var(--background);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.joke-content {
+    flex: 1;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.joke-content em {
+    color: var(--yellow);
+    font-style: normal;
+    font-weight: 500;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.error {
+    background: var(--red);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+</style>

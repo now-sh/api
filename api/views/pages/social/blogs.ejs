@@ -1,0 +1,323 @@
+<div class="hero fade-in">
+    <h1>Blog Posts</h1>
+    <p class="lead">Browse and search blog posts from the repository</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Search Blog Posts</h2>
+            <form id="blogSearchForm" class="api-form">
+                <div class="form-group">
+                    <label for="searchQuery" class="form-label">Search Query</label>
+                    <input 
+                        type="text" 
+                        id="searchQuery" 
+                        class="form-control" 
+                        placeholder="Enter keywords to search posts"
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search Posts
+                </button>
+            </form>
+            
+            <div id="searchResults" class="result-container mt-4" style="display: none;"></div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">All Blog Posts</h3>
+            <button id="loadAllPosts" class="btn btn-primary mb-3">
+                <i class="bi bi-download"></i> Load All Posts
+            </button>
+            <div id="allPosts" class="all-posts"></div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Custom Repository</h3>
+            <p>Load blog posts from a specific GitHub repository</p>
+            <form id="repoForm" class="api-form">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="repoUser" class="form-label">GitHub Username</label>
+                            <input 
+                                type="text" 
+                                id="repoUser" 
+                                class="form-control" 
+                                placeholder="e.g., casjay"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="repoName" class="form-label">Repository Name</label>
+                            <input 
+                                type="text" 
+                                id="repoName" 
+                                class="form-control" 
+                                placeholder="e.g., blog"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-github"></i> Load Repository Posts
+                </button>
+            </form>
+            
+            <div id="repoResult" class="result-container mt-4" style="display: none;"></div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>List all posts:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/list</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Search posts:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/search?q=javascript</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get specific repository posts:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/repo/casjay/blog</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('blogSearchForm');
+    const repoForm = document.getElementById('repoForm');
+    const loadAllBtn = document.getElementById('loadAllPosts');
+    
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = document.getElementById('searchQuery').value.trim();
+        if (query) {
+            await searchPosts(query);
+        }
+    });
+    
+    repoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('repoUser').value.trim();
+        const repo = document.getElementById('repoName').value.trim();
+        if (user && repo) {
+            await loadRepoPosts(user, repo);
+        }
+    });
+    
+    loadAllBtn.addEventListener('click', async () => {
+        await loadAllPosts();
+    });
+});
+
+async function loadAllPosts() {
+    const container = document.getElementById('allPosts');
+    const loadBtn = document.getElementById('loadAllPosts');
+    
+    loadBtn.disabled = true;
+    loadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+    container.innerHTML = '<div class="loading">Loading posts...</div>';
+    
+    try {
+        const response = await fetch('/api/v1/blog/list');
+        const data = await response.json();
+        
+        if (response.ok && data.success && data.data.posts) {
+            displayPosts(data.data.posts, container);
+        } else {
+            container.innerHTML = '<div class="error">No posts available</div>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="error">Failed to load posts</div>';
+    } finally {
+        loadBtn.disabled = false;
+        loadBtn.innerHTML = '<i class="bi bi-download"></i> Load All Posts';
+    }
+}
+
+async function searchPosts(query) {
+    const resultDiv = document.getElementById('searchResults');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="loading">Searching...</div>';
+    
+    try {
+        const response = await fetch(`/api/v1/blog/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            if (data.data.posts && data.data.posts.length > 0) {
+                const html = `
+                    <h4>Search Results (${data.data.count} posts)</h4>
+                    <div class="posts-container">
+                        ${createPostsHTML(data.data.posts)}
+                    </div>
+                `;
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.innerHTML = '<div class="no-data">No posts found matching your search</div>';
+            }
+        } else {
+            resultDiv.innerHTML = '<div class="error">Search failed</div>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = '<div class="error">Failed to search posts</div>';
+    }
+}
+
+async function loadRepoPosts(user, repo) {
+    const resultDiv = document.getElementById('repoResult');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="loading">Loading repository posts...</div>';
+    
+    try {
+        const response = await fetch(`/api/v1/blog/repo/${user}/${repo}`);
+        const data = await response.json();
+        
+        if (response.ok && data.success && data.data.posts) {
+            const html = `
+                <h4>Posts from ${user}/${repo} (${data.data.count} posts)</h4>
+                <div class="posts-container">
+                    ${createPostsHTML(data.data.posts)}
+                </div>
+            `;
+            resultDiv.innerHTML = html;
+        } else {
+            resultDiv.innerHTML = '<div class="error">Failed to load repository posts. Make sure the repository exists and contains blog posts.</div>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = '<div class="error">Failed to load repository posts</div>';
+    }
+}
+
+function displayPosts(posts, container) {
+    if (!posts || posts.length === 0) {
+        container.innerHTML = '<div class="no-data">No posts available</div>';
+        return;
+    }
+    
+    container.innerHTML = createPostsHTML(posts);
+}
+
+function createPostsHTML(posts) {
+    return posts.map(post => `
+        <div class="post-card">
+            <h5 class="post-title">${post.title}</h5>
+            <div class="post-meta">
+                ${post.date ? `<span><i class="bi bi-calendar"></i> ${new Date(post.date).toLocaleDateString()}</span>` : ''}
+                ${post.author ? `<span><i class="bi bi-person"></i> ${post.author}</span>` : ''}
+                ${post.filename ? `<span><i class="bi bi-file-text"></i> ${post.filename}</span>` : ''}
+            </div>
+            ${post.excerpt || post.content ? `
+                <p class="post-excerpt">${post.excerpt || post.content.substring(0, 200) + '...'}</p>
+            ` : ''}
+            ${post.tags && post.tags.length > 0 ? `
+                <div class="post-tags">
+                    ${post.tags.map(tag => `<span class="tag-small">${tag}</span>`).join('')}
+                </div>
+            ` : ''}
+            ${post.url ? `
+                <a href="${post.url}" target="_blank" class="btn btn-sm btn-primary">
+                    Read More <i class="bi bi-arrow-right"></i>
+                </a>
+            ` : ''}
+        </div>
+    `).join('');
+}
+</script>
+
+<style>
+.posts-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.post-card {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--purple);
+}
+
+.post-title {
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+}
+
+.post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.post-excerpt {
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.tag-small {
+    font-size: 0.8rem;
+    background-color: var(--bg-primary);
+    color: var(--cyan);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.all-posts {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--red);
+}
+</style>

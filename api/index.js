@@ -97,81 +97,7 @@ app.use('/api/v1/profile', require('./routes/profileRoute'));
 app.use('/api/health', require('./routes/healthRoute'));
 app.use('/api/v1/version', require('./routes/apiRoute'));
 
-// ==== LEGACY ROUTES (For backward compatibility) ====
-app.use('/api/v1/utilities/base64', require('./routes/base64Route'));
-app.use('/api/v1/utilities/lorem', require('./routes/loremRoute'));
-app.use('/api/v1/git', require('./routes/gitLegacyRoute'));
-app.use('/api/v1/reddit', require('./routes/redditRoute'));
-app.use('/api/v1/blog', require('./routes/blogRoute'));
-app.use('/api/v1/domains', require('./routes/domainRoute'));
-app.use('/api/v1/anime', require('./routes/animeRoute'));
-app.use('/api/v1/anime/quote', require('./routes/animeRoute'));
-app.use('/api/v1/commit', require('./routes/commitRoute'));
-app.use('/api/v1/shrtnr', require('./routes/urlRoute'));
-app.use('/api/v1/closings', require('./routes/closingsRoute'));
-app.use('/api/v1/timezones', require('./routes/timezoneRoute'));
-app.use('/api/v1/global', require('./routes/covidRoute'));
-app.use('/api/v1/usa/nys', require('./routes/nysRoute'));
-app.use('/api/v1/personal/todos', require('./routes/todoRoute'));
-app.use('/api/v1/disease', require('./routes/diseaseRoute'));
-app.use('/api/v1/arcgis', require('./routes/arcgisRoute'));
-app.use('/api/v1/usa', require('./routes/usaRoute'));
 
-// Add healthz at v1 level
-const healthRoute = require('./routes/healthRoute');
-app.use('/api/v1', (req, res, next) => {
-  if (req.path === '/healthz') {
-    req.url = '/healthz';
-    healthRoute(req, res, next);
-  } else {
-    next();
-  }
-});
-
-// 🔐 Authentication Services
-app.use('/api/v1/auth', require('./routes/authRoute'));
-
-// ==== LEGACY ROUTES (BACKWARD COMPATIBILITY) ====
-// These routes maintain backward compatibility with existing clients
-
-// Legacy utility routes
-app.use('/api/v1/base64', require('./routes/base64Route'));
-app.use('/api/v1/hash', require('./routes/hashRoute'));
-app.use('/api/v1/uuid', require('./routes/uuidRoute'));
-app.use('/api/v1/jwt', require('./routes/jwtRoute'));
-app.use('/api/v1/qr', require('./routes/qrRoute'));
-app.use('/api/v1/color', require('./routes/colorRoute'));
-app.use('/api/v1/lorem', require('./routes/loremIpsum'));
-app.use('/api/v1/passwd', require('./routes/genpasswdRoute'));
-
-// Legacy tool routes
-app.use('/api/v1/commit', require('./routes/commitRoute'));
-
-// Legacy data routes
-app.use('/api/v1/domains', require('./routes/domainRoute'));
-app.use('/api/v1/git', require('./routes/gitLegacyRoute'));
-app.use('/api/v1/reddit', require('./routes/redditRoute'));
-app.use('/api/v1/blogs', require('./routes/blogRoute'));
-app.use('/api/v1/anime', require('./routes/animeRoute'));
-
-// Legacy health routes
-app.use('/api/v1/global', require('./routes/covidRoute'));
-app.use('/api/v1/arcgis', require('./routes/arcgisRoute'));
-app.use('/api/v1/usa', require('./routes/usaRoute'));
-app.use('/api/v1/nys', require('./routes/nysRoute'));
-app.use('/api/v1/disease', require('./routes/diseaseRoute'));
-app.use('/api/v1/closings', require('./routes/closingsRoute'));
-app.use('/api/v1/traffic', require('./routes/TrafficRoutes'));
-
-// Legacy personal routes
-app.use('/api/v1/auth', require('./routes/authRoute'));
-app.use('/api/v1/todos', require('./routes/todoRoute'));
-app.use('/api/v1/notes', require('./routes/notesRoute'));
-app.use('/api/v1/profile', require('./routes/profileRoute'));
-app.use('/api/v1/url', require('./routes/urlRoute'));
-
-// Legacy service routes
-app.use('/api/v1/timezones', require('./routes/timezoneRoute'));
 
 // ==== FRONTEND ROUTES ====
 // These serve the interactive frontend pages for API endpoints
@@ -198,6 +124,31 @@ app.get('/data/domains', (req, res) => res.render('pages/data/domains'));
 app.get('/data/timezones', (req, res) => res.render('pages/data/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/data/closings'));
 app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));
+
+// World pages
+app.get('/world/nys', (req, res) => res.render('pages/world/nys'));
+app.get('/world/usa', (req, res) => res.render('pages/world/usa'));
+app.get('/world/disease', (req, res) => res.render('pages/world/disease'));
+app.get('/world/arcgis', (req, res) => res.render('pages/world/arcgis'));
+app.get('/world/closings', (req, res) => res.render('pages/data/closings'));
+
+// Fun pages
+app.get('/fun/anime', (req, res) => res.render('pages/data/anime'));
+app.get('/fun/jokes', (req, res) => res.render('pages/fun/jokes'));
+app.get('/fun/facts', (req, res) => res.render('pages/fun/facts'));
+app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia'));
+
+// Social pages  
+app.get('/social/reddit', (req, res) => res.render('pages/social/reddit'));
+app.get('/social/github', (req, res) => res.render('pages/social/github'));
+app.get('/social/blogs', (req, res) => res.render('pages/social/blogs'));
+
+// Tool pages
+app.get('/tools/markdown', (req, res) => res.render('pages/tools/markdown'));
+app.get('/tools/cron', (req, res) => res.render('pages/tools/cron'));
+app.get('/tools/regex', (req, res) => res.render('pages/tools/regex'));
+app.get('/tools/diff', (req, res) => res.render('pages/tools/diff'));
+app.get('/tools/dictionary', (req, res) => res.render('pages/tools/dictionary'));
 
 // Personal frontend pages
 app.get('/personal/todos', (req, res) => res.render('pages/personal/todos'));

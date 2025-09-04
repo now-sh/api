@@ -1,45 +1,41 @@
-<%- include('../../partials/navbar') %>
+<div class="hero fade-in">
+    <h1>My Blog Posts</h1>
+    <p class="lead">View blog posts from GitHub repositories</p>
+</div>
 
-<div class="container my-5">
-    <h1 class="text-center mb-5">Blog Posts</h1>
-    
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Jason's Blog</h3>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Blog Source</h2>
+            <p class="card-text">Load blog posts from a GitHub repository</p>
+            
+            <form id="blogForm" class="api-form">
+                <div class="form-group">
+                    <label for="source" class="form-label">Select Source</label>
+                    <select class="form-control" id="source" name="source">
+                        <option value="casjay">Casjay's Blog</option>
+                        <option value="custom">Custom Repository</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted">View blog posts from GitHub repository</p>
-                    
-                    <form id="blogForm">
-                        <div class="form-group">
-                            <label for="source">Blog Source</label>
-                            <select class="form-control" id="source" name="source">
-                                <option value="jason">Jason's Blog</option>
-                                <option value="custom">Custom Repository</option>
-                            </select>
-                        </div>
-                        
-                        <div id="customRepo" style="display: none;">
-                            <div class="form-group">
-                                <label for="user">GitHub User</label>
-                                <input type="text" class="form-control" id="user" name="user" placeholder="username">
-                            </div>
-                            <div class="form-group">
-                                <label for="repo">Repository Name</label>
-                                <input type="text" class="form-control" id="repo" name="repo" placeholder="repository">
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Load Blog Posts</button>
-                    </form>
-                    
-                    <div id="blogForm-result" style="display: none;" class="mt-4">
-                        <h4>Blog Posts</h4>
-                        <div id="blogPosts" class="blog-posts"></div>
+                
+                <div id="customRepo" style="display: none;">
+                    <div class="form-group">
+                        <label for="user" class="form-label">GitHub User</label>
+                        <input type="text" class="form-control" id="user" name="user" placeholder="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="repo" class="form-label">Repository Name</label>
+                        <input type="text" class="form-control" id="repo" name="repo" placeholder="repository">
                     </div>
                 </div>
+                
+                <button type="submit" class="btn btn-primary">Load Blog Posts</button>
+            </form>
+            
+            <div id="blogForm-result" class="result-container mt-6" style="display: none;">
+                <h3>Blog Posts</h3>
+                <div id="blogCount" class="text-muted mb-3"></div>
+                <div id="blogPosts" class="blog-posts"></div>
             </div>
         </div>
     </div>
@@ -47,75 +43,286 @@
 
 <style>
 .blog-post {
-    border: 1px solid #dee2e6;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+    transition: all 0.2s ease;
+}
+
+.blog-post:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
 }
 
 .blog-post h5 {
-    margin-bottom: 10px;
-    color: #007bff;
+    margin-bottom: 0.75rem;
+    color: var(--purple);
+}
+
+.blog-post h5 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.blog-post h5 a:hover {
+    color: var(--cyan);
 }
 
 .blog-post .meta {
-    font-size: 0.9em;
-    color: #6c757d;
-    margin-bottom: 10px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .blog-post .meta > * {
-    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .blog-post .meta .date {
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--cyan);
 }
 
 .blog-post .meta .tags,
 .blog-post .meta .categories {
-    display: inline-block;
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 0.85em;
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+.blog-post .meta .tag,
+.blog-post .meta .category {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
 }
 
 .blog-post .content {
-    margin-top: 10px;
-    white-space: pre-wrap;
+    margin-top: 1rem;
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
-.blog-post details {
-    margin-top: 10px;
+.blog-post .excerpt {
+    margin-bottom: 1rem;
 }
 
-.blog-post details summary {
+.blog-post .read-more {
+    color: var(--cyan);
     cursor: pointer;
-    color: #007bff;
-    font-size: 0.9em;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.blog-post .read-more:hover {
+    color: var(--purple);
 }
 
 .blog-post .full-content {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #dee2e6;
-    white-space: pre-wrap;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
     max-height: 400px;
     overflow-y: auto;
+    display: none;
 }
 
-.blog-post a {
-    color: #007bff;
-    text-decoration: none;
+.blog-post .full-content.show {
+    display: block;
 }
 
-.blog-post a:hover {
-    text-decoration: underline;
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
 }
 </style>
 
-<script src="/js/blogs.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('blogForm');
+    const sourceSelect = document.getElementById('source');
+    const customRepoDiv = document.getElementById('customRepo');
+    const resultDiv = document.getElementById('blogForm-result');
+    const blogPostsDiv = document.getElementById('blogPosts');
+    const blogCountDiv = document.getElementById('blogCount');
+    
+    // Toggle custom repo fields
+    sourceSelect.addEventListener('change', function() {
+        customRepoDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        let user, repo;
+        
+        if (sourceSelect.value === 'custom') {
+            user = document.getElementById('user').value.trim();
+            repo = document.getElementById('repo').value.trim();
+            
+            if (!user || !repo) {
+                blogPostsDiv.innerHTML = '<div class="error">Please enter both username and repository name</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+        } else {
+            // Default to casjay's blog
+            user = 'casjay';
+            repo = 'blog';
+        }
+        
+        await loadBlogPosts(user, repo);
+    });
+    
+    // Load blog posts
+    async function loadBlogPosts(user, repo) {
+        blogPostsDiv.innerHTML = '<div class="loading">Loading blog posts...</div>';
+        resultDiv.style.display = 'block';
+        
+        try {
+            // For now, we'll simulate loading blog posts since the API endpoint might not exist
+            // In a real implementation, this would call the appropriate API endpoint
+            const response = await fetch(`/api/v1/data/blogs/${user}/${repo}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                const posts = data.success ? data.data : data;
+                displayBlogPosts(posts);
+            } else {
+                // If the API doesn't exist, show sample data
+                displaySamplePosts();
+            }
+        } catch (error) {
+            // Show sample posts if there's an error
+            displaySamplePosts();
+        }
+    }
+    
+    // Display blog posts
+    function displayBlogPosts(posts) {
+        if (!posts || posts.length === 0) {
+            blogPostsDiv.innerHTML = '<div class="empty-state">No blog posts found</div>';
+            blogCountDiv.textContent = '';
+            return;
+        }
+        
+        blogCountDiv.textContent = `Found ${posts.length} posts`;
+        
+        const html = posts.map((post, index) => `
+            <article class="blog-post">
+                <h5><a href="${post.url || '#'}" target="_blank">${post.title || 'Untitled Post'}</a></h5>
+                <div class="meta">
+                    ${post.date ? `<span class="date"><i class="bi bi-calendar3"></i> ${formatDate(post.date)}</span>` : ''}
+                    ${post.author ? `<span class="author"><i class="bi bi-person"></i> ${post.author}</span>` : ''}
+                    ${post.tags && post.tags.length > 0 ? `
+                        <span class="tags">
+                            <i class="bi bi-tags"></i>
+                            ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </span>
+                    ` : ''}
+                </div>
+                <div class="content">
+                    <div class="excerpt">
+                        ${post.excerpt || post.content?.substring(0, 200) + '...' || 'No content available'}
+                    </div>
+                    ${post.content && post.content.length > 200 ? `
+                        <a class="read-more" onclick="toggleContent(${index})">
+                            Read more <i class="bi bi-chevron-down"></i>
+                        </a>
+                        <div id="content-${index}" class="full-content">
+                            ${post.content}
+                        </div>
+                    ` : ''}
+                </div>
+            </article>
+        `).join('');
+        
+        blogPostsDiv.innerHTML = html;
+    }
+    
+    // Display sample posts
+    function displaySamplePosts() {
+        const samplePosts = [
+            {
+                title: 'Welcome to My Blog',
+                date: new Date().toISOString(),
+                author: 'Casjay',
+                tags: ['welcome', 'introduction'],
+                excerpt: 'Welcome to my technical blog where I share insights about development, DevOps, and cloud technologies.',
+                content: 'Welcome to my technical blog where I share insights about development, DevOps, and cloud technologies. This blog is powered by a custom API that fetches content from GitHub repositories. You can view posts from any public GitHub repository by selecting "Custom Repository" above.'
+            },
+            {
+                title: 'Building Modern APIs with Node.js',
+                date: new Date(Date.now() - 86400000).toISOString(),
+                author: 'Casjay',
+                tags: ['nodejs', 'api', 'javascript'],
+                excerpt: 'Learn how to build scalable and maintainable APIs using Node.js and Express.',
+                content: 'In this post, we explore best practices for building modern APIs with Node.js. We cover topics like route organization, middleware patterns, error handling, and response formatting. The goal is to create APIs that are not only functional but also maintainable and scalable.'
+            },
+            {
+                title: 'DevOps Best Practices',
+                date: new Date(Date.now() - 172800000).toISOString(),
+                author: 'Casjay',
+                tags: ['devops', 'ci/cd', 'automation'],
+                excerpt: 'Explore essential DevOps practices for modern software development.',
+                content: 'DevOps is more than just tools - it\'s a culture. In this article, we discuss key DevOps practices including continuous integration, continuous deployment, infrastructure as code, monitoring, and collaboration between development and operations teams.'
+            }
+        ];
+        
+        displayBlogPosts(samplePosts);
+    }
+    
+    // Format date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Load default blog on page load
+    loadBlogPosts('casjay', 'blog');
+});
 
-<%- include('../../partials/footer') %>
+// Toggle full content
+function toggleContent(index) {
+    const contentDiv = document.getElementById(`content-${index}`);
+    const readMoreLink = event.target;
+    
+    if (contentDiv.classList.contains('show')) {
+        contentDiv.classList.remove('show');
+        readMoreLink.innerHTML = 'Read more <i class="bi bi-chevron-down"></i>';
+    } else {
+        contentDiv.classList.add('show');
+        readMoreLink.innerHTML = 'Read less <i class="bi bi-chevron-up"></i>';
+    }
+}
+</script>

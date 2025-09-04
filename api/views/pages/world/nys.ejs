@@ -1,0 +1,276 @@
+<div class="hero fade-in">
+    <h1>New York State COVID-19 Data</h1>
+    <p class="lead">Real-time COVID-19 statistics for New York State</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">NYS COVID-19 Statistics</h2>
+            <p class="card-text">Current COVID-19 data from disease.sh API</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-virus"></i></div>
+                    <div class="stat-value" id="totalCases">-</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-activity"></i></div>
+                    <div class="stat-value" id="activeCases">-</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-heart-pulse"></i></div>
+                    <div class="stat-value" id="recovered">-</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-graph-down"></i></div>
+                    <div class="stat-value" id="deaths">-</div>
+                    <div class="stat-label">Deaths</div>
+                </div>
+            </div>
+            
+            <div class="additional-stats mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-detail">
+                            <span class="stat-detail-label">Cases per Million:</span>
+                            <span class="stat-detail-value" id="casesPerMillion">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-detail">
+                            <span class="stat-detail-label">Deaths per Million:</span>
+                            <span class="stat-detail-value" id="deathsPerMillion">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-detail">
+                            <span class="stat-detail-label">State Population:</span>
+                            <span class="stat-detail-value" id="population">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-detail">
+                            <span class="stat-detail-label">Last Updated:</span>
+                            <span class="stat-detail-value" id="lastUpdated">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="refreshStats" class="btn btn-primary mt-4">
+                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+            </button>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get NYS COVID data:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/nys</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Response format:</h4>
+                <pre><code>{
+  "nys": {
+    "state": "New York",
+    "cases": 6234567,
+    "deaths": 78432,
+    "recovered": 5923456,
+    "active": 232679,
+    "casesPerOneMillion": 320456,
+    "deathsPerOneMillion": 4032,
+    "population": 19453561,
+    "updated": 1634567890123
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshBtn = document.getElementById('refreshStats');
+    
+    // Load initial stats
+    loadNYSStats();
+    
+    // Refresh button
+    refreshBtn.addEventListener('click', loadNYSStats);
+    
+    async function loadNYSStats() {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        
+        try {
+            const response = await fetch('/api/v1/nys');
+            const data = await response.json();
+            
+            if (response.ok && data.nys) {
+                displayStats(data.nys);
+            } else {
+                showError('Failed to load NYS data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Failed to connect to server');
+        } finally {
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Data';
+        }
+    }
+    
+    function displayStats(stats) {
+        document.getElementById('totalCases').textContent = formatNumber(stats.cases || 0);
+        document.getElementById('activeCases').textContent = formatNumber(stats.active || 0);
+        document.getElementById('recovered').textContent = formatNumber(stats.recovered || 0);
+        document.getElementById('deaths').textContent = formatNumber(stats.deaths || 0);
+        
+        document.getElementById('casesPerMillion').textContent = formatNumber(stats.casesPerOneMillion || 0);
+        document.getElementById('deathsPerMillion').textContent = formatNumber(stats.deathsPerOneMillion || 0);
+        document.getElementById('population').textContent = formatNumber(stats.population || 0);
+        
+        if (stats.updated) {
+            const date = new Date(stats.updated);
+            document.getElementById('lastUpdated').textContent = date.toLocaleString();
+        }
+    }
+    
+    function showError(message) {
+        document.querySelectorAll('.stat-value').forEach(el => el.textContent = 'Error');
+        document.querySelectorAll('.stat-detail-value').forEach(el => el.textContent = 'N/A');
+        showToast(message, 'error');
+    }
+    
+    function formatNumber(num) {
+        return num.toLocaleString();
+    }
+    
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+});
+</script>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--purple);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.additional-stats {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.stat-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat-detail:last-child {
+    border-bottom: none;
+}
+
+.stat-detail-label {
+    color: var(--text-secondary);
+}
+
+.stat-detail-value {
+    color: var(--cyan);
+    font-weight: 500;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    color: var(--background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-error {
+    background-color: var(--red);
+}
+
+.toast-info {
+    background-color: var(--cyan);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--red);
+}
+</style>

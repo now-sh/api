@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load all available domains
     async function loadAllDomains() {
         try {
-            const response = await fetch('/api/v1/domains');
+            const response = await fetch('/api/v1/me/info/domains');
             
             if (response.ok) {
                 const data = await response.json();
@@ -47,6 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display domains as a grid
     function displayDomains(domains) {
+        // Update domain count
+        const countEl = document.getElementById('domainCount');
+        if (countEl) {
+            countEl.textContent = `${domains.length} domains`;
+        }
+        
         if (!domains || domains.length === 0) {
             domainsList.innerHTML = '<div class="empty-state">No domains available</div>';
             return;
@@ -74,8 +80,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.domain-item').forEach(item => {
             item.addEventListener('click', function() {
                 const domain = this.getAttribute('data-domain');
-                // You could expand this to show more details or redirect
-                alert(`Domain: ${domain}\nClick functionality can be expanded here.`);
+                // Copy domain to clipboard
+                navigator.clipboard.writeText(domain).then(() => {
+                    // Visual feedback
+                    const originalBorder = this.style.borderColor;
+                    this.style.borderColor = 'var(--green)';
+                    
+                    // Show copied message
+                    const statusEl = this.querySelector('.domain-status');
+                    const originalText = statusEl.textContent;
+                    statusEl.textContent = 'Copied!';
+                    statusEl.classList.add('status-available');
+                    
+                    setTimeout(() => {
+                        this.style.borderColor = originalBorder;
+                        statusEl.textContent = originalText;
+                        statusEl.classList.remove('status-available');
+                    }, 2000);
+                });
             });
         });
     }

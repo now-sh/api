@@ -1,0 +1,415 @@
+<div class="hero fade-in">
+    <h1>Regex Tester</h1>
+    <p class="lead">Test and debug regular expressions with real-time matching</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Regular Expression Tester</h2>
+            <p class="card-text">Write and test regex patterns with instant feedback</p>
+            
+            <form id="regexForm" class="api-form">
+                <div class="form-group">
+                    <label for="pattern" class="form-label">Regex Pattern</label>
+                    <input 
+                        type="text" 
+                        id="pattern" 
+                        name="pattern" 
+                        class="form-control regex-input" 
+                        placeholder="Enter regex pattern (e.g., \d{3}-\d{3}-\d{4})"
+                        value="\d{3}-\d{3}-\d{4}"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Regex Flags</label>
+                    <div class="flags-group">
+                        <label class="flag-label">
+                            <input type="checkbox" name="flag_g" value="g" checked>
+                            <span>g - Global</span>
+                        </label>
+                        <label class="flag-label">
+                            <input type="checkbox" name="flag_i" value="i">
+                            <span>i - Case insensitive</span>
+                        </label>
+                        <label class="flag-label">
+                            <input type="checkbox" name="flag_m" value="m">
+                            <span>m - Multiline</span>
+                        </label>
+                        <label class="flag-label">
+                            <input type="checkbox" name="flag_s" value="s">
+                            <span>s - Dot matches newline</span>
+                        </label>
+                        <label class="flag-label">
+                            <input type="checkbox" name="flag_u" value="u">
+                            <span>u - Unicode</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="testString" class="form-label">Test String</label>
+                    <textarea 
+                        id="testString" 
+                        name="testString" 
+                        class="form-control" 
+                        rows="6" 
+                        placeholder="Enter text to test against..."
+                    >Call me at 555-123-4567 or 555-987-6543.
+Email: user@example.com
+Visit https://example.com or http://test.org
+Date: 2024-01-15</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-play-circle"></i> Test Pattern
+                </button>
+            </form>
+            
+            <div id="regexResult" class="result-container mt-6" style="display: none;">
+                <h3>Results</h3>
+                
+                <div class="match-summary">
+                    <span id="matchCount" class="badge bg-success"></span>
+                    <span id="patternInfo" class="text-muted ms-3"></span>
+                </div>
+                
+                <div class="matches-section mt-4">
+                    <h4>Matches</h4>
+                    <div id="matchesList" class="matches-list"></div>
+                </div>
+                
+                <div class="highlighted-section mt-4">
+                    <h4>Highlighted Text</h4>
+                    <div id="highlightedText" class="highlighted-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Common Patterns</h3>
+            <div class="pattern-grid">
+                <button class="pattern-btn" onclick="setPattern('\\\\d{3}-\\\\d{3}-\\\\d{4}')">
+                    <strong>Phone Number</strong>
+                    <code>\d{3}-\d{3}-\d{4}</code>
+                </button>
+                <button class="pattern-btn" onclick="setPattern('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}')">
+                    <strong>Email</strong>
+                    <code>Email pattern</code>
+                </button>
+                <button class="pattern-btn" onclick="setPattern('https?://[^\\\\s]+')">
+                    <strong>URL</strong>
+                    <code>https?://[^\s]+</code>
+                </button>
+                <button class="pattern-btn" onclick="setPattern('\\\\b\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3}\\\\b')">
+                    <strong>IP Address</strong>
+                    <code>IP pattern</code>
+                </button>
+                <button class="pattern-btn" onclick="setPattern('\\\\d{4}-\\\\d{2}-\\\\d{2}')">
+                    <strong>Date (YYYY-MM-DD)</strong>
+                    <code>\d{4}-\d{2}-\d{2}</code>
+                </button>
+                <button class="pattern-btn" onclick="setPattern('#[0-9A-Fa-f]{6}')">
+                    <strong>Hex Color</strong>
+                    <code>#[0-9A-Fa-f]{6}</code>
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Test regex pattern:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/regex/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pattern": "\\\\d{3}-\\\\d{3}-\\\\d{4}",
+    "text": "Call me at 555-123-4567",
+    "flags": "g"
+  }'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('regexForm');
+    const patternInput = document.getElementById('pattern');
+    const testStringInput = document.getElementById('testString');
+    const resultDiv = document.getElementById('regexResult');
+    
+    // Test on form submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await testRegex();
+    });
+    
+    // Test on input change
+    patternInput.addEventListener('input', debounce(testRegex, 500));
+    testStringInput.addEventListener('input', debounce(testRegex, 500));
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', testRegex);
+    });
+    
+    async function testRegex() {
+        const pattern = patternInput.value;
+        const text = testStringInput.value;
+        
+        if (!pattern || !text) {
+            resultDiv.style.display = 'none';
+            return;
+        }
+        
+        // Get selected flags
+        const flags = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value)
+            .join('');
+        
+        try {
+            const response = await fetch('/api/v1/tools/regex/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pattern, text, flags })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayResults(data.data);
+                resultDiv.style.display = 'block';
+            } else {
+                showError(data.error || 'Invalid regex pattern');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    }
+    
+    function displayResults(result) {
+        // Match count
+        const matchCount = result.matches ? result.matches.length : 0;
+        document.getElementById('matchCount').textContent = `${matchCount} match${matchCount !== 1 ? 'es' : ''} found`;
+        document.getElementById('patternInfo').textContent = `Pattern: /${patternInput.value}/${result.flags || ''}`;
+        
+        // Matches list
+        const matchesList = document.getElementById('matchesList');
+        if (result.matches && result.matches.length > 0) {
+            matchesList.innerHTML = result.matches.map((match, index) => `
+                <div class="match-item">
+                    <span class="match-index">${index + 1}</span>
+                    <span class="match-value">${escapeHtml(match.value)}</span>
+                    <span class="match-position">Position: ${match.index}</span>
+                    ${match.groups && Object.keys(match.groups).length > 0 ? `
+                        <div class="match-groups">
+                            Groups: ${Object.entries(match.groups).map(([key, val]) => 
+                                `<span class="group-item">${key}: ${escapeHtml(val)}</span>`
+                            ).join(' ')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        } else {
+            matchesList.innerHTML = '<p class="text-muted">No matches found</p>';
+        }
+        
+        // Highlighted text
+        const highlightedText = document.getElementById('highlightedText');
+        if (result.highlighted) {
+            highlightedText.innerHTML = result.highlighted;
+        } else {
+            // Create highlighted text client-side as fallback
+            let highlighted = escapeHtml(testStringInput.value);
+            if (result.matches) {
+                // Sort matches by index in reverse order to avoid position shifts
+                const sortedMatches = [...result.matches].sort((a, b) => b.index - a.index);
+                sortedMatches.forEach(match => {
+                    const before = highlighted.slice(0, match.index);
+                    const matched = highlighted.slice(match.index, match.index + match.value.length);
+                    const after = highlighted.slice(match.index + match.value.length);
+                    highlighted = before + `<span class="regex-match">${matched}</span>` + after;
+                });
+            }
+            highlightedText.innerHTML = highlighted;
+        }
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function showError(message) {
+        resultDiv.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        resultDiv.style.display = 'block';
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Test with default values on load
+    testRegex();
+});
+
+function setPattern(pattern) {
+    document.getElementById('pattern').value = pattern;
+    document.getElementById('regexForm').dispatchEvent(new Event('submit'));
+}
+</script>
+
+<style>
+.regex-input {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.1rem;
+}
+
+.flags-group {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.flag-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.flag-label input {
+    cursor: pointer;
+}
+
+.flag-label span {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+.match-summary {
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.matches-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.match-item {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.match-index {
+    background-color: var(--purple);
+    color: var(--background);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.match-value {
+    font-family: 'Monaco', 'Consolas', monospace;
+    background-color: var(--bg-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    color: var(--yellow);
+}
+
+.match-position {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.match-groups {
+    width: 100%;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.group-item {
+    background-color: var(--bg-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    margin-right: 0.5rem;
+    color: var(--cyan);
+}
+
+.highlighted-text {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    font-family: 'Monaco', 'Consolas', monospace;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.regex-match {
+    background-color: rgba(189, 147, 249, 0.3);
+    color: var(--yellow);
+    padding: 0.2rem;
+    border-radius: var(--radius-sm);
+    border-bottom: 2px solid var(--purple);
+}
+
+.pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.pattern-btn {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: left;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pattern-btn:hover {
+    background-color: var(--bg-primary);
+    border-color: var(--purple);
+    transform: translateY(-2px);
+}
+
+.pattern-btn strong {
+    display: block;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+}
+
+.pattern-btn code {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+</style>

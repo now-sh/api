@@ -1,0 +1,419 @@
+<div class="hero fade-in">
+    <h1>Text Diff Tool</h1>
+    <p class="lead">Compare two texts and visualize the differences</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Text Comparison</h2>
+            <p class="card-text">Enter two texts to see their differences highlighted</p>
+            
+            <form id="diffForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="text1" class="form-label">Original Text</label>
+                            <textarea 
+                                id="text1" 
+                                class="form-control diff-input" 
+                                rows="10" 
+                                placeholder="Enter original text..."
+                            >The quick brown fox jumps over the lazy dog.
+This is the original text.
+It has multiple lines.
+Some lines will be changed.
+Others will remain the same.</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="text2" class="form-label">Modified Text</label>
+                            <textarea 
+                                id="text2" 
+                                class="form-control diff-input" 
+                                rows="10" 
+                                placeholder="Enter modified text..."
+                            >The quick brown fox jumps over the sleepy cat.
+This is the modified text.
+It has multiple lines.
+Some lines have been changed.
+Others will remain the same.
+A new line was added here.</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diff-options">
+                    <label class="form-label">Diff Options</label>
+                    <div class="options-group">
+                        <label class="option-label">
+                            <input type="checkbox" id="ignoreCase" name="ignoreCase">
+                            <span>Ignore case</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="ignoreWhitespace" name="ignoreWhitespace">
+                            <span>Ignore whitespace</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="viewMode" value="inline" checked>
+                            <span>Inline view</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="viewMode" value="split">
+                            <span>Side-by-side view</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-file-diff"></i> Compare Texts
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="swapTexts()">
+                        <i class="bi bi-arrow-left-right"></i> Swap Texts
+                    </button>
+                    <button type="reset" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </button>
+                </div>
+            </form>
+            
+            <div id="diffResult" class="result-container mt-6" style="display: none;">
+                <h3>Comparison Results</h3>
+                
+                <div class="diff-stats">
+                    <span class="stat-item additions">
+                        <i class="bi bi-plus-circle"></i> <span id="additionsCount">0</span> additions
+                    </span>
+                    <span class="stat-item deletions">
+                        <i class="bi bi-dash-circle"></i> <span id="deletionsCount">0</span> deletions
+                    </span>
+                    <span class="stat-item changes">
+                        <i class="bi bi-arrow-left-right"></i> <span id="changesCount">0</span> changes
+                    </span>
+                </div>
+                
+                <div id="diffOutput" class="diff-output"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Compare texts:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/diff/compare \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text1": "Original text here",
+    "text2": "Modified text here",
+    "options": {
+      "ignoreCase": false,
+      "ignoreWhitespace": false
+    }
+  }'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('diffForm');
+    const text1 = document.getElementById('text1');
+    const text2 = document.getElementById('text2');
+    const resultDiv = document.getElementById('diffResult');
+    const diffOutput = document.getElementById('diffOutput');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await compareTexts();
+    });
+    
+    // Auto-compare on text change
+    text1.addEventListener('input', debounce(compareTexts, 1000));
+    text2.addEventListener('input', debounce(compareTexts, 1000));
+    
+    async function compareTexts() {
+        const originalText = text1.value;
+        const modifiedText = text2.value;
+        
+        if (!originalText && !modifiedText) {
+            resultDiv.style.display = 'none';
+            return;
+        }
+        
+        const options = {
+            ignoreCase: document.getElementById('ignoreCase').checked,
+            ignoreWhitespace: document.getElementById('ignoreWhitespace').checked
+        };
+        
+        try {
+            const response = await fetch('/api/v1/tools/diff/compare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text1: originalText,
+                    text2: modifiedText,
+                    options
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayDiff(data.data);
+                resultDiv.style.display = 'block';
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError(data.error || 'Comparison failed');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    }
+    
+    function displayDiff(result) {
+        // Update statistics
+        document.getElementById('additionsCount').textContent = result.statistics?.additions || 0;
+        document.getElementById('deletionsCount').textContent = result.statistics?.deletions || 0;
+        document.getElementById('changesCount').textContent = result.statistics?.changes || 0;
+        
+        // Display diff based on view mode
+        const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+        
+        if (viewMode === 'split') {
+            displaySplitView(result);
+        } else {
+            displayInlineView(result);
+        }
+    }
+    
+    function displayInlineView(result) {
+        let html = '<div class="diff-inline">';
+        
+        if (result.diff) {
+            result.diff.forEach(part => {
+                if (part.added) {
+                    html += `<span class="diff-added">${escapeHtml(part.value)}</span>`;
+                } else if (part.removed) {
+                    html += `<span class="diff-removed">${escapeHtml(part.value)}</span>`;
+                } else {
+                    html += `<span class="diff-unchanged">${escapeHtml(part.value)}</span>`;
+                }
+            });
+        } else if (result.lines) {
+            result.lines.forEach(line => {
+                if (line.type === 'add') {
+                    html += `<div class="diff-line diff-line-added">+ ${escapeHtml(line.content)}</div>`;
+                } else if (line.type === 'remove') {
+                    html += `<div class="diff-line diff-line-removed">- ${escapeHtml(line.content)}</div>`;
+                } else {
+                    html += `<div class="diff-line diff-line-unchanged">&nbsp; ${escapeHtml(line.content)}</div>`;
+                }
+            });
+        }
+        
+        html += '</div>';
+        diffOutput.innerHTML = html;
+    }
+    
+    function displaySplitView(result) {
+        let html = '<div class="diff-split"><div class="diff-side diff-side-left">';
+        let rightHtml = '<div class="diff-side diff-side-right">';
+        
+        if (result.lines) {
+            result.lines.forEach(line => {
+                if (line.type === 'remove') {
+                    html += `<div class="diff-line diff-line-removed">${escapeHtml(line.content)}</div>`;
+                    rightHtml += `<div class="diff-line diff-line-empty">&nbsp;</div>`;
+                } else if (line.type === 'add') {
+                    html += `<div class="diff-line diff-line-empty">&nbsp;</div>`;
+                    rightHtml += `<div class="diff-line diff-line-added">${escapeHtml(line.content)}</div>`;
+                } else {
+                    html += `<div class="diff-line">${escapeHtml(line.content)}</div>`;
+                    rightHtml += `<div class="diff-line">${escapeHtml(line.content)}</div>`;
+                }
+            });
+        }
+        
+        html += '</div>';
+        rightHtml += '</div>';
+        diffOutput.innerHTML = html + rightHtml + '</div>';
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function showError(message) {
+        diffOutput.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        resultDiv.style.display = 'block';
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Compare on load if texts are present
+    if (text1.value || text2.value) {
+        compareTexts();
+    }
+});
+
+function swapTexts() {
+    const text1 = document.getElementById('text1');
+    const text2 = document.getElementById('text2');
+    const temp = text1.value;
+    text1.value = text2.value;
+    text2.value = temp;
+    
+    document.getElementById('diffForm').dispatchEvent(new Event('submit'));
+}
+</script>
+
+<style>
+.diff-input {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+.diff-options {
+    margin: 1.5rem 0;
+}
+
+.options-group {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.diff-stats {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-item.additions {
+    color: var(--green);
+}
+
+.stat-item.deletions {
+    color: var(--red);
+}
+
+.stat-item.changes {
+    color: var(--yellow);
+}
+
+.diff-output {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.diff-inline {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.diff-added {
+    background-color: rgba(80, 250, 123, 0.2);
+    color: var(--green);
+    padding: 0.2rem;
+    border-radius: var(--radius-sm);
+}
+
+.diff-removed {
+    background-color: rgba(255, 85, 85, 0.2);
+    color: var(--red);
+    padding: 0.2rem;
+    border-radius: var(--radius-sm);
+    text-decoration: line-through;
+}
+
+.diff-unchanged {
+    color: var(--text-secondary);
+}
+
+.diff-line {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.diff-line-added {
+    background-color: rgba(80, 250, 123, 0.1);
+    color: var(--green);
+}
+
+.diff-line-removed {
+    background-color: rgba(255, 85, 85, 0.1);
+    color: var(--red);
+}
+
+.diff-line-unchanged {
+    color: var(--text-secondary);
+}
+
+.diff-line-empty {
+    background-color: var(--bg-primary);
+    opacity: 0.5;
+}
+
+.diff-split {
+    display: flex;
+    gap: 1rem;
+}
+
+.diff-side {
+    flex: 1;
+    overflow-x: auto;
+}
+
+.diff-side-left {
+    border-right: 1px solid var(--border-color);
+    padding-right: 1rem;
+}
+
+.diff-side-right {
+    padding-left: 1rem;
+}
+</style>

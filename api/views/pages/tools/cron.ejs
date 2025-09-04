@@ -1,0 +1,320 @@
+<div class="hero fade-in">
+    <h1>Cron Expression Parser</h1>
+    <p class="lead">Parse and validate cron expressions with human-readable descriptions</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Parse Cron Expression</h2>
+            <p class="card-text">Enter a cron expression to see when it will run</p>
+            
+            <form id="cronForm" class="api-form">
+                <div class="form-group">
+                    <label for="cronExpression" class="form-label">Cron Expression</label>
+                    <input 
+                        type="text" 
+                        id="cronExpression" 
+                        name="cronExpression" 
+                        class="form-control cron-input" 
+                        placeholder="0 0 * * *"
+                        value="0 0 * * *"
+                        required
+                    >
+                    <small class="form-text text-muted">
+                        Format: minute hour day month weekday
+                    </small>
+                </div>
+                
+                <div class="cron-help">
+                    <p class="mb-2"><strong>Quick Reference:</strong></p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <code>* * * * *</code> - Every minute<br>
+                            <code>0 * * * *</code> - Every hour<br>
+                            <code>0 0 * * *</code> - Every day at midnight<br>
+                            <code>0 0 * * 0</code> - Every Sunday at midnight
+                        </div>
+                        <div class="col-md-6">
+                            <code>*/5 * * * *</code> - Every 5 minutes<br>
+                            <code>0 9-17 * * 1-5</code> - Hourly on weekdays 9am-5pm<br>
+                            <code>0 0 1 * *</code> - First day of every month<br>
+                            <code>0 0 1 1 *</code> - New Year's Day
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-clock"></i> Parse Expression
+                </button>
+            </form>
+            
+            <div id="cronResult" class="result-container mt-6" style="display: none;">
+                <h3 class="mb-4">Cron Analysis</h3>
+                
+                <div class="cron-description">
+                    <h4>Description:</h4>
+                    <p id="humanReadable" class="lead text-info"></p>
+                </div>
+                
+                <div class="cron-fields mt-4">
+                    <h4>Field Breakdown:</h4>
+                    <div class="row">
+                        <div class="col">
+                            <strong>Minute:</strong>
+                            <div id="minuteField" class="field-value"></div>
+                        </div>
+                        <div class="col">
+                            <strong>Hour:</strong>
+                            <div id="hourField" class="field-value"></div>
+                        </div>
+                        <div class="col">
+                            <strong>Day:</strong>
+                            <div id="dayField" class="field-value"></div>
+                        </div>
+                        <div class="col">
+                            <strong>Month:</strong>
+                            <div id="monthField" class="field-value"></div>
+                        </div>
+                        <div class="col">
+                            <strong>Weekday:</strong>
+                            <div id="weekdayField" class="field-value"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="next-runs mt-4">
+                    <h4>Next 10 Runs:</h4>
+                    <ul id="nextRuns" class="next-runs-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Common Cron Expressions</h3>
+            <div class="common-crons">
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('0 0 * * *')">Daily at midnight</button>
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('0 */6 * * *')">Every 6 hours</button>
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('0 9 * * 1-5')">Weekdays at 9am</button>
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('0 0 * * 1')">Every Monday</button>
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('0 0 1,15 * *')">1st and 15th of month</button>
+                <button class="btn btn-sm btn-outline-info" onclick="setCron('*/30 * * * *')">Every 30 minutes</button>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Parse cron expression:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/cron/parse \
+  -H "Content-Type: application/json" \
+  -d '{"expression": "0 0 * * *"}'</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Validate cron expression:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/cron/validate \
+  -H "Content-Type: application/json" \
+  -d '{"expression": "0 0 * * *"}'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cronForm');
+    const cronInput = document.getElementById('cronExpression');
+    const resultDiv = document.getElementById('cronResult');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await parseCron();
+    });
+    
+    cronInput.addEventListener('input', debounce(async () => {
+        if (cronInput.value.trim()) {
+            await parseCron();
+        }
+    }, 500));
+    
+    async function parseCron() {
+        const expression = cronInput.value.trim();
+        if (!expression) return;
+        
+        try {
+            const response = await fetch('/api/v1/tools/cron/parse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ expression })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayResults(data.data);
+                resultDiv.style.display = 'block';
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError(data.error || 'Invalid cron expression');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    }
+    
+    function displayResults(result) {
+        // Human readable description
+        document.getElementById('humanReadable').textContent = result.description || 'Custom schedule';
+        
+        // Field breakdown
+        const fields = result.fields || {};
+        document.getElementById('minuteField').textContent = fields.minute || '*';
+        document.getElementById('hourField').textContent = fields.hour || '*';
+        document.getElementById('dayField').textContent = fields.dayOfMonth || '*';
+        document.getElementById('monthField').textContent = fields.month || '*';
+        document.getElementById('weekdayField').textContent = fields.dayOfWeek || '*';
+        
+        // Next runs
+        const nextRunsList = document.getElementById('nextRuns');
+        nextRunsList.innerHTML = '';
+        
+        if (result.nextRuns && result.nextRuns.length > 0) {
+            result.nextRuns.forEach(run => {
+                const li = document.createElement('li');
+                const date = new Date(run);
+                li.innerHTML = `
+                    <span class="run-date">${date.toLocaleDateString()}</span>
+                    <span class="run-time">${date.toLocaleTimeString()}</span>
+                    <span class="run-relative">${getRelativeTime(date)}</span>
+                `;
+                nextRunsList.appendChild(li);
+            });
+        }
+    }
+    
+    function getRelativeTime(date) {
+        const now = new Date();
+        const diff = date - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        if (days > 0) {
+            return `in ${days} day${days > 1 ? 's' : ''}`;
+        } else if (hours > 0) {
+            return `in ${hours} hour${hours > 1 ? 's' : ''}`;
+        } else {
+            const minutes = Math.floor(diff / (1000 * 60));
+            return `in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+        }
+    }
+    
+    function showError(message) {
+        resultDiv.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        resultDiv.style.display = 'block';
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Parse default expression on load
+    parseCron();
+});
+
+function setCron(expression) {
+    document.getElementById('cronExpression').value = expression;
+    document.getElementById('cronForm').dispatchEvent(new Event('submit'));
+}
+</script>
+
+<style>
+.cron-input {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+}
+
+.cron-help {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.cron-help code {
+    color: var(--yellow);
+    background-color: var(--bg-primary);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--radius-sm);
+}
+
+.cron-description {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--cyan);
+}
+
+.field-value {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.1rem;
+    color: var(--yellow);
+    background-color: var(--bg-secondary);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.next-runs-list {
+    list-style: none;
+    padding: 0;
+}
+
+.next-runs-list li {
+    background-color: var(--bg-secondary);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.run-date {
+    color: var(--purple);
+    font-weight: 500;
+}
+
+.run-time {
+    color: var(--cyan);
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.run-relative {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.common-crons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.common-crons button {
+    font-size: 0.85rem;
+}
+</style>

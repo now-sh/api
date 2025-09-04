@@ -1,0 +1,519 @@
+<div class="hero fade-in">
+    <h1>Disease Information</h1>
+    <p class="lead">Global disease outbreak tracking and information</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Disease Outbreak Tracker</h2>
+            <p class="card-text">Monitor current disease outbreaks worldwide</p>
+            
+            <div class="disease-filters">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="diseaseType" class="form-label">Disease Type</label>
+                            <select id="diseaseType" class="form-control">
+                                <option value="all">All Diseases</option>
+                                <option value="covid-19">COVID-19</option>
+                                <option value="influenza">Influenza</option>
+                                <option value="dengue">Dengue</option>
+                                <option value="malaria">Malaria</option>
+                                <option value="cholera">Cholera</option>
+                                <option value="measles">Measles</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="region" class="form-label">Region</label>
+                            <select id="region" class="form-control">
+                                <option value="global">Global</option>
+                                <option value="africa">Africa</option>
+                                <option value="americas">Americas</option>
+                                <option value="asia">Asia</option>
+                                <option value="europe">Europe</option>
+                                <option value="oceania">Oceania</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="timeframe" class="form-label">Time Frame</label>
+                            <select id="timeframe" class="form-control">
+                                <option value="current">Current</option>
+                                <option value="week">Past Week</option>
+                                <option value="month">Past Month</option>
+                                <option value="year">Past Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="fetchData" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Update Data
+                </button>
+            </div>
+            
+            <div id="alertBanner" class="alert-banner mt-4" style="display: none;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span id="alertText"></span>
+            </div>
+            
+            <div id="diseaseStats" class="disease-stats mt-4">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-globe"></i></div>
+                    <div class="stat-value" id="totalOutbreaks">-</div>
+                    <div class="stat-label">Active Outbreaks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-geo-alt"></i></div>
+                    <div class="stat-value" id="affectedCountries">-</div>
+                    <div class="stat-label">Affected Countries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-people"></i></div>
+                    <div class="stat-value" id="totalCases">-</div>
+                    <div class="stat-label">Reported Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-calendar"></i></div>
+                    <div class="stat-value" id="lastUpdate">-</div>
+                    <div class="stat-label">Last Updated</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Outbreak Details</h3>
+            <div id="outbreakList" class="outbreak-list">
+                <div class="loading">Loading outbreak data...</div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Disease Information</h3>
+            <form id="diseaseInfoForm" class="api-form">
+                <div class="form-group">
+                    <label for="diseaseName" class="form-label">Search Disease Information</label>
+                    <input 
+                        type="text" 
+                        id="diseaseName" 
+                        class="form-control" 
+                        placeholder="Enter disease name (e.g., malaria, covid-19)"
+                        list="diseaseList"
+                    >
+                    <datalist id="diseaseList">
+                        <option value="COVID-19">
+                        <option value="Influenza">
+                        <option value="Malaria">
+                        <option value="Dengue">
+                        <option value="Cholera">
+                        <option value="Tuberculosis">
+                        <option value="HIV/AIDS">
+                        <option value="Ebola">
+                        <option value="Zika">
+                        <option value="Measles">
+                    </datalist>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Get Information
+                </button>
+            </form>
+            
+            <div id="diseaseInfo" class="disease-info mt-4" style="display: none;"></div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get current outbreaks:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/disease/outbreaks</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get disease information:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/disease/info/malaria</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get regional data:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/disease/region/africa</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const diseaseType = document.getElementById('diseaseType');
+    const region = document.getElementById('region');
+    const timeframe = document.getElementById('timeframe');
+    const fetchBtn = document.getElementById('fetchData');
+    const diseaseInfoForm = document.getElementById('diseaseInfoForm');
+    
+    // Load initial data
+    loadOutbreakData();
+    
+    // Event listeners
+    fetchBtn.addEventListener('click', loadOutbreakData);
+    diseaseType.addEventListener('change', loadOutbreakData);
+    region.addEventListener('change', loadOutbreakData);
+    timeframe.addEventListener('change', loadOutbreakData);
+    
+    diseaseInfoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const disease = document.getElementById('diseaseName').value.trim();
+        if (disease) {
+            await loadDiseaseInfo(disease);
+        }
+    });
+    
+    async function loadOutbreakData() {
+        const outbreakList = document.getElementById('outbreakList');
+        outbreakList.innerHTML = '<div class="loading">Loading outbreak data...</div>';
+        
+        try {
+            let url = '/api/v1/disease';
+            const params = new URLSearchParams();
+            
+            if (diseaseType.value !== 'all') params.append('disease', diseaseType.value);
+            if (region.value !== 'global') params.append('region', region.value);
+            if (timeframe.value !== 'current') params.append('timeframe', timeframe.value);
+            
+            if (params.toString()) url += '?' + params.toString();
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayOutbreakData(data.data);
+            } else {
+                outbreakList.innerHTML = '<div class="error">Failed to load outbreak data</div>';
+            }
+        } catch (error) {
+            outbreakList.innerHTML = '<div class="error">Error loading data: ' + error.message + '</div>';
+        }
+    }
+    
+    function displayOutbreakData(data) {
+        // Update statistics
+        if (data.statistics) {
+            document.getElementById('totalOutbreaks').textContent = data.statistics.totalOutbreaks || '0';
+            document.getElementById('affectedCountries').textContent = data.statistics.affectedCountries || '0';
+            document.getElementById('totalCases').textContent = formatNumber(data.statistics.totalCases || 0);
+            document.getElementById('lastUpdate').textContent = formatDate(data.statistics.lastUpdate);
+        }
+        
+        // Show alert if any
+        if (data.alert) {
+            document.getElementById('alertText').textContent = data.alert;
+            document.getElementById('alertBanner').style.display = 'block';
+        } else {
+            document.getElementById('alertBanner').style.display = 'none';
+        }
+        
+        // Display outbreaks
+        const outbreakList = document.getElementById('outbreakList');
+        if (data.outbreaks && data.outbreaks.length > 0) {
+            const html = data.outbreaks.map(outbreak => `
+                <div class="outbreak-item">
+                    <div class="outbreak-header">
+                        <h4 class="outbreak-disease">${outbreak.disease}</h4>
+                        <span class="outbreak-severity severity-${outbreak.severity || 'low'}">${outbreak.severity || 'Low'}</span>
+                    </div>
+                    <div class="outbreak-details">
+                        <div class="outbreak-location">
+                            <i class="bi bi-geo-alt"></i> ${outbreak.location || outbreak.country || 'Unknown'}
+                        </div>
+                        <div class="outbreak-stats">
+                            <span><i class="bi bi-people"></i> ${formatNumber(outbreak.cases || 0)} cases</span>
+                            ${outbreak.deaths ? `<span><i class="bi bi-heart-break"></i> ${formatNumber(outbreak.deaths)} deaths</span>` : ''}
+                        </div>
+                        ${outbreak.description ? `<p class="outbreak-description">${outbreak.description}</p>` : ''}
+                        <div class="outbreak-date">
+                            Reported: ${formatDate(outbreak.reportDate || outbreak.date)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            outbreakList.innerHTML = html;
+        } else {
+            outbreakList.innerHTML = '<div class="error">Unable to load outbreak data. The disease tracking API may be unavailable.</div>';
+            showToast('Failed to load disease data', 'error');
+        }
+    }
+    
+    async function loadDiseaseInfo(disease) {
+        const diseaseInfoDiv = document.getElementById('diseaseInfo');
+        diseaseInfoDiv.style.display = 'block';
+        diseaseInfoDiv.innerHTML = '<div class="loading">Loading disease information...</div>';
+        
+        try {
+            const response = await fetch(`/api/v1/world/disease/info/${encodeURIComponent(disease)}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayDiseaseInfo(data.data);
+            } else {
+                diseaseInfoDiv.innerHTML = `<div class="error">No information found for "${disease}"</div>`;
+            }
+        } catch (error) {
+            diseaseInfoDiv.innerHTML = '<div class="error">Error loading information: ' + error.message + '</div>';
+        }
+    }
+    
+    function displayDiseaseInfo(info) {
+        const diseaseInfoDiv = document.getElementById('diseaseInfo');
+        
+        const html = `
+            <div class="disease-card">
+                <h4>${info.name || 'Disease Information'}</h4>
+                ${info.description ? `<p class="disease-description">${info.description}</p>` : ''}
+                
+                <div class="disease-details-grid">
+                    ${info.transmission ? `
+                        <div class="detail-item">
+                            <strong><i class="bi bi-arrow-right-circle"></i> Transmission:</strong>
+                            <p>${info.transmission}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${info.symptoms ? `
+                        <div class="detail-item">
+                            <strong><i class="bi bi-thermometer"></i> Symptoms:</strong>
+                            <p>${Array.isArray(info.symptoms) ? info.symptoms.join(', ') : info.symptoms}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${info.prevention ? `
+                        <div class="detail-item">
+                            <strong><i class="bi bi-shield-check"></i> Prevention:</strong>
+                            <p>${info.prevention}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${info.treatment ? `
+                        <div class="detail-item">
+                            <strong><i class="bi bi-hospital"></i> Treatment:</strong>
+                            <p>${info.treatment}</p>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${info.source ? `<p class="info-source">Source: ${info.source}</p>` : ''}
+            </div>
+        `;
+        
+        diseaseInfoDiv.innerHTML = html;
+        diseaseInfoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function formatNumber(num) {
+        return num.toLocaleString();
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'Unknown';
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+});
+</script>
+
+<style>
+.disease-filters {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.alert-banner {
+    background-color: rgba(255, 85, 85, 0.1);
+    border: 2px solid var(--red);
+    color: var(--red);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.disease-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--purple);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.outbreak-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.outbreak-item {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.outbreak-item:hover {
+    border-color: var(--purple);
+}
+
+.outbreak-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.outbreak-disease {
+    color: var(--purple);
+    margin: 0;
+}
+
+.outbreak-severity {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.severity-low {
+    background-color: rgba(80, 250, 123, 0.2);
+    color: var(--green);
+}
+
+.severity-medium {
+    background-color: rgba(241, 250, 140, 0.2);
+    color: var(--yellow);
+}
+
+.severity-high {
+    background-color: rgba(255, 85, 85, 0.2);
+    color: var(--red);
+}
+
+.outbreak-location {
+    color: var(--cyan);
+    margin-bottom: 0.5rem;
+}
+
+.outbreak-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.outbreak-stats span {
+    color: var(--text-secondary);
+}
+
+.outbreak-description {
+    margin: 0.75rem 0;
+    color: var(--text-primary);
+}
+
+.outbreak-date {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.disease-info {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+}
+
+.disease-card h4 {
+    color: var(--purple);
+    margin-bottom: 1rem;
+}
+
+.disease-description {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.disease-details-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.detail-item {
+    background-color: var(--bg-primary);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--purple);
+}
+
+.detail-item strong {
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-item p {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.info-source {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--red);
+}
+</style>

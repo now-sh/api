@@ -16,7 +16,7 @@
             <i class="bi bi-geo-alt"></i> Load NY State Data
           </button>
           <button id="loadArcGISData" class="btn btn-info">
-            <i class="bi bi-map"></i> Load ArcGIS Data
+            <i class="bi bi-virus"></i> Load Disease Data
           </button>
         </div>
       </div>
@@ -46,8 +46,8 @@
         <div class="card-body">
           <ul class="list-unstyled">
             <li><strong>Global Data:</strong> <code>/api/v1/global</code></li>
-            <li><strong>NY State:</strong> <code>/api/v1/usa/nys</code></li>
-            <li><strong>ArcGIS Data:</strong> <code>/api/v1/arcgis</code></li>
+            <li><strong>NY State:</strong> <code>/api/v1/world/nys</code></li>
+            <li><strong>Disease Tracker:</strong> <code>/api/v1/world/disease</code></li>
           </ul>
           <a href="/api/v1/global" class="btn btn-info btn-sm" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i> View Global API
@@ -99,7 +99,7 @@ async function loadCovidData(endpoint, buttonId) {
     } else if (buttonId === 'loadNYSData') {
       button.innerHTML = '<i class="bi bi-geo-alt"></i> Load NY State Data';
     } else if (buttonId === 'loadArcGISData') {
-      button.innerHTML = '<i class="bi bi-map"></i> Load ArcGIS Data';
+      button.innerHTML = '<i class="bi bi-virus"></i> Load Disease Data';
     }
   }
 }
@@ -109,10 +109,10 @@ document.getElementById('loadGlobalData').addEventListener('click', () => {
 });
 
 document.getElementById('loadNYSData').addEventListener('click', () => {
-  loadCovidData('/api/v1/usa/nys', 'loadNYSData');
+  loadCovidData('/api/v1/world/nys', 'loadNYSData');
 });
 
 document.getElementById('loadArcGISData').addEventListener('click', () => {
-  loadCovidData('/api/v1/arcgis', 'loadArcGISData');
+  loadCovidData('/api/v1/world/disease', 'loadArcGISData');
 });
 </script>

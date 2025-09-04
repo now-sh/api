@@ -1,0 +1,429 @@
+<div class="hero fade-in">
+    <h1>Dictionary</h1>
+    <p class="lead">Look up word definitions, synonyms, and more</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Word Lookup</h2>
+            <p class="card-text">Search for word definitions, pronunciations, and usage examples</p>
+            
+            <form id="dictionaryForm" class="api-form">
+                <div class="form-group">
+                    <label for="word" class="form-label">Enter a word</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="word" 
+                            name="word" 
+                            class="form-control" 
+                            placeholder="e.g., serendipity"
+                            required
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Look Up
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div id="searchHistory" class="search-history mt-3">
+                <span class="text-muted">Recent:</span>
+                <div id="recentWords" class="recent-words"></div>
+            </div>
+            
+            <div id="dictionaryResult" class="result-container mt-6" style="display: none;">
+                <div id="wordHeader" class="word-header"></div>
+                <div id="wordDefinitions" class="definitions"></div>
+                <div id="wordExtras" class="word-extras"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Popular Words</h3>
+            <div class="popular-words">
+                <button class="word-btn" onclick="lookupWord('ephemeral')">ephemeral</button>
+                <button class="word-btn" onclick="lookupWord('ubiquitous')">ubiquitous</button>
+                <button class="word-btn" onclick="lookupWord('paradigm')">paradigm</button>
+                <button class="word-btn" onclick="lookupWord('eloquent')">eloquent</button>
+                <button class="word-btn" onclick="lookupWord('pragmatic')">pragmatic</button>
+                <button class="word-btn" onclick="lookupWord('resilient')">resilient</button>
+                <button class="word-btn" onclick="lookupWord('innovate')">innovate</button>
+                <button class="word-btn" onclick="lookupWord('synergy')">synergy</button>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Look up a word:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/define/serendipity</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get synonyms:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/synonyms/happy</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get antonyms:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/antonyms/happy</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('dictionaryForm');
+    const wordInput = document.getElementById('word');
+    const resultDiv = document.getElementById('dictionaryResult');
+    const recentWords = [];
+    
+    // Load recent words from localStorage
+    const savedWords = localStorage.getItem('recentWords');
+    if (savedWords) {
+        recentWords.push(...JSON.parse(savedWords).slice(0, 5));
+        updateRecentWords();
+    }
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const word = wordInput.value.trim().toLowerCase();
+        if (word) {
+            await searchWord(word);
+        }
+    });
+    
+    async function searchWord(word) {
+        resultDiv.style.display = 'block';
+        document.getElementById('wordHeader').innerHTML = '<div class="loading">Looking up definition...</div>';
+        document.getElementById('wordDefinitions').innerHTML = '';
+        document.getElementById('wordExtras').innerHTML = '';
+        
+        try {
+            const response = await fetch(`/api/v1/tools/dictionary/define/${encodeURIComponent(word)}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayResults(word, data.data);
+                addToRecent(word);
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError(data.error || `Word "${word}" not found`);
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    }
+    
+    function displayResults(word, result) {
+        // Word header
+        const headerHtml = `
+            <h2 class="word-title">${word}</h2>
+            ${result.phonetic ? `<span class="phonetic">${result.phonetic}</span>` : ''}
+            ${result.audio ? `
+                <button class="btn btn-sm btn-info ms-2" onclick="playAudio('${result.audio}')">
+                    <i class="bi bi-volume-up"></i> Pronounce
+                </button>
+            ` : ''}
+        `;
+        document.getElementById('wordHeader').innerHTML = headerHtml;
+        
+        // Definitions
+        let definitionsHtml = '';
+        if (result.meanings && result.meanings.length > 0) {
+            result.meanings.forEach(meaning => {
+                definitionsHtml += `
+                    <div class="meaning-group">
+                        <h4 class="part-of-speech">${meaning.partOfSpeech}</h4>
+                        <ol class="definitions-list">
+                            ${meaning.definitions.map(def => `
+                                <li class="definition-item">
+                                    <p class="definition">${def.definition}</p>
+                                    ${def.example ? `<p class="example">"${def.example}"</p>` : ''}
+                                    ${def.synonyms && def.synonyms.length > 0 ? `
+                                        <p class="synonyms">
+                                            <strong>Synonyms:</strong> 
+                                            ${def.synonyms.map(syn => 
+                                                `<span class="synonym-link" onclick="lookupWord('${syn}')">${syn}</span>`
+                                            ).join(', ')}
+                                        </p>
+                                    ` : ''}
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                `;
+            });
+        } else if (result.definitions) {
+            // Fallback for simple definition structure
+            definitionsHtml = `
+                <div class="meaning-group">
+                    <ol class="definitions-list">
+                        ${result.definitions.map(def => `
+                            <li class="definition-item">
+                                <p class="definition">${def}</p>
+                            </li>
+                        `).join('')}
+                    </ol>
+                </div>
+            `;
+        }
+        document.getElementById('wordDefinitions').innerHTML = definitionsHtml;
+        
+        // Extras (synonyms, antonyms, origin)
+        let extrasHtml = '';
+        if (result.synonyms && result.synonyms.length > 0) {
+            extrasHtml += `
+                <div class="word-extra">
+                    <h5>Synonyms</h5>
+                    <div class="word-tags">
+                        ${result.synonyms.map(syn => 
+                            `<span class="word-tag" onclick="lookupWord('${syn}')">${syn}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        if (result.antonyms && result.antonyms.length > 0) {
+            extrasHtml += `
+                <div class="word-extra">
+                    <h5>Antonyms</h5>
+                    <div class="word-tags">
+                        ${result.antonyms.map(ant => 
+                            `<span class="word-tag antonym" onclick="lookupWord('${ant}')">${ant}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        if (result.origin) {
+            extrasHtml += `
+                <div class="word-extra">
+                    <h5>Origin</h5>
+                    <p class="origin-text">${result.origin}</p>
+                </div>
+            `;
+        }
+        document.getElementById('wordExtras').innerHTML = extrasHtml;
+    }
+    
+    function showError(message) {
+        document.getElementById('wordHeader').innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        document.getElementById('wordDefinitions').innerHTML = '';
+        document.getElementById('wordExtras').innerHTML = '';
+    }
+    
+    function addToRecent(word) {
+        const index = recentWords.indexOf(word);
+        if (index > -1) {
+            recentWords.splice(index, 1);
+        }
+        recentWords.unshift(word);
+        if (recentWords.length > 5) {
+            recentWords.pop();
+        }
+        localStorage.setItem('recentWords', JSON.stringify(recentWords));
+        updateRecentWords();
+    }
+    
+    function updateRecentWords() {
+        const container = document.getElementById('recentWords');
+        if (recentWords.length === 0) {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'inline-flex';
+            container.innerHTML = recentWords.map(word => 
+                `<button class="recent-word" onclick="lookupWord('${word}')">${word}</button>`
+            ).join('');
+        }
+    }
+});
+
+function lookupWord(word) {
+    document.getElementById('word').value = word;
+    document.getElementById('dictionaryForm').dispatchEvent(new Event('submit'));
+}
+
+function playAudio(url) {
+    const audio = new Audio(url);
+    audio.play().catch(err => console.error('Audio playback failed:', err));
+}
+</script>
+
+<style>
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-history {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-words {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.recent-word {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.recent-word:hover {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+
+.word-header {
+    padding: 1.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.word-title {
+    font-size: 2.5rem;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.phonetic {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-left: 1rem;
+}
+
+.meaning-group {
+    margin-bottom: 2rem;
+}
+
+.part-of-speech {
+    color: var(--cyan);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.definitions-list {
+    margin-left: 1rem;
+}
+
+.definition-item {
+    margin-bottom: 1.5rem;
+}
+
+.definition {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.example {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.synonyms {
+    font-size: 0.9rem;
+    margin-left: 1rem;
+}
+
+.synonym-link {
+    color: var(--cyan);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.synonym-link:hover {
+    color: var(--purple);
+}
+
+.word-extras {
+    margin-top: 2rem;
+}
+
+.word-extra {
+    margin-bottom: 1.5rem;
+}
+
+.word-extra h5 {
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+}
+
+.word-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.word-tag {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.word-tag:hover {
+    background-color: var(--cyan);
+    color: var(--background);
+}
+
+.word-tag.antonym {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.word-tag.antonym:hover {
+    background-color: var(--red);
+    color: var(--background);
+}
+
+.origin-text {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.popular-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.word-btn {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.word-btn:hover {
+    background-color: var(--purple);
+    color: var(--background);
+    border-color: var(--purple);
+}
+</style>

@@ -1,0 +1,507 @@
+<div class="hero fade-in">
+    <h1>Fun Facts</h1>
+    <p class="lead">Discover amazing and interesting facts from around the world</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Random Facts</h2>
+            <p class="card-text">Learn something new every day!</p>
+            
+            <div class="fact-controls">
+                <button id="getFact" class="btn btn-primary btn-lg">
+                    <i class="bi bi-lightbulb"></i> Get a Fact
+                </button>
+                
+                <div class="fact-categories mt-3">
+                    <label class="form-label">Category:</label>
+                    <select id="factCategory" class="form-control" style="max-width: 300px; margin: 0 auto;">
+                        <option value="random">Random</option>
+                        <option value="science">Science</option>
+                        <option value="history">History</option>
+                        <option value="technology">Technology</option>
+                        <option value="nature">Nature</option>
+                        <option value="space">Space</option>
+                        <option value="animals">Animals</option>
+                        <option value="food">Food</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="factResult" class="result-container mt-6" style="display: none;">
+                <div class="fact-display">
+                    <div class="fact-icon">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div id="factText" class="fact-text"></div>
+                    <div id="factSource" class="fact-source"></div>
+                </div>
+                
+                <div class="fact-actions">
+                    <button class="btn btn-sm btn-info" onclick="copyFact()">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="shareFact()">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                    <button id="saveFact" class="btn btn-sm btn-warning">
+                        <i class="bi bi-bookmark"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Fact of the Day</h3>
+            <div id="dailyFact" class="daily-fact">
+                <div class="loading">Loading fact of the day...</div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Saved Facts</h3>
+            <div id="savedFacts" class="saved-facts">
+                <p class="text-muted">No saved facts yet. Click the bookmark icon to save facts!</p>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get a random fact:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/facts/random</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get fact by category:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/facts/science</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get fact of the day:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/facts/daily</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const getFactBtn = document.getElementById('getFact');
+    const categorySelect = document.getElementById('factCategory');
+    const factResult = document.getElementById('factResult');
+    const saveBtn = document.getElementById('saveFact');
+    let currentFact = null;
+    let savedFacts = [];
+    
+    // Load saved facts from localStorage
+    const saved = localStorage.getItem('savedFacts');
+    if (saved) {
+        savedFacts = JSON.parse(saved);
+        displaySavedFacts();
+    }
+    
+    // Get fact button
+    getFactBtn.addEventListener('click', fetchFact);
+    
+    // Category change
+    categorySelect.addEventListener('change', fetchFact);
+    
+    // Save fact button
+    saveBtn.addEventListener('click', () => saveFact(currentFact));
+    
+    // Load fact of the day on page load
+    loadDailyFact();
+    
+    async function fetchFact() {
+        const category = categorySelect.value;
+        const button = getFactBtn;
+        const originalText = button.innerHTML;
+        
+        // Show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        
+        try {
+            const endpoint = category === 'random' ? 
+                '/api/v1/fun/facts/random' : 
+                `/api/v1/fun/facts/${category}`;
+                
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentFact = data.data;
+                displayFact(currentFact);
+                factResult.style.display = 'block';
+                factResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError('Failed to fetch fact. Please try again.');
+            }
+        } catch (error) {
+            showError(`Error: ${error.message}`);
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }
+    
+    async function loadDailyFact() {
+        const dailyFactDiv = document.getElementById('dailyFact');
+        
+        try {
+            const response = await fetch('/api/v1/fun/facts/daily');
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                const fact = data.data;
+                dailyFactDiv.innerHTML = `
+                    <div class="daily-fact-content">
+                        <div class="daily-fact-date">${new Date().toLocaleDateString()}</div>
+                        <div class="daily-fact-text">${fact.fact || fact.text || fact}</div>
+                        ${fact.category ? `<div class="daily-fact-category">Category: ${fact.category}</div>` : ''}
+                        <button class="btn btn-sm btn-warning mt-2" onclick="saveDailyFact(${JSON.stringify(fact).replace(/"/g, '&quot;')})">
+                            <i class="bi bi-bookmark"></i> Save this fact
+                        </button>
+                    </div>
+                `;
+            } else {
+                dailyFactDiv.innerHTML = '<div class="error">Failed to load fact of the day</div>';
+            }
+        } catch (error) {
+            dailyFactDiv.innerHTML = '<div class="error">Error loading fact of the day</div>';
+        }
+    }
+    
+    function displayFact(fact) {
+        const factText = fact.fact || fact.text || fact;
+        document.getElementById('factText').textContent = factText;
+        
+        // Display source if available
+        const sourceEl = document.getElementById('factSource');
+        if (fact.source || fact.category) {
+            sourceEl.innerHTML = `
+                ${fact.category ? `<span class="category-tag">${fact.category}</span>` : ''}
+                ${fact.source ? `<span class="source-info">Source: ${fact.source}</span>` : ''}
+            `;
+            sourceEl.style.display = 'block';
+        } else {
+            sourceEl.style.display = 'none';
+        }
+        
+        // Update save button state
+        const isAlreadySaved = savedFacts.some(f => 
+            (f.fact || f.text || f) === factText
+        );
+        updateSaveButton(isAlreadySaved);
+    }
+    
+    function saveFact(fact) {
+        if (!fact) return;
+        
+        const factText = fact.fact || fact.text || fact;
+        const existingIndex = savedFacts.findIndex(f => 
+            (f.fact || f.text || f) === factText
+        );
+        
+        if (existingIndex > -1) {
+            // Remove if already saved
+            savedFacts.splice(existingIndex, 1);
+            showToast('Fact removed from saved');
+            updateSaveButton(false);
+        } else {
+            // Add to saved
+            savedFacts.unshift({
+                ...fact,
+                savedDate: new Date().toISOString()
+            });
+            showToast('Fact saved!');
+            updateSaveButton(true);
+        }
+        
+        localStorage.setItem('savedFacts', JSON.stringify(savedFacts));
+        displaySavedFacts();
+    }
+    
+    function displaySavedFacts() {
+        const container = document.getElementById('savedFacts');
+        
+        if (savedFacts.length === 0) {
+            container.innerHTML = '<p class="text-muted">No saved facts yet. Click the bookmark icon to save facts!</p>';
+            return;
+        }
+        
+        const html = savedFacts.map((fact, index) => {
+            const factText = fact.fact || fact.text || fact;
+            return `
+                <div class="saved-fact-item">
+                    <div class="saved-fact-text">${factText}</div>
+                    <div class="saved-fact-meta">
+                        ${fact.category ? `<span class="category-tag">${fact.category}</span>` : ''}
+                        <span class="saved-date">Saved: ${new Date(fact.savedDate).toLocaleDateString()}</span>
+                    </div>
+                    <div class="saved-fact-actions">
+                        <button class="btn btn-sm btn-info" onclick="copySavedFact('${factText.replace(/'/g, "\\'")}')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="removeSavedFact(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    function updateSaveButton(isSaved) {
+        if (isSaved) {
+            saveBtn.innerHTML = '<i class="bi bi-bookmark-fill"></i> Saved';
+            saveBtn.classList.remove('btn-warning');
+            saveBtn.classList.add('btn-success');
+        } else {
+            saveBtn.innerHTML = '<i class="bi bi-bookmark"></i> Save';
+            saveBtn.classList.remove('btn-success');
+            saveBtn.classList.add('btn-warning');
+        }
+    }
+    
+    function showError(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification error';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+});
+
+function copyFact() {
+    const factText = document.getElementById('factText').textContent;
+    navigator.clipboard.writeText(factText).then(() => {
+        showToast('Fact copied to clipboard!');
+    });
+}
+
+function copySavedFact(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Fact copied to clipboard!');
+    });
+}
+
+function shareFact() {
+    const factText = document.getElementById('factText').textContent;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Amazing Fact',
+            text: factText
+        });
+    } else {
+        copyFact();
+        showToast('Fact copied! Share functionality not available on this device.');
+    }
+}
+
+function saveDailyFact(fact) {
+    const savedFacts = JSON.parse(localStorage.getItem('savedFacts') || '[]');
+    const factText = fact.fact || fact.text || fact;
+    
+    if (!savedFacts.some(f => (f.fact || f.text || f) === factText)) {
+        savedFacts.unshift({
+            ...fact,
+            savedDate: new Date().toISOString()
+        });
+        localStorage.setItem('savedFacts', JSON.stringify(savedFacts));
+        showToast('Daily fact saved!');
+        
+        // Reload saved facts display
+        document.dispatchEvent(new Event('DOMContentLoaded'));
+    } else {
+        showToast('This fact is already saved!');
+    }
+}
+
+function removeSavedFact(index) {
+    const savedFacts = JSON.parse(localStorage.getItem('savedFacts') || '[]');
+    savedFacts.splice(index, 1);
+    localStorage.setItem('savedFacts', JSON.stringify(savedFacts));
+    
+    // Reload saved facts display
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    showToast('Fact removed');
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
+<style>
+.fact-controls {
+    text-align: center;
+}
+
+.fact-display {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    position: relative;
+}
+
+.fact-icon {
+    font-size: 3rem;
+    color: var(--purple);
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.fact-text {
+    font-size: 1.3rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.fact-source {
+    margin-top: 1rem;
+}
+
+.category-tag {
+    background-color: var(--purple);
+    color: var(--background);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.source-info {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.fact-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.daily-fact {
+    padding: 1.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--purple);
+}
+
+.daily-fact-date {
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.daily-fact-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.daily-fact-category {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.saved-facts {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.saved-fact-item {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.saved-fact-item:hover {
+    border-color: var(--purple);
+}
+
+.saved-fact-text {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.saved-fact-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.saved-date {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.saved-fact-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.error {
+    background: var(--red);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+</style>

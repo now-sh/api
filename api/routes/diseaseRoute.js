@@ -13,7 +13,7 @@ diseaseRoute.use(
     target: 'https://disease.sh',
     changeOrigin: true,
     pathRewrite: {
-      [`^/api/v1/disease`]: 'https://disease.sh/v3/covid-19/all',
+      [`^/api/v1/world/disease`]: '/v3/covid-19/all',
     },
 
     // subscribe to http-proxy's proxyRes event

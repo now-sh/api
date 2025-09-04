@@ -41,7 +41,7 @@
                 <div class="form-group">
                     <label for="format" class="form-label">Output Format</label>
                     <select id="format" name="format" class="form-control">
-                        <option value="plain">Plain Text</option>
+                        <option value="text">Plain Text</option>
                         <option value="html">HTML</option>
                     </select>
                 </div>
@@ -141,17 +141,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    count,
-                    type,
-                    format,
-                    startWithLorem
+                    [type === 'paragraphs' ? 'paragraphs' : 'sentences']: count,
+                    format
                 })
             });
             
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                generatedText = data.data.text;
+            if (response.ok) {
+                if (format === 'text' && typeof data === 'string') {
+                    generatedText = data;
+                } else if (data.success) {
+                    generatedText = data.data.text;
+                } else {
+                    generatedText = data.text || data;
+                }
                 displayText(generatedText, format);
                 updateStats(generatedText);
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

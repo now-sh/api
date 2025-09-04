@@ -115,7 +115,7 @@ body {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   font-size: 1rem;
   transition: all 0.2s ease;
 }
@@ -125,6 +125,7 @@ body {
   border-color: var(--purple);
   box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.1);
   background-color: var(--bg-primary);
+  color: var(--text-primary) !important;
 }
 
 textarea.form-control {
@@ -478,4 +479,69 @@ select.form-control {
 
 .mt-5 {
   margin-top: 3rem !important;
+}
+
+/* Fix input text color for Bootstrap dark theme */
+input.form-control,
+textarea.form-control,
+select.form-control {
+  color: white !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+input.form-control::placeholder,
+textarea.form-control::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.8;
+}
+
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-control:focus {
+  color: white !important;
+  background-color: var(--bg-primary) !important;
+  border-color: var(--purple) !important;
+}
+
+/* Fix for autofill */
+input.form-control:-webkit-autofill,
+input.form-control:-webkit-autofill:hover,
+input.form-control:-webkit-autofill:focus,
+input.form-control:-webkit-autofill:active,
+textarea.form-control:-webkit-autofill,
+select.form-control:-webkit-autofill {
+  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-secondary) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure select options are visible */
+select.form-control option {
+  background-color: var(--bg-primary);
+  color: white;
+}
+
+/* Fix Patreon and PayPal button visibility */
+.footer-social img,
+.share-buttons img[src*="patreon"],
+.share-buttons img[src*="paypal"] {
+  background: white;
+  border-radius: 4px;
+  padding: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.footer-social a:hover img,
+.share-buttons a:hover img[src*="patreon"],
+.share-buttons a:hover img[src*="paypal"] {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+}
+
+/* Dropdown divider */
+.dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border-color);
 }

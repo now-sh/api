@@ -1,0 +1,200 @@
+<div class="hero fade-in">
+    <h1>ArcGIS COVID-19 Data</h1>
+    <p class="lead">COVID-19 data from ArcGIS Feature Server</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">ArcGIS COVID-19 Statistics</h2>
+            <p class="card-text">Real-time COVID-19 data from ArcGIS Feature Server</p>
+            
+            <button id="loadData" class="btn btn-primary">
+                <i class="bi bi-download"></i> Load ArcGIS Data
+            </button>
+            
+            <div id="dataResult" class="result-container mt-4" style="display: none;">
+                <h4>ArcGIS COVID-19 Data</h4>
+                <div id="dataContent" class="data-content"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get ArcGIS COVID data:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/arcgis</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Response format:</h4>
+                <pre><code>{
+  "arcgis": {
+    "features": [
+      {
+        "attributes": {
+          "Country_Region": "US",
+          "Confirmed": 103436829,
+          "Deaths": 1127152,
+          "Recovered": 100198090
+          // ... more fields
+        }
+      }
+    ]
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loadBtn = document.getElementById('loadData');
+    
+    loadBtn.addEventListener('click', async () => {
+        await loadArcGISData();
+    });
+    
+    async function loadArcGISData() {
+        const resultDiv = document.getElementById('dataResult');
+        const contentDiv = document.getElementById('dataContent');
+        
+        loadBtn.disabled = true;
+        loadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        
+        try {
+            const response = await fetch('/api/v1/world/arcgis');
+            const data = await response.json();
+            
+            if (response.ok && data.arcgis && data.arcgis.features) {
+                displayArcGISData(data.arcgis.features);
+                resultDiv.style.display = 'block';
+            } else {
+                contentDiv.innerHTML = '<div class="error">Failed to load ArcGIS data</div>';
+                resultDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            contentDiv.innerHTML = '<div class="error">Failed to connect to server</div>';
+            resultDiv.style.display = 'block';
+        } finally {
+            loadBtn.disabled = false;
+            loadBtn.innerHTML = '<i class="bi bi-download"></i> Load ArcGIS Data';
+        }
+    }
+    
+    function displayArcGISData(features) {
+        const contentDiv = document.getElementById('dataContent');
+        
+        if (!features || features.length === 0) {
+            contentDiv.innerHTML = '<div class="no-data">No data available</div>';
+            return;
+        }
+        
+        // Group by country and sort by confirmed cases
+        const countries = features.map(f => ({
+            country: f.attributes.Country_Region || 'Unknown',
+            confirmed: f.attributes.Confirmed || 0,
+            deaths: f.attributes.Deaths || 0,
+            recovered: f.attributes.Recovered || 0,
+            active: f.attributes.Active || 0,
+            lastUpdate: f.attributes.Last_Update
+        })).sort((a, b) => b.confirmed - a.confirmed);
+        
+        const html = `
+            <div class="stats-summary mb-4">
+                <h5>Top 10 Countries by Confirmed Cases</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Confirmed</th>
+                                <th>Deaths</th>
+                                <th>Recovered</th>
+                                <th>Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${countries.slice(0, 10).map(country => `
+                                <tr>
+                                    <td>${country.country}</td>
+                                    <td>${formatNumber(country.confirmed)}</td>
+                                    <td>${formatNumber(country.deaths)}</td>
+                                    <td>${formatNumber(country.recovered)}</td>
+                                    <td>${formatNumber(country.active)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="raw-data">
+                <h5>Raw Data (${features.length} features)</h5>
+                <pre class="data-pre">${JSON.stringify(features, null, 2)}</pre>
+            </div>
+        `;
+        
+        contentDiv.innerHTML = html;
+    }
+    
+    function formatNumber(num) {
+        return num.toLocaleString();
+    }
+});
+</script>
+
+<style>
+.data-content {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table {
+    color: var(--text-primary);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--bg-secondary);
+}
+
+.table th {
+    border-bottom: 2px solid var(--purple);
+    color: var(--purple);
+}
+
+.table td {
+    border-color: var(--border-color);
+}
+
+.data-pre {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    max-height: 400px;
+    overflow-y: auto;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--red);
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--cyan);
+}
+</style>

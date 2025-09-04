@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultOutput = resultDiv.querySelector('.result-output');
             
             try {
-                const response = await fetch('/api/v1/world/covid');
+                const response = await fetch('/api/v1/global');
                 const data = await response.json();
                 
                 if (response.ok) {

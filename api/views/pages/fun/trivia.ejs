@@ -1,0 +1,689 @@
+<div class="hero fade-in">
+    <h1>Trivia Quiz</h1>
+    <p class="lead">Test your knowledge with fun trivia questions</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card" id="setupCard">
+            <h2 class="card-title">Start a New Quiz</h2>
+            <p class="card-text">Choose your quiz settings and begin!</p>
+            
+            <form id="triviaSetup" class="api-form">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="category" class="form-label">Category</label>
+                            <select id="category" name="category" class="form-control">
+                                <option value="any">Any Category</option>
+                                <option value="general">General Knowledge</option>
+                                <option value="science">Science & Nature</option>
+                                <option value="history">History</option>
+                                <option value="geography">Geography</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="sports">Sports</option>
+                                <option value="technology">Technology</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="difficulty" class="form-label">Difficulty</label>
+                            <select id="difficulty" name="difficulty" class="form-control">
+                                <option value="any">Any Difficulty</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="numQuestions" class="form-label">Number of Questions</label>
+                    <input 
+                        type="number" 
+                        id="numQuestions" 
+                        name="numQuestions" 
+                        class="form-control" 
+                        min="1" 
+                        max="20" 
+                        value="10"
+                    >
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle"></i> Start Quiz
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" id="quizCard" style="display: none;">
+            <div class="quiz-header">
+                <div class="quiz-progress">
+                    <div class="progress">
+                        <div id="progressBar" class="progress-bar bg-purple" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="quiz-stats">
+                        <span>Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></span>
+                        <span>Score: <span id="currentScore">0</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="questionContainer" class="question-container">
+                <div id="questionDisplay" class="question-display"></div>
+                <div id="answersDisplay" class="answers-display"></div>
+            </div>
+            
+            <div class="quiz-controls">
+                <button id="nextQuestion" class="btn btn-primary" style="display: none;">
+                    Next Question <i class="bi bi-arrow-right"></i>
+                </button>
+                <button id="endQuiz" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> End Quiz
+                </button>
+            </div>
+        </div>
+
+        <div class="card" id="resultsCard" style="display: none;">
+            <h2 class="card-title text-center">Quiz Complete!</h2>
+            
+            <div class="results-display">
+                <div class="final-score">
+                    <div class="score-circle">
+                        <span id="finalScore">0</span>
+                        <span class="score-total">/ <span id="finalTotal">10</span></span>
+                    </div>
+                    <div id="scorePercentage" class="score-percentage"></div>
+                    <div id="scoreMessage" class="score-message"></div>
+                </div>
+                
+                <div class="results-breakdown">
+                    <h4>Your Answers</h4>
+                    <div id="answersReview"></div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="newQuiz" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> New Quiz
+                    </button>
+                    <button class="btn btn-info" onclick="shareResults()">
+                        <i class="bi bi-share"></i> Share Results
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Leaderboard</h3>
+            <div id="leaderboard" class="leaderboard">
+                <p class="text-muted">No scores yet. Complete a quiz to see the leaderboard!</p>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get trivia questions:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/trivia/questions?category=science&difficulty=medium&amount=10</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get single question:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/trivia/random</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const setupForm = document.getElementById('triviaSetup');
+    const setupCard = document.getElementById('setupCard');
+    const quizCard = document.getElementById('quizCard');
+    const resultsCard = document.getElementById('resultsCard');
+    
+    let currentQuiz = {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        answers: []
+    };
+    
+    // Load leaderboard
+    loadLeaderboard();
+    
+    // Setup form submit
+    setupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await startQuiz();
+    });
+    
+    // Quiz controls
+    document.getElementById('nextQuestion').addEventListener('click', nextQuestion);
+    document.getElementById('endQuiz').addEventListener('click', endQuiz);
+    document.getElementById('newQuiz').addEventListener('click', () => {
+        setupCard.style.display = 'block';
+        quizCard.style.display = 'none';
+        resultsCard.style.display = 'none';
+    });
+    
+    async function startQuiz() {
+        const category = document.getElementById('category').value;
+        const difficulty = document.getElementById('difficulty').value;
+        const amount = document.getElementById('numQuestions').value;
+        
+        // Show loading
+        setupCard.innerHTML = '<div class="loading">Loading quiz questions...</div>';
+        
+        try {
+            let url = `/api/v1/fun/trivia/questions?amount=${amount}`;
+            if (category !== 'any') url += `&category=${category}`;
+            if (difficulty !== 'any') url += `&difficulty=${difficulty}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentQuiz = {
+                    questions: data.data.questions || data.data,
+                    currentIndex: 0,
+                    score: 0,
+                    answers: [],
+                    startTime: new Date()
+                };
+                
+                document.getElementById('totalQuestions').textContent = currentQuiz.questions.length;
+                
+                setupCard.style.display = 'none';
+                quizCard.style.display = 'block';
+                displayQuestion();
+            } else {
+                showError('Failed to load quiz questions');
+                location.reload();
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+            location.reload();
+        }
+    }
+    
+    function displayQuestion() {
+        const question = currentQuiz.questions[currentQuiz.currentIndex];
+        const questionNum = currentQuiz.currentIndex + 1;
+        
+        // Update progress
+        document.getElementById('currentQuestion').textContent = questionNum;
+        document.getElementById('progressBar').style.width = `${(questionNum / currentQuiz.questions.length) * 100}%`;
+        
+        // Display question
+        document.getElementById('questionDisplay').innerHTML = `
+            <div class="question-number">Question ${questionNum}</div>
+            <div class="question-text">${question.question}</div>
+            ${question.category ? `<div class="question-category">${question.category}</div>` : ''}
+        `;
+        
+        // Shuffle answers
+        const answers = [...(question.incorrectAnswers || question.incorrect_answers || []), question.correctAnswer || question.correct_answer];
+        shuffleArray(answers);
+        
+        // Display answers
+        const answersHtml = answers.map((answer, index) => `
+            <button class="answer-btn" onclick="selectAnswer('${escapeQuotes(answer)}', '${escapeQuotes(question.correctAnswer || question.correct_answer)}')">
+                ${String.fromCharCode(65 + index)}. ${answer}
+            </button>
+        `).join('');
+        
+        document.getElementById('answersDisplay').innerHTML = answersHtml;
+        document.getElementById('nextQuestion').style.display = 'none';
+    }
+    
+    function selectAnswer(selected, correct) {
+        const isCorrect = selected === correct;
+        
+        // Save answer
+        currentQuiz.answers.push({
+            question: currentQuiz.questions[currentQuiz.currentIndex].question,
+            selected,
+            correct,
+            isCorrect
+        });
+        
+        // Update score
+        if (isCorrect) {
+            currentQuiz.score++;
+            document.getElementById('currentScore').textContent = currentQuiz.score;
+        }
+        
+        // Highlight answers
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.includes(correct)) {
+                btn.classList.add('correct');
+            } else if (btn.textContent.includes(selected) && !isCorrect) {
+                btn.classList.add('incorrect');
+            }
+        });
+        
+        // Show feedback
+        const feedback = isCorrect ? 
+            '<div class="feedback correct">✓ Correct!</div>' : 
+            '<div class="feedback incorrect">✗ Incorrect</div>';
+        document.getElementById('questionDisplay').insertAdjacentHTML('beforeend', feedback);
+        
+        // Show next button or complete quiz
+        if (currentQuiz.currentIndex < currentQuiz.questions.length - 1) {
+            document.getElementById('nextQuestion').style.display = 'inline-block';
+        } else {
+            setTimeout(completeQuiz, 1500);
+        }
+    }
+    
+    function nextQuestion() {
+        currentQuiz.currentIndex++;
+        displayQuestion();
+    }
+    
+    function endQuiz() {
+        if (confirm('Are you sure you want to end the quiz?')) {
+            completeQuiz();
+        }
+    }
+    
+    function completeQuiz() {
+        const endTime = new Date();
+        const duration = Math.round((endTime - currentQuiz.startTime) / 1000);
+        
+        // Calculate results
+        const percentage = Math.round((currentQuiz.score / currentQuiz.questions.length) * 100);
+        
+        // Display results
+        document.getElementById('finalScore').textContent = currentQuiz.score;
+        document.getElementById('finalTotal').textContent = currentQuiz.questions.length;
+        document.getElementById('scorePercentage').textContent = `${percentage}%`;
+        
+        // Score message
+        let message;
+        if (percentage >= 90) message = '🏆 Outstanding!';
+        else if (percentage >= 80) message = '🌟 Excellent!';
+        else if (percentage >= 70) message = '👍 Great job!';
+        else if (percentage >= 60) message = '😊 Good effort!';
+        else message = '💪 Keep practicing!';
+        document.getElementById('scoreMessage').textContent = message;
+        
+        // Review answers
+        const reviewHtml = currentQuiz.answers.map((ans, index) => `
+            <div class="answer-review ${ans.isCorrect ? 'review-correct' : 'review-incorrect'}">
+                <div class="review-question">Q${index + 1}: ${ans.question}</div>
+                <div class="review-answer">
+                    Your answer: ${ans.selected}
+                    ${!ans.isCorrect ? `<br>Correct answer: ${ans.correct}` : ''}
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('answersReview').innerHTML = reviewHtml;
+        
+        // Save to leaderboard
+        saveScore({
+            score: currentQuiz.score,
+            total: currentQuiz.questions.length,
+            percentage,
+            duration,
+            date: new Date().toISOString()
+        });
+        
+        // Show results
+        quizCard.style.display = 'none';
+        resultsCard.style.display = 'block';
+    }
+    
+    function saveScore(scoreData) {
+        const scores = JSON.parse(localStorage.getItem('triviaScores') || '[]');
+        scores.push(scoreData);
+        scores.sort((a, b) => b.percentage - a.percentage);
+        scores.splice(10); // Keep top 10
+        localStorage.setItem('triviaScores', JSON.stringify(scores));
+        loadLeaderboard();
+    }
+    
+    function loadLeaderboard() {
+        const scores = JSON.parse(localStorage.getItem('triviaScores') || '[]');
+        const leaderboardDiv = document.getElementById('leaderboard');
+        
+        if (scores.length === 0) {
+            leaderboardDiv.innerHTML = '<p class="text-muted">No scores yet. Complete a quiz to see the leaderboard!</p>';
+            return;
+        }
+        
+        const html = scores.map((score, index) => `
+            <div class="leaderboard-entry">
+                <div class="rank">${index + 1}</div>
+                <div class="score-info">
+                    <div class="score-main">${score.score}/${score.total} (${score.percentage}%)</div>
+                    <div class="score-meta">
+                        ${new Date(score.date).toLocaleDateString()} • ${formatDuration(score.duration)}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        leaderboardDiv.innerHTML = html;
+    }
+    
+    function formatDuration(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+    
+    function escapeQuotes(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+    
+    function showError(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification error';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+});
+
+function shareResults() {
+    const score = document.getElementById('finalScore').textContent;
+    const total = document.getElementById('finalTotal').textContent;
+    const percentage = document.getElementById('scorePercentage').textContent;
+    
+    const text = `I scored ${score}/${total} (${percentage}) on the Trivia Quiz! Can you beat my score?`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Trivia Quiz Results',
+            text: text
+        });
+    } else {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Results copied to clipboard!');
+        });
+    }
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+</script>
+
+<style>
+.quiz-header {
+    margin-bottom: 2rem;
+}
+
+.progress {
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+.quiz-stats {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+}
+
+.question-container {
+    min-height: 300px;
+    padding: 2rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+}
+
+.question-number {
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.question-text {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.question-category {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.answers-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.answer-btn {
+    background-color: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.answer-btn:hover:not(:disabled) {
+    background-color: var(--bg-secondary);
+    border-color: var(--purple);
+}
+
+.answer-btn.correct {
+    background-color: rgba(80, 250, 123, 0.2);
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.answer-btn.incorrect {
+    background-color: rgba(255, 85, 85, 0.2);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.answer-btn:disabled {
+    cursor: not-allowed;
+}
+
+.feedback {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.feedback.correct {
+    color: var(--green);
+}
+
+.feedback.incorrect {
+    color: var(--red);
+}
+
+.quiz-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.results-display {
+    text-align: center;
+}
+
+.final-score {
+    margin: 2rem 0;
+}
+
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 8px solid var(--purple);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--purple);
+}
+
+.score-total {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.score-percentage {
+    font-size: 2rem;
+    color: var(--cyan);
+    margin: 1rem 0;
+}
+
+.score-message {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.results-breakdown {
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+    margin-top: 2rem;
+}
+
+.answer-review {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--border-color);
+}
+
+.review-correct {
+    border-left-color: var(--green);
+}
+
+.review-incorrect {
+    border-left-color: var(--red);
+}
+
+.review-question {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.review-answer {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.leaderboard {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.leaderboard-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: var(--bg-secondary);
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.rank {
+    width: 30px;
+    height: 30px;
+    background-color: var(--purple);
+    color: var(--background);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.score-info {
+    flex: 1;
+}
+
+.score-main {
+    font-weight: 500;
+}
+
+.score-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.error {
+    background: var(--red);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.loading {
+    text-align: center;
+    padding: 4rem;
+    color: var(--cyan);
+    font-size: 1.2rem;
+}
+</style>

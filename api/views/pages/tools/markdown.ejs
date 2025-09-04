@@ -1,0 +1,294 @@
+<div class="hero fade-in">
+    <h1>Markdown Converter</h1>
+    <p class="lead">Convert between Markdown and HTML</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Markdown to HTML Converter</h2>
+            <p class="card-text">Convert your Markdown text to HTML or vice versa</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="inputText" class="form-label">Input <span id="inputFormat">Markdown</span></label>
+                        <textarea 
+                            id="inputText" 
+                            class="form-control code-input" 
+                            rows="12" 
+                            placeholder="Enter your markdown text here..."
+                        ># Hello World
+
+This is a **bold** text and this is *italic*.
+
+## Features
+- List item 1
+- List item 2
+- List item 3
+
+[Link to Google](https://google.com)</textarea>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="outputText" class="form-label">Output <span id="outputFormat">HTML</span></label>
+                        <textarea 
+                            id="outputText" 
+                            class="form-control code-output" 
+                            rows="12" 
+                            readonly
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button id="convertBtn" class="btn btn-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Convert to HTML
+                </button>
+                <button id="swapBtn" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left-right"></i> Swap Direction
+                </button>
+                <button id="copyBtn" class="btn btn-info" disabled>
+                    <i class="bi bi-clipboard"></i> Copy Output
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> Clear
+                </button>
+            </div>
+            
+            <div class="mt-4">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="sanitizeHtml" checked>
+                    <label class="form-check-label" for="sanitizeHtml">
+                        Sanitize HTML output
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="gfm" checked>
+                    <label class="form-check-label" for="gfm">
+                        GitHub Flavored Markdown
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Preview</h3>
+            <div id="previewArea" class="preview-area">
+                <p class="text-muted">Preview will appear here...</p>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Convert Markdown to HTML:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/markdown/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "# Hello World\n\nThis is **bold** text.",
+    "from": "markdown",
+    "to": "html"
+  }'</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Convert HTML to Markdown:</h4>
+                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/markdown/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "<h1>Hello World</h1><p>This is <strong>bold</strong> text.</p>",
+    "from": "html",
+    "to": "markdown"
+  }'</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const convertBtn = document.getElementById('convertBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const previewArea = document.getElementById('previewArea');
+    const inputFormat = document.getElementById('inputFormat');
+    const outputFormat = document.getElementById('outputFormat');
+    
+    let currentDirection = 'markdown-to-html';
+    
+    // Convert on input change
+    inputText.addEventListener('input', debounce(convert, 500));
+    
+    // Convert button
+    convertBtn.addEventListener('click', convert);
+    
+    // Swap direction
+    swapBtn.addEventListener('click', () => {
+        if (currentDirection === 'markdown-to-html') {
+            currentDirection = 'html-to-markdown';
+            inputFormat.textContent = 'HTML';
+            outputFormat.textContent = 'Markdown';
+            convertBtn.innerHTML = '<i class="bi bi-arrow-right-circle"></i> Convert to Markdown';
+            inputText.placeholder = 'Enter your HTML here...';
+            
+            // Swap content
+            const temp = inputText.value;
+            inputText.value = outputText.value;
+            outputText.value = temp;
+        } else {
+            currentDirection = 'markdown-to-html';
+            inputFormat.textContent = 'Markdown';
+            outputFormat.textContent = 'HTML';
+            convertBtn.innerHTML = '<i class="bi bi-arrow-right-circle"></i> Convert to HTML';
+            inputText.placeholder = 'Enter your markdown text here...';
+            
+            // Swap content
+            const temp = inputText.value;
+            inputText.value = outputText.value;
+            outputText.value = temp;
+        }
+        convert();
+    });
+    
+    // Copy button
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(outputText.value).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+            copyBtn.classList.add('btn-success');
+            copyBtn.classList.remove('btn-info');
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.classList.remove('btn-success');
+                copyBtn.classList.add('btn-info');
+            }, 2000);
+        });
+    });
+    
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+        inputText.value = '';
+        outputText.value = '';
+        previewArea.innerHTML = '<p class="text-muted">Preview will appear here...</p>';
+        copyBtn.disabled = true;
+    });
+    
+    async function convert() {
+        const text = inputText.value.trim();
+        if (!text) {
+            outputText.value = '';
+            previewArea.innerHTML = '<p class="text-muted">Preview will appear here...</p>';
+            copyBtn.disabled = true;
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/v1/tools/markdown/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    from: currentDirection === 'markdown-to-html' ? 'markdown' : 'html',
+                    to: currentDirection === 'markdown-to-html' ? 'html' : 'markdown',
+                    sanitize: document.getElementById('sanitizeHtml').checked,
+                    gfm: document.getElementById('gfm').checked
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                outputText.value = data.data.converted;
+                copyBtn.disabled = false;
+                
+                // Update preview
+                if (currentDirection === 'markdown-to-html') {
+                    previewArea.innerHTML = data.data.converted;
+                } else {
+                    // For HTML to Markdown, show the original HTML rendered
+                    previewArea.innerHTML = text;
+                }
+            } else {
+                showError(data.error || 'Conversion failed');
+            }
+        } catch (error) {
+            showError('Error: ' + error.message);
+        }
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    function showError(message) {
+        outputText.value = 'Error: ' + message;
+        previewArea.innerHTML = `<p class="text-danger">Error: ${message}</p>`;
+    }
+    
+    // Initial conversion
+    convert();
+});
+</script>
+
+<style>
+.code-input, .code-output {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.preview-area {
+    padding: 1.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.preview-area h1, .preview-area h2, .preview-area h3 {
+    color: var(--purple);
+    margin-top: 0;
+}
+
+.preview-area pre {
+    background-color: var(--bg-primary);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+}
+
+.preview-area code {
+    color: var(--cyan);
+}
+
+.preview-area a {
+    color: var(--cyan);
+}
+
+.preview-area blockquote {
+    border-left: 4px solid var(--purple);
+    padding-left: 1rem;
+    margin-left: 0;
+    color: var(--text-secondary);
+}
+</style>

@@ -18,10 +18,20 @@
 </div>
 
 <div class="card mt-6">
-    <h3>All Domains</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>All Domains</h3>
+        <span id="domainCount" class="badge bg-purple"></span>
+    </div>
     <div id="domainsList" class="domains-grid">
         <div class="loading">Loading domains...</div>
     </div>
+</div>
+
+<div class="info-box mt-4">
+    <p class="text-muted">
+        <i class="bi bi-info-circle"></i> 
+        Click on any domain to copy it to your clipboard
+    </p>
 </div>
 
 <style>
@@ -171,6 +181,26 @@
     padding: var(--space-3);
     border-radius: var(--radius-md);
     margin-top: var(--space-3);
+}
+
+.badge.bg-purple {
+    background-color: var(--purple);
+    color: var(--background);
+    font-size: var(--text-sm);
+    padding: 0.5rem 1rem;
+}
+
+.info-box {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
 }
 </style>
 

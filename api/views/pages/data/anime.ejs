@@ -1,135 +1,301 @@
-<div class="v-100">
-  <h1 class="text-danger">📊 Anime Quotes</h1>
-  <p class="lead">Get random anime quotes and inspiration</p>
-
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card border border-danger">
-        <div class="card-header">
-          <h5 class="mb-0">Random Anime Quote</h5>
-        </div>
-        <div class="card-body text-center">
-          <button id="getQuote" class="btn btn-danger btn-lg">
-            <i class="bi bi-quote"></i> Get Random Quote
-          </button>
-        </div>
-      </div>
-      
-      <div id="quote-result" class="mt-4" style="display: none;">
-        <div class="card border border-success">
-          <div class="card-header">
-            <h5 class="mb-0">Anime Quote</h5>
-          </div>
-          <div class="card-body">
-            <div id="quote-display" class="text-center mb-3">
-              <blockquote class="blockquote">
-                <p id="quote-text" class="fs-5 text-primary"></p>
-                <footer class="blockquote-footer">
-                  <span id="quote-character"></span> from <cite id="quote-anime"></cite>
-                </footer>
-              </blockquote>
-            </div>
-            <div class="text-center">
-              <button class="btn btn-outline-success btn-sm" onclick="copyToClipboard('#quote-text')">
-                <i class="bi bi-clipboard"></i> Copy Quote
-              </button>
-              <button id="getAnotherQuote" class="btn btn-primary btn-sm ms-2">
-                <i class="bi bi-arrow-clockwise"></i> Another Quote
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row justify-content-center mt-5">
-    <div class="col-md-8">
-      <div class="card border-info">
-        <div class="card-header">
-          <h5 class="mb-0">API Information</h5>
-        </div>
-        <div class="card-body">
-          <p><strong>Endpoint:</strong> <code>/api/v1/anime/quote</code></p>
-          <p><strong>Method:</strong> GET</p>
-          <p><strong>Returns:</strong> Random anime quote with character and anime name</p>
-          <a href="/api/v1/anime/quote" class="btn btn-info btn-sm" target="_blank">
-            <i class="bi bi-box-arrow-up-right"></i> View API Response
-          </a>
-          <a href="http://quotes.casjay.coffee" class="btn btn-success btn-sm ms-2" target="_blank">
-            <i class="bi bi-box-arrow-up-right"></i> Official Quotes Site
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="hero fade-in">
+    <h1>Anime Quotes</h1>
+    <p class="lead">Get random anime quotes and inspiration</p>
 </div>
 
-<%- locals.customScripts = '<script src="/js/data-forms.js"></script>' %>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Random Anime Quote</h2>
+            <p class="card-text">Get inspirational quotes from your favorite anime characters</p>
+            
+            <div class="text-center">
+                <button id="getQuote" class="btn btn-primary btn-lg">
+                    <i class="bi bi-quote"></i> Get Random Quote
+                </button>
+            </div>
+            
+            <div id="quoteResult" class="result-container mt-6" style="display: none;">
+                <div id="quoteDisplay" class="quote-display">
+                    <blockquote class="blockquote text-center">
+                        <p id="quoteText" class="quote-text"></p>
+                        <footer class="blockquote-footer">
+                            <span id="quoteCharacter"></span> 
+                            <cite id="quoteAnime"></cite>
+                        </footer>
+                    </blockquote>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-sm btn-info" onclick="copyQuote()">
+                        <i class="bi bi-clipboard"></i> Copy Quote
+                    </button>
+                    <button id="getAnotherQuote" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Another Quote
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">Batch Quotes</h3>
+            <p class="card-text">Get multiple quotes at once</p>
+            
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                        <label for="quoteCount" class="form-label">Number of quotes</label>
+                        <input 
+                            type="number" 
+                            id="quoteCount" 
+                            class="form-control" 
+                            min="1" 
+                            max="10" 
+                            value="3"
+                        >
+                    </div>
+                    <button id="getBatchQuotes" class="btn btn-primary">
+                        Get Multiple Quotes
+                    </button>
+                </div>
+            </div>
+            
+            <div id="batchResult" class="mt-4" style="display: none;">
+                <h4>Quotes Collection</h4>
+                <div id="batchQuotesDisplay"></div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Information</h3>
+            <div class="code-block">
+                <h4>Get single quote:</h4>
+                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/anime/quote</code></pre>
+            </div>
+            <div class="code-block">
+                <h4>Get multiple quotes:</h4>
+                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/anime/quotes/5</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-function copyToClipboard(selector) {
-  const element = document.querySelector(selector);
-  if (element) {
-    navigator.clipboard.writeText(element.textContent);
-  }
-}
-
-async function fetchAnimeQuote() {
-  const resultDiv = document.getElementById('quote-result');
-  const button = document.getElementById('getQuote');
-  const anotherButton = document.getElementById('getAnotherQuote');
-  
-  // Disable button and show loading
-  const activeButton = event ? event.target : button;
-  activeButton.disabled = true;
-  activeButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
-  
-  try {
-    const response = await fetch('/api/v1/anime/quote');
+document.addEventListener('DOMContentLoaded', function() {
+    const getQuoteBtn = document.getElementById('getQuote');
+    const getAnotherBtn = document.getElementById('getAnotherQuote');
+    const getBatchBtn = document.getElementById('getBatchQuotes');
+    const quoteResult = document.getElementById('quoteResult');
     
-    if (response.ok) {
-      const text = await response.text();
-      const lines = text.trim().split('\n');
-      
-      let quote = 'No quote available';
-      let character = 'Unknown';
-      let anime = 'Unknown';
-      
-      // Parse the response format
-      lines.forEach(line => {
-        if (line.startsWith('quote: ')) {
-          quote = line.replace('quote: ', '');
-        } else if (line.startsWith('character: ')) {
-          character = line.replace('character: ', '');
-        } else if (line.startsWith('anime: ')) {
-          anime = line.replace('anime: ', '');
+    let currentQuote = null;
+    
+    // Single quote button
+    getQuoteBtn.addEventListener('click', fetchSingleQuote);
+    getAnotherBtn.addEventListener('click', fetchSingleQuote);
+    
+    // Batch quotes button
+    getBatchBtn.addEventListener('click', fetchBatchQuotes);
+    
+    async function fetchSingleQuote() {
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        
+        // Show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        
+        try {
+            const response = await fetch('/api/v1/fun/anime/quote');
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentQuote = data.data;
+                displaySingleQuote(currentQuote);
+                quoteResult.style.display = 'block';
+                quoteResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showError('Failed to fetch quote. Please try again.');
+            }
+        } catch (error) {
+            showError(`Error: ${error.message}`);
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
         }
-      });
-      
-      // Update the display
-      document.getElementById('quote-text').textContent = `"${quote}"`;
-      document.getElementById('quote-character').textContent = character;
-      document.getElementById('quote-anime').textContent = anime;
-      
-      resultDiv.style.display = 'block';
-      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-      alert('Failed to fetch quote. Please try again.');
     }
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  } finally {
-    // Re-enable buttons
-    activeButton.disabled = false;
-    if (activeButton === button) {
-      activeButton.innerHTML = '<i class="bi bi-quote"></i> Get Random Quote';
-    } else {
-      activeButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Another Quote';
+    
+    async function fetchBatchQuotes() {
+        const count = document.getElementById('quoteCount').value;
+        const button = event.target;
+        const originalText = button.innerHTML;
+        const batchResult = document.getElementById('batchResult');
+        const batchDisplay = document.getElementById('batchQuotesDisplay');
+        
+        // Show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        batchDisplay.innerHTML = '<div class="loading">Fetching quotes...</div>';
+        batchResult.style.display = 'block';
+        
+        try {
+            const response = await fetch(`/api/v1/fun/anime/quotes/${count}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                displayBatchQuotes(data.data.quotes || data.data);
+                batchResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                batchDisplay.innerHTML = '<div class="error">Failed to fetch quotes.</div>';
+            }
+        } catch (error) {
+            batchDisplay.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
     }
-  }
+    
+    function displaySingleQuote(quote) {
+        document.getElementById('quoteText').textContent = `"${quote.quote}"`;
+        document.getElementById('quoteCharacter').textContent = quote.character;
+        document.getElementById('quoteAnime').textContent = ` from ${quote.anime}`;
+    }
+    
+    function displayBatchQuotes(quotes) {
+        if (!Array.isArray(quotes)) {
+            quotes = [quotes];
+        }
+        
+        const html = quotes.map((quote, index) => `
+            <div class="quote-item">
+                <blockquote class="blockquote">
+                    <p class="quote-text">"${quote.quote}"</p>
+                    <footer class="blockquote-footer">
+                        ${quote.character} <cite>from ${quote.anime}</cite>
+                    </footer>
+                </blockquote>
+                <button class="btn btn-sm btn-info" onclick="copySpecificQuote('${quote.quote.replace(/'/g, "\\'")}')">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+            </div>
+        `).join('');
+        
+        document.getElementById('batchQuotesDisplay').innerHTML = html;
+    }
+    
+    function showError(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification error';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+});
+
+function copyQuote() {
+    const quoteText = document.getElementById('quoteText').textContent;
+    copyToClipboard(quoteText);
 }
 
-document.getElementById('getQuote').addEventListener('click', fetchAnimeQuote);
-document.getElementById('getAnotherQuote').addEventListener('click', fetchAnimeQuote);
+function copySpecificQuote(quote) {
+    copyToClipboard(`"${quote}"`);
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Quote copied to clipboard!');
+    });
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
 </script>
+
+<style>
+.quote-display {
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--purple);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+}
+
+.quote-text {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.blockquote-footer {
+    color: var(--cyan);
+    font-size: 1rem;
+}
+
+.blockquote-footer cite {
+    color: var(--purple);
+}
+
+.quote-item {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.quote-item:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--purple);
+    color: var(--background);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.error {
+    background: var(--red);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+</style>

@@ -1,0 +1,345 @@
+<div class="hero fade-in">
+    <h1>USA COVID-19 Data by State</h1>
+    <p class="lead">COVID-19 statistics for all US states</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <h2 class="card-title">State COVID-19 Information</h2>
+            <form id="stateForm" class="api-form">
+                <div class="form-group">
+                    <label for="state" class="form-label">Select State</label>
+                    <select id="state" class="form-control">
+                        <option value="">Choose a state...</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Get State Data
+                </button>
+            </form>
+            
+            <div id="stateResult" class="result-container mt-4" style="display: none;">
+                <h3 id="stateName" class="text-purple mb-3"></h3>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-virus"></i></div>
+                        <div class="stat-value" id="totalCases">-</div>
+                        <div class="stat-label">Total Cases</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-activity"></i></div>
+                        <div class="stat-value" id="activeCases">-</div>
+                        <div class="stat-label">Active Cases</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-heart-pulse"></i></div>
+                        <div class="stat-value" id="recovered">-</div>
+                        <div class="stat-label">Recovered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-graph-down"></i></div>
+                        <div class="stat-value" id="deaths">-</div>
+                        <div class="stat-label">Deaths</div>
+                    </div>
+                </div>
+                
+                <div class="additional-stats mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Cases Today:</span>
+                                <span class="stat-detail-value" id="todayCases">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Deaths Today:</span>
+                                <span class="stat-detail-value" id="todayDeaths">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Cases per Million:</span>
+                                <span class="stat-detail-value" id="casesPerMillion">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Deaths per Million:</span>
+                                <span class="stat-detail-value" id="deathsPerMillion">-</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Tests Performed:</span>
+                                <span class="stat-detail-value" id="tests">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Tests per Million:</span>
+                                <span class="stat-detail-value" id="testsPerMillion">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">State Population:</span>
+                                <span class="stat-detail-value" id="population">-</span>
+                            </div>
+                            <div class="stat-detail">
+                                <span class="stat-detail-label">Last Updated:</span>
+                                <span class="stat-detail-value" id="lastUpdated">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3 class="card-title">API Usage</h3>
+            <div class="code-block">
+                <h4>Get available states:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/usa</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Get state data:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/usa/California</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Response format:</h4>
+                <pre><code>{
+  "state": "California",
+  "cases": 12345678,
+  "todayCases": 1234,
+  "deaths": 98765,
+  "todayDeaths": 123,
+  "recovered": 11234567,
+  "active": 12346,
+  "casesPerOneMillion": 312456,
+  "deathsPerOneMillion": 2498,
+  "tests": 123456789,
+  "testsPerOneMillion": 3123456,
+  "population": 39538223,
+  "updated": 1634567890123
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stateForm = document.getElementById('stateForm');
+    const stateSelect = document.getElementById('state');
+    
+    // Load available states
+    loadStates();
+    
+    stateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const state = document.getElementById('state').value;
+        if (state) {
+            await loadStateInfo(state);
+        }
+    });
+    
+    async function loadStates() {
+        try {
+            const response = await fetch('/api/v1/world/usa');
+            const data = await response.json();
+            
+            if (response.ok && data.available_states) {
+                populateStates(data.available_states);
+            }
+        } catch (error) {
+            console.error('Error loading states:', error);
+            // Fallback to hardcoded states if API fails
+            const fallbackStates = [
+                'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+                'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 
+                'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 
+                'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 
+                'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 
+                'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 
+                'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 
+                'West Virginia', 'Wisconsin', 'Wyoming'
+            ];
+            populateStates(fallbackStates);
+        }
+    }
+    
+    function populateStates(states) {
+        stateSelect.innerHTML = '<option value="">Choose a state...</option>';
+        states.forEach(state => {
+            const option = document.createElement('option');
+            option.value = state;
+            option.textContent = state;
+            stateSelect.appendChild(option);
+        });
+    }
+});
+
+async function loadStateInfo(state) {
+    const resultDiv = document.getElementById('stateResult');
+    resultDiv.style.display = 'block';
+    
+    // Show loading state
+    document.getElementById('stateName').textContent = 'Loading...';
+    document.querySelectorAll('.stat-value').forEach(el => el.textContent = '-');
+    document.querySelectorAll('.stat-detail-value').forEach(el => el.textContent = '-');
+    
+    try {
+        const response = await fetch(`/api/v1/world/usa/${encodeURIComponent(state)}`);
+        const data = await response.json();
+        
+        if (response.ok && !data.error) {
+            displayStateInfo(data);
+        } else {
+            showError(`Failed to load data for ${state}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showError('Failed to connect to server');
+    }
+}
+
+function displayStateInfo(data) {
+    document.getElementById('stateName').textContent = data.state || 'Unknown State';
+    
+    // Main stats
+    document.getElementById('totalCases').textContent = formatNumber(data.cases || 0);
+    document.getElementById('activeCases').textContent = formatNumber(data.active || 0);
+    document.getElementById('recovered').textContent = formatNumber(data.recovered || 0);
+    document.getElementById('deaths').textContent = formatNumber(data.deaths || 0);
+    
+    // Additional stats
+    document.getElementById('todayCases').textContent = formatNumber(data.todayCases || 0);
+    document.getElementById('todayDeaths').textContent = formatNumber(data.todayDeaths || 0);
+    document.getElementById('casesPerMillion').textContent = formatNumber(data.casesPerOneMillion || 0);
+    document.getElementById('deathsPerMillion').textContent = formatNumber(data.deathsPerOneMillion || 0);
+    document.getElementById('tests').textContent = formatNumber(data.tests || 0);
+    document.getElementById('testsPerMillion').textContent = formatNumber(data.testsPerOneMillion || 0);
+    document.getElementById('population').textContent = formatNumber(data.population || 0);
+    
+    if (data.updated) {
+        const date = new Date(data.updated);
+        document.getElementById('lastUpdated').textContent = date.toLocaleString();
+    }
+}
+
+function showError(message) {
+    document.getElementById('stateName').textContent = 'Error';
+    document.querySelectorAll('.stat-value').forEach(el => el.textContent = 'Error');
+    document.querySelectorAll('.stat-detail-value').forEach(el => el.textContent = 'N/A');
+    showToast(message, 'error');
+}
+
+function formatNumber(num) {
+    return num.toLocaleString();
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--purple);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.additional-stats {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.stat-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat-detail:last-child {
+    border-bottom: none;
+}
+
+.stat-detail-label {
+    color: var(--text-secondary);
+}
+
+.stat-detail-value {
+    color: var(--cyan);
+    font-weight: 500;
+}
+
+#stateName {
+    text-align: center;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    color: var(--background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-error {
+    background-color: var(--red);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
