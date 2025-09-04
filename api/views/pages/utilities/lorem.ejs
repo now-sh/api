@@ -142,19 +142,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     [type === 'paragraphs' ? 'paragraphs' : 'sentences']: count,
-                    format
+                    format: format === 'html' ? 'html' : 'json' // Always request json format from API
                 })
             });
             
             const data = await response.json();
             
             if (response.ok) {
-                if (format === 'text' && typeof data === 'string') {
-                    generatedText = data;
-                } else if (data.success) {
+                if (data.success) {
                     generatedText = data.data.text;
                 } else {
-                    generatedText = data.text || data;
+                    generatedText = data.text || data.data || data;
                 }
                 displayText(generatedText, format);
                 updateStats(generatedText);
