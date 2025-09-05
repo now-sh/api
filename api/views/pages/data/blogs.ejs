@@ -181,47 +181,68 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        let user, repo;
+        if (!sourceSelect.value) {
+            blogPostsDiv.innerHTML = '<div class="error">Please select a source</div>';
+            resultDiv.style.display = 'block';
+            return;
+        }
         
         if (sourceSelect.value === 'custom') {
-            user = document.getElementById('user').value.trim();
-            repo = document.getElementById('repo').value.trim();
+            const user = document.getElementById('user').value.trim();
+            const repo = document.getElementById('repo').value.trim();
             
             if (!user || !repo) {
                 blogPostsDiv.innerHTML = '<div class="error">Please enter both username and repository name</div>';
                 resultDiv.style.display = 'block';
                 return;
             }
-        } else {
-            // Default to malaks-us/jason (backend default)
-            user = 'malaks-us';
-            repo = 'jason';
+            
+            await loadBlogPosts(user, repo, false);
+        } else if (sourceSelect.value === 'casjay') {
+            // Use the personal blog endpoint
+            await loadBlogPosts(null, null, true);
         }
-        
-        await loadBlogPosts(user, repo);
     });
     
     // Load blog posts
-    async function loadBlogPosts(user, repo) {
+    async function loadBlogPosts(user, repo, isPersonal = false) {
         blogPostsDiv.innerHTML = '<div class="loading">Loading blog posts...</div>';
         resultDiv.style.display = 'block';
         
         try {
-            // For now, we'll simulate loading blog posts since the API endpoint might not exist
-            // In a real implementation, this would call the appropriate API endpoint
-            const response = await fetch(`/api/v1/social/blogs/${user}/${repo}/posts`);
+            let response;
+            
+            if (isPersonal) {
+                // Use data blogs endpoint
+                response = await fetch('/api/v1/data/blogs/list');
+            } else {
+                // Use social blogs endpoint
+                response = await fetch(`/api/v1/social/blogs/${user}/${repo}/posts`);
+            }
             
             if (response.ok) {
                 const data = await response.json();
-                const posts = data.success ? data.data : data;
+                let posts;
+                
+                if (isPersonal) {
+                    // Personal blog endpoint returns posts in data.posts
+                    posts = data.data?.posts || data.posts || [];
+                } else {
+                    // Social blogs endpoint returns array directly
+                    posts = data.success ? data.data : data;
+                }
+                
                 displayBlogPosts(posts);
+                
+                // Update count
+                const count = Array.isArray(posts) ? posts.length : 0;
+                document.getElementById('blogCount').textContent = `Found ${count} blog post${count !== 1 ? 's' : ''}`;
             } else {
-                // If the API doesn't exist, show sample data
-                blogPostsDiv.innerHTML = '<div class="error">No blog posts found</div>';
+                blogPostsDiv.innerHTML = '<div class="error">Failed to load blog posts</div>';
             }
         } catch (error) {
-            // Show sample posts if there's an error
-            displaySamplePosts();
+            console.error('Error loading blog posts:', error);
+            blogPostsDiv.innerHTML = '<div class="error">Error loading blog posts</div>';
         }
     }
     

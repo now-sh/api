@@ -112,8 +112,8 @@ async function saveNote(autoSave = false) {
     try {
         const method = currentNoteId ? 'PUT' : 'POST';
         const url = currentNoteId ? 
-            `/api/v1/personal/notes/${currentNoteId}` : 
-            '/api/v1/personal/notes';
+            `/api/v1/data/notes/${currentNoteId}` : 
+            '/api/v1/data/notes';
         
         const response = await fetch(url, {
             method,
@@ -156,7 +156,7 @@ async function loadNotes() {
     }
     
     try {
-        const response = await fetch('/api/v1/personal/notes', {
+        const response = await fetch('/api/v1/data/notes', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -247,7 +247,7 @@ async function deleteCurrentNote() {
     if (!confirm('Are you sure you want to delete this note?')) return;
     
     try {
-        const response = await fetch(`/api/v1/personal/notes/${currentNoteId}`, {
+        const response = await fetch(`/api/v1/data/notes/${currentNoteId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`

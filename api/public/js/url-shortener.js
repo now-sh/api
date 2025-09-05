@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers['Authorization'] = `Bearer ${token}`;
                 }
                 
-                const response = await fetch('/api/v1/services/url/shorten', {
+                const response = await fetch('/api/v1/data/urls/shorten', {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify(data)
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch('/api/v1/services/url/list', {
+            const response = await fetch('/api/v1/data/urls/list', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showQRCode(url) {
         // Generate QR code URL
-        const qrUrl = `/api/v1/qr/generate?text=${encodeURIComponent(url)}&size=250`;
+        const qrUrl = `/api/v1/tools/qr/generate?text=${encodeURIComponent(url)}&size=250`;
         
         // Create popup
         const popupHtml = `

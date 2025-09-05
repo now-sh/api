@@ -100,7 +100,7 @@ async function loadUrlCount(token) {
 
 async function loadTodoCount(token) {
     try {
-        const response = await fetch('/api/v1/personal/todos', {
+        const response = await fetch('/api/v1/data/todos', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -120,7 +120,7 @@ async function loadTodoCount(token) {
 
 async function loadNoteCount(token) {
     try {
-        const response = await fetch('/api/v1/personal/notes', {
+        const response = await fetch('/api/v1/data/notes', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

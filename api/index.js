@@ -61,6 +61,7 @@ app.use('/api/v1/tools/dictionary', require('./routes/dictionaryRoute'));
 
 // 👤 ME - Your Personal Data
 app.use('/api/v1/me/blog', require('./routes/blogRoute'));
+app.use('/api/v1/data/blogs', require('./routes/blogRoute'));
 app.use('/api/v1/me/domains', require('./routes/domainRoute'));
 app.use('/api/v1/me/info', require('./routes/meInfoRoute'));
 
@@ -119,10 +120,10 @@ app.get('/tools/commit', (req, res) => res.render('pages/tools/commit'));
 // Data frontend pages
 app.get('/data/git', (req, res) => res.render('pages/data/git'));
 app.get('/data/reddit', (req, res) => res.render('pages/data/reddit'));
-app.get('/data/covid', (req, res) => res.render('pages/data/covid'));
+app.get('/world/covid', (req, res) => res.render('pages/data/covid'));
 app.get('/data/anime', (req, res) => res.render('pages/data/anime'));
 app.get('/data/domains', (req, res) => res.render('pages/data/domains'));
-app.get('/data/timezones', (req, res) => res.render('pages/data/timezones'));
+app.get('/world/timezones', (req, res) => res.render('pages/data/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/data/closings'));
 app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));
 
