@@ -7,16 +7,19 @@ const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const { setStandardHeaders } = require('../utils/standardHeaders');
 
+// Single proxy middleware for all disease.sh endpoints
 diseaseRoute.use(
   '/',
   createProxyMiddleware({
     target: 'https://disease.sh',
     changeOrigin: true,
+    logLevel: 'silent', // Suppress proxy logs
     pathRewrite: {
-      [`^/api/v1/world/disease`]: '/v3/covid-19/all',
+      // Specific COVID-19 endpoint mapping
+      [`^/api/v1/world/disease/covid/all`]: '/v3/covid-19/all',
+      // General mapping for all other endpoints
+      [`^/api/v1/world/disease`]: '/v3',
     },
-
-    // subscribe to http-proxy's proxyRes event
     onProxyRes: function (proxyRes, req, res) {
       if (proxyRes.statusCode === 404) {
         const data = { Error: 'Page not found.' };
@@ -29,7 +32,6 @@ diseaseRoute.use(
         return res.status(500).json(data);
       }
     },
-    // subscribe to http-proxy's proxyReq event
     onProxyReq: function (proxyReq, req, res) {},
   })
 );

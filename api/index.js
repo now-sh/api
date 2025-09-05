@@ -33,13 +33,15 @@ app.use(handlers.handlerRoute);
 app.use(defaultLimiter);
 app.use(formatResponse);
 
+// Health check alias - calls version endpoint handler directly (must be before main route)
+const { versionHandler } = require('./routes/apiRoute');
+app.get('/healthz', cors(), versionHandler);
+app.get('/api/healthz', cors(), versionHandler);
+
 // Main routes
 app.use('/', require('./routes/mainRoute'));
 app.use('/api', require('./routes/apiRoute'));
 app.use('/api/docs', require('./routes/docsRoute'));
-
-// Health check alias at root
-app.get('/healthz', (req, res) => res.redirect('/api/health/healthz'));
 
 // ==== API ROUTES ORGANIZED BY CATEGORY ====
 
@@ -95,9 +97,10 @@ app.use('/api/v1/world/arcgis', require('./routes/arcgisRoute'));
 app.use('/api/v1/auth', require('./routes/authRoute'));
 app.use('/api/v1/profile', require('./routes/profileRoute'));
 
-// 🏥 SYSTEM - System Health & Info
-app.use('/api/health', require('./routes/healthRoute'));
+// 🏥 SYSTEM - System Info
 app.use('/api/v1/version', require('./routes/apiRoute'));
+app.use('/api/v1/cache', require('./routes/cacheRoute'));
+app.use('/api/v1/docs', require('./routes/swaggerRoute'));
 
 
 
@@ -120,11 +123,11 @@ app.get('/tools/commit', (req, res) => res.render('pages/tools/commit'));
 // Data frontend pages
 app.get('/data/git', (req, res) => res.render('pages/data/git'));
 app.get('/data/reddit', (req, res) => res.render('pages/data/reddit'));
-app.get('/world/covid', (req, res) => res.render('pages/data/covid'));
-app.get('/data/anime', (req, res) => res.render('pages/data/anime'));
+app.get('/world/covid', (req, res) => res.render('pages/world/covid'));
+app.get('/data/anime', (req, res) => res.render('pages/fun/anime'));
 app.get('/data/domains', (req, res) => res.render('pages/data/domains'));
-app.get('/world/timezones', (req, res) => res.render('pages/data/timezones'));
-app.get('/data/closings', (req, res) => res.render('pages/data/closings'));
+app.get('/world/timezones', (req, res) => res.render('pages/world/timezones'));
+app.get('/data/closings', (req, res) => res.render('pages/world/closings'));
 app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));
 
 // World pages
@@ -132,10 +135,10 @@ app.get('/world/nys', (req, res) => res.render('pages/world/nys'));
 app.get('/world/usa', (req, res) => res.render('pages/world/usa'));
 app.get('/world/disease', (req, res) => res.render('pages/world/disease'));
 app.get('/world/arcgis', (req, res) => res.render('pages/world/arcgis'));
-app.get('/world/closings', (req, res) => res.render('pages/data/closings'));
+app.get('/world/closings', (req, res) => res.render('pages/world/closings'));
 
 // Fun pages
-app.get('/fun/anime', (req, res) => res.render('pages/data/anime'));
+app.get('/fun/anime', (req, res) => res.render('pages/fun/anime'));
 app.get('/fun/jokes', (req, res) => res.render('pages/fun/jokes'));
 app.get('/fun/facts', (req, res) => res.render('pages/fun/facts'));
 app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia'));
@@ -168,6 +171,10 @@ const port = process.env.PORT || 2000;
 const hostname = process.env.HOSTNAME;
 
 app.listen(port, async () => {
-  await connectToDatabase();
+  try {
+    await connectToDatabase();
+  } catch (error) {
+    console.warn('⚠️  Starting without database connection');
+  }
   console.log(`🚀 Server started: http://${hostname}:${port}`);
 });

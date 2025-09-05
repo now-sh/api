@@ -6,6 +6,7 @@ const datetime = require('node-datetime');
 const cors = require('cors');
 
 const { setStandardHeaders } = require('../utils/standardHeaders');
+const { mongoose } = require('../db/connection');
 
 const apiRoute = express.Router();
 const dttoday = datetime.create();
@@ -90,10 +91,84 @@ apiRoute.get('/help', cors(), async (req, res) => {
   }
 });
 
-apiRoute.get('/v1/version', cors(), async (req, res) => {
+// Version handler function (exported for healthz alias)
+const versionHandler = async (req, res) => {
   const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
+  
+  // Check Reddit OAuth status
+  const redditClientId = process.env.REDDIT_CLIENT_ID;
+  const redditClientSecret = process.env.REDDIT_CLIENT_SECRET;
+  const hasRedditAuth = redditClientId && redditClientSecret && 
+                       redditClientId.trim() !== '' && 
+                       redditClientSecret.trim() !== '';
+  const redditAuthStatus = hasRedditAuth ? 'Set and Valid' : 'Not Set';
+  
+  // Check database connection status
+  const mongoUri = process.env.MONGO_URI || process.env.MONGO_URI_API;
+  const dbConnected = mongoose.connection && mongoose.connection.readyState === 1;
+  const dbStatus = dbConnected ? 'Connected' : 'Not Connected';
+  
+  // Sanitize MongoDB URI
+  let sanitizedUri = 'Not Set';
+  if (mongoUri) {
+    // Replace username:password with asterisks
+    sanitizedUri = mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//****:****@');
+    // Also hide the database name after the last /
+    sanitizedUri = sanitizedUri.replace(/\/([^/?]+)(\?|$)/, '/****$2');
+  }
+  
+  // Gather more system info (sanitized)
+  const uptime = process.uptime();
+  const memUsage = process.memoryUsage();
+  const nodeVersion = process.version;
+  const platform = process.platform;
+  const arch = process.arch;
+  
+  // Proxy information (sanitized)
+  const proxyInfo = {
+    disease: {
+      target: 'https://disease.sh',
+      endpoints: ['/v3/covid-19/all', '/v3'],
+      status: 'Active'
+    }
+  };
+  
+  // Determine overall health status
+  let healthStatus = 'healthy';
+  let healthIssues = [];
+  
+  // Check database connection
+  if (!dbConnected) {
+    healthStatus = 'degraded';
+    healthIssues.push('Database not connected');
+  }
+  
+  // Check memory usage (warn if heap is over 98% of total)
+  const heapPercentage = (memUsage.heapUsed / memUsage.heapTotal) * 100;
+  if (heapPercentage > 98) {
+    if (healthStatus === 'healthy') healthStatus = 'degraded';
+    healthIssues.push(`High memory usage (${Math.round(heapPercentage)}%)`);
+  }
+  
+  // Check if critical environment variables are set
+  if (!mongoUri && healthStatus === 'healthy') {
+    healthStatus = 'degraded';
+    healthIssues.push('MongoDB URI not configured');
+  }
+  
+  // Check uptime (warn if just restarted - less than 10 seconds)
+  if (uptime < 10) {
+    if (healthStatus === 'healthy') healthStatus = 'degraded';
+    healthIssues.push('Service recently restarted');
+  }
+  
   try {
     const data = {
+      Health: {
+        Status: healthStatus,
+        Issues: healthIssues,
+        Timestamp: new Date().toISOString()
+      },
       Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
       Version: version,
       TimeZone: timeZone,
@@ -101,33 +176,45 @@ apiRoute.get('/v1/version', cors(), async (req, res) => {
       Today: today,
       Time: curtime,
       GitHubToken: githubHeader,
+      RedditAuth: redditAuthStatus,
+      Database: {
+        Status: dbStatus,
+        URI: sanitizedUri
+      },
+      System: {
+        NodeVersion: nodeVersion,
+        Platform: platform,
+        Architecture: arch,
+        Uptime: `${Math.floor(uptime / 60)} minutes`,
+        Memory: {
+          HeapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`,
+          HeapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`,
+          RSS: `${Math.round(memUsage.rss / 1024 / 1024)} MB`,
+          HeapPercentage: `${Math.round(heapPercentage)}%`
+        }
+      },
+      Environment: {
+        NodeEnv: process.env.NODE_ENV || 'development',
+        Port: process.env.PORT || '1919'
+      },
+      Proxies: proxyInfo,
       Auth: auth,
     };
+    
+    // Set appropriate status code based on health
+    const statusCode = healthStatus === 'healthy' ? 200 : 503;
+    
     setStandardHeaders(res, data);
-    res.send(data);
+    res.status(statusCode).send(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-apiRoute.post('/v1/version', cors(), async (req, res) => {
-  const auth = req.header('auth-token') || req.header('Bearer') || req.header('token') || req.header('authorization') || 'no';
-  try {
-    const data = {
-      Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-      Version: version,
-      TimeZone: timeZone,
-      Yesterday: yesterday,
-      Today: today,
-      Time: curtime,
-      GitHubToken: githubHeader,
-      Auth: auth,
-    };
-    setStandardHeaders(res, data);
-    res.send(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Add the handler to the route
+apiRoute.get('/v1/version', cors(), versionHandler);
+
+apiRoute.post('/v1/version', cors(), versionHandler);
 
 module.exports = apiRoute;
+module.exports.versionHandler = versionHandler;

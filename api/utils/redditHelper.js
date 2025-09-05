@@ -1,118 +1,231 @@
 const axios = require('axios');
 const https = require('https');
+const fetch = require('node-fetch');
 
-// Reddit JSON endpoints that work without auth
+// Reddit configuration
 const REDDIT_BASE = 'https://www.reddit.com';
+const REDDIT_OAUTH_BASE = 'https://oauth.reddit.com';
+const REDDIT_TOKEN_URL = 'https://www.reddit.com/api/v1/access_token';
 
-// Browser-like headers to mimic real browser behavior
-const BROWSER_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Accept-Encoding': 'gzip, deflate, br',
-  'Cache-Control': 'no-cache',
-  'Pragma': 'no-cache',
-  'Sec-Ch-Ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-  'Sec-Ch-Ua-Mobile': '?0',
-  'Sec-Ch-Ua-Platform': '"Windows"',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'none',
-  'Sec-Fetch-User': '?1',
-  'Upgrade-Insecure-Requests': '1'
-};
+// Reddit API credentials from environment
+const REDDIT_CLIENT_ID = process.env.REDDIT_CLIENT_ID;
+const REDDIT_CLIENT_SECRET = process.env.REDDIT_CLIENT_SECRET;
+const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'API:v1.9.4 (by /u/casjay)';
 
-// Try multiple methods to fetch Reddit data
-async function fetchRedditData(username, subreddit = null, limit = 25) {
-  // Try browser-like approach 
-  const result = await fetchWithBrowserHeaders(username, subreddit, limit);
-  return result;
+// Working Firefox user agent for RSS fallback
+const FIREFOX_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0';
+
+// Various user agents to try
+const USER_AGENTS = [
+  FIREFOX_USER_AGENT,
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+  'curl/7.68.0',
+  'python-requests/2.31.0'
+];
+
+// OAuth token cache
+let oauthToken = null;
+let tokenExpiry = null;
+
+/**
+ * Get OAuth token for Reddit API
+ */
+async function getOAuthToken() {
+  // Check if we have a valid token
+  if (oauthToken && tokenExpiry && new Date() < tokenExpiry) {
+    return oauthToken;
+  }
+
+  // Only try OAuth if credentials are configured
+  if (!REDDIT_CLIENT_ID || !REDDIT_CLIENT_SECRET) {
+    return null;
+  }
+
+  try {
+    const auth = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString('base64');
+    
+    const response = await axios.post(REDDIT_TOKEN_URL, 
+      'grant_type=client_credentials',
+      {
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'User-Agent': REDDIT_USER_AGENT,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout: 5000
+      }
+    );
+
+    if (response.data && response.data.access_token) {
+      oauthToken = response.data.access_token;
+      // Set expiry to 5 minutes before actual expiry
+      const expiresIn = response.data.expires_in || 3600;
+      tokenExpiry = new Date(Date.now() + (expiresIn - 300) * 1000);
+      console.log('✅ Reddit OAuth token obtained');
+      return oauthToken;
+    }
+  } catch (error) {
+    console.error('Reddit OAuth error:', error.message);
+  }
+
+  return null;
 }
 
-// Browser-like fetch implementation
-async function fetchWithBrowserHeaders(username, subreddit = null, limit = 25) {
-  // Try multiple Reddit domains and approaches
-  const attempts = [
-    // Try Reddit RSS feeds first (often less protected)
+/**
+ * Try to fetch data using OAuth API
+ */
+async function fetchWithOAuth(username, subreddit, limit) {
+  const token = await getOAuthToken();
+  if (!token) return null;
+
+  try {
+    const url = subreddit
+      ? `${REDDIT_OAUTH_BASE}/r/${subreddit}/hot.json?limit=${limit}`
+      : `${REDDIT_OAUTH_BASE}/user/${username}/about.json`;
+
+    const response = await axios.get(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'User-Agent': REDDIT_USER_AGENT,
+        'Accept': 'application/json'
+      },
+      timeout: 10000
+    });
+
+    console.log('✅ Reddit OAuth API request successful');
+    return response.data;
+  } catch (error) {
+    console.error('Reddit OAuth API error:', error.message);
+    // Clear token on auth errors
+    if (error.response && error.response.status === 401) {
+      oauthToken = null;
+      tokenExpiry = null;
+    }
+    return null;
+  }
+}
+
+/**
+ * Main function to fetch Reddit data
+ */
+async function fetchRedditData(username, subreddit = null, limit = 25) {
+  console.log(`Fetching Reddit data - ${subreddit ? `subreddit: ${subreddit}` : `user: ${username}`}`);
+  
+  // First try OAuth if configured
+  const skipOAuth = process.env.REDDIT_SKIP_OAUTH === 'true';
+  if (!skipOAuth && REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET) {
+    const oauthData = await fetchWithOAuth(username, subreddit, limit);
+    if (oauthData) {
+      console.log('✅ Using Reddit OAuth API data');
+      oauthData.source = 'oauth';
+      return oauthData;
+    }
+  }
+
+  // Try direct JSON endpoints with old.reddit.com and reddit.com
+  console.log('Trying direct JSON endpoints...');
+  const jsonResult = await tryDirectJSONEndpoints(username, subreddit, limit);
+  if (jsonResult) {
+    console.log('✅ Direct JSON endpoint successful');
+    jsonResult.source = 'json';
+    return jsonResult;
+  }
+
+  // Fallback to RSS approach
+  console.log('Using RSS fallback for Reddit data');
+  try {
+    const result = await fetchViaRSSFeed(username, subreddit, limit);
+    if (result && result.data && result.data.children && result.data.children.length > 0) {
+      console.log(`✅ RSS fetch successful - got ${result.data.children.length} posts`);
+      result.source = 'rss';
+      return result;
+    }
+  } catch (error) {
+    console.error('RSS fetch error:', error.message);
+  }
+
+  // Final fallback: Try multiple JSON approaches (likely to fail but worth trying)
+  console.log('RSS failed, trying JSON fallback methods...');
+  try {
+    const result = await fetchWithMultipleMethods(username, subreddit, limit);
+    result.source = 'fallback';
+    return result;
+  } catch (error) {
+    console.error('All fallback methods failed:', error.message);
+    throw new Error(`Unable to fetch Reddit data for ${subreddit || username}. Reddit appears to be blocking API requests.`);
+  }
+}
+
+/**
+ * Primary fallback method: Fetch via RSS/Atom feeds (works reliably)
+ */
+async function fetchViaRSSFeed(username, subreddit, limit = 25) {
+  const endpoints = [
+    // RSS endpoints (XML format)
     {
-      hostname: 'www.reddit.com',
-      path: subreddit 
-        ? `/r/${subreddit}.rss?limit=${limit}`
-        : `/user/${username}.rss?limit=${limit}`,
-      isRSS: true
+      url: subreddit 
+        ? `${REDDIT_BASE}/r/${subreddit}.rss?limit=${limit}`
+        : `${REDDIT_BASE}/user/${username}.rss?limit=${limit}`,
+      format: 'rss'
     },
-    // Try old.reddit.com with minimal headers
+    // Atom endpoints  
     {
-      hostname: 'old.reddit.com',
-      path: subreddit 
-        ? `/r/${subreddit}.json?limit=${limit}&sort=hot`
-        : `/user/${username}/about.json`
+      url: subreddit
+        ? `${REDDIT_BASE}/r/${subreddit}/.rss`
+        : `${REDDIT_BASE}/user/${username}/.rss`,
+      format: 'atom'
     },
-    // Try mobile version
+    // XML endpoints
     {
-      hostname: 'm.reddit.com',
-      path: subreddit 
-        ? `/r/${subreddit}.json?limit=${limit}`
-        : `/user/${username}/about.json`
-    },
-    // Try with different user agent (mobile)
-    {
-      hostname: 'www.reddit.com',
-      path: subreddit 
-        ? `/r/${subreddit}.json?limit=${limit}`
-        : `/user/${username}/about.json`,
-      mobile: true
-    },
-    // Try API endpoint directly
-    {
-      hostname: 'oauth.reddit.com',
-      path: subreddit 
-        ? `/r/${subreddit}/hot.json?limit=${limit}`
-        : `/user/${username}/about.json`,
-      api: true
+      url: subreddit
+        ? `${REDDIT_BASE}/r/${subreddit}.xml?limit=${limit}`
+        : `${REDDIT_BASE}/user/${username}.xml?limit=${limit}`,
+      format: 'xml'
     }
   ];
 
-  for (const attempt of attempts) {
+  for (const endpoint of endpoints) {
     try {
-      const rawResult = await makeHttpsRequest(attempt);
-      if (rawResult) {
-        let result;
-        
-        if (attempt.isRSS) {
-          // Parse RSS to JSON-like format
-          console.log(`RSS response length: ${rawResult.length}`);
-          console.log(`RSS response preview: ${rawResult.substring(0, 200)}...`);
-          result = parseRedditRSS(rawResult, subreddit);
-        } else {
-          // Try to parse as JSON
-          try {
-            result = JSON.parse(rawResult);
-          } catch (e) {
-            console.log(`Failed to parse JSON from ${attempt.hostname}: ${e.message}`);
-            continue;
-          }
-        }
-        
-        if (result && (result.data || result.kind || (result.children && result.children.length))) {
-          console.log(`Success with ${attempt.hostname}${attempt.path}`);
-          return result;
-        }
+      console.log(`Trying RSS/Atom feed: ${endpoint.url}`);
+      
+      const response = await fetch(endpoint.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; RSS Reader)',
+          'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml'
+        },
+        timeout: 10000
+      });
+
+      if (!response.ok) {
+        console.log(`RSS endpoint returned ${response.status}`);
+        continue;
+      }
+
+      const text = await response.text();
+      
+      // Parse the RSS/Atom feed
+      const result = parseRedditFeed(text, subreddit);
+      if (result && result.data && result.data.children && result.data.children.length > 0) {
+        return result;
       }
     } catch (error) {
-      console.log(`Failed ${attempt.hostname}${attempt.path}: ${error.message}`);
+      console.log(`RSS endpoint failed: ${error.message}`);
     }
   }
-  
-  throw new Error('All Reddit endpoints failed');
+
+  throw new Error('All RSS endpoints failed');
 }
 
-// Parser for Reddit Atom/RSS feeds
-function parseRedditRSS(feedData, subreddit) {
+/**
+ * Parse Reddit RSS/Atom feed into Reddit JSON API format
+ */
+function parseRedditFeed(feedData, subreddit) {
   try {
     const items = [];
     
-    // Check if it's Atom format (which Reddit uses)
+    // Check if it's Atom format
     if (feedData.includes('<feed xmlns="http://www.w3.org/2005/Atom"')) {
       // Parse Atom format
       const entryMatches = feedData.match(/<entry[^>]*>[\s\S]*?<\/entry>/gi);
@@ -124,25 +237,29 @@ function parseRedditRSS(feedData, subreddit) {
           const link = entry.match(/<link[^>]*href="([^"]*)"[^>]*>/i);
           const updated = entry.match(/<updated[^>]*>(.*?)<\/updated>/i);
           const author = entry.match(/<author[^>]*>[\s\S]*?<name[^>]*>(.*?)<\/name>[\s\S]*?<\/author>/i);
-          const content = entry.match(/<content[^>]*>(.*?)<\/content>/i);
+          const content = entry.match(/<content[^>]*>(.*?)<\/content>/is);
+          const id = entry.match(/<id[^>]*>(.*?)<\/id>/i);
           
-          if (title) {
-            const titleText = title[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-            const linkUrl = link ? link[1] : '';
-            const authorName = author ? author[1] : 'unknown';
+          if (title && link) {
+            const titleText = decodeHTMLEntities(title[1]);
+            const linkUrl = link[1];
+            const authorName = author ? author[1].replace('/u/', '') : 'unknown';
+            const postId = id ? id[1].split('/').pop() : null;
             
             items.push({
+              kind: 't3',
               data: {
+                id: postId,
                 title: titleText,
                 author: authorName,
                 url: linkUrl,
                 permalink: linkUrl.replace('https://www.reddit.com', ''),
                 subreddit: subreddit || 'unknown',
-                created_utc: updated ? Math.floor(new Date(updated[1]).getTime() / 1000) : Math.floor(Date.now() / 1000),
-                score: Math.floor(Math.random() * 100) + 10, // Atom doesn't have score, estimate
-                num_comments: Math.floor(Math.random() * 50), // Atom doesn't have comments, estimate
+                created_utc: updated ? Math.floor(new Date(updated[1]).getTime() / 1000) : Date.now() / 1000,
+                score: 1, // RSS doesn't provide score
+                num_comments: 0, // RSS doesn't provide comment count
                 is_self: linkUrl.includes('/comments/'),
-                selftext: content ? content[1].substring(0, 200).replace(/<[^>]*>/g, '') + '...' : ''
+                selftext: content ? decodeHTMLEntities(content[1]).substring(0, 500) : ''
               }
             });
           }
@@ -155,30 +272,38 @@ function parseRedditRSS(feedData, subreddit) {
       if (itemMatches) {
         console.log(`Found ${itemMatches.length} RSS items`);
         for (const item of itemMatches.slice(0, 25)) {
-          const title = item.match(/<title[^>]*><!\[CDATA\[(.*?)\]\]><\/title>/i) || item.match(/<title[^>]*>(.*?)<\/title>/i);
+          const title = item.match(/<title[^>]*><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
+                        item.match(/<title[^>]*>(.*?)<\/title>/i);
           const link = item.match(/<link[^>]*>(.*?)<\/link>/i);
-          const description = item.match(/<description[^>]*><!\[CDATA\[(.*?)\]\]><\/description>/i) || item.match(/<description[^>]*>(.*?)<\/description>/i);
+          const description = item.match(/<description[^>]*><!\[CDATA\[(.*?)\]\]><\/description>/is) || 
+                             item.match(/<description[^>]*>(.*?)<\/description>/is);
           const pubDate = item.match(/<pubDate[^>]*>(.*?)<\/pubDate>/i);
+          const guid = item.match(/<guid[^>]*>(.*?)<\/guid>/i);
           
           if (title && link) {
-            const titleText = title[1];
+            const titleText = decodeHTMLEntities(title[1]);
             const linkUrl = link[1];
+            const postId = guid ? guid[1].split('/').pop() : null;
             
-            const authorMatch = titleText.match(/by (?:u\/)?([^\s\]]+)/i);
+            // Extract author from title if present
+            const authorMatch = titleText.match(/by (?:\/u\/)?([^\s\]]+)/i);
             const author = authorMatch ? authorMatch[1] : 'unknown';
+            const cleanTitle = titleText.replace(/\s*by\s+(?:\/u\/)?[^\s\]]+.*$/, '').trim();
             
             items.push({
+              kind: 't3',
               data: {
-                title: titleText.replace(/\s*by\s+(?:u\/)?[^\s\]]+.*$/, '').trim(),
+                id: postId,
+                title: cleanTitle,
                 author: author,
                 url: linkUrl,
                 permalink: linkUrl.replace('https://www.reddit.com', ''),
                 subreddit: subreddit || 'unknown',
-                created_utc: pubDate ? Math.floor(new Date(pubDate[1]).getTime() / 1000) : Math.floor(Date.now() / 1000),
-                score: Math.floor(Math.random() * 100) + 1,
-                num_comments: Math.floor(Math.random() * 50),
+                created_utc: pubDate ? Math.floor(new Date(pubDate[1]).getTime() / 1000) : Date.now() / 1000,
+                score: 1,
+                num_comments: 0,
                 is_self: linkUrl.includes('/comments/'),
-                selftext: description ? description[1].substring(0, 200) + '...' : ''
+                selftext: description ? decodeHTMLEntities(description[1]).substring(0, 500) : ''
               }
             });
           }
@@ -188,7 +313,10 @@ function parseRedditRSS(feedData, subreddit) {
     
     console.log(`Parsed ${items.length} items from feed`);
     return {
+      kind: 'Listing',
       data: {
+        after: null,
+        before: null,
         children: items
       }
     };
@@ -198,124 +326,194 @@ function parseRedditRSS(feedData, subreddit) {
   }
 }
 
-function makeHttpsRequest({ hostname, path, isRSS, mobile, api }) {
-  return new Promise((resolve, reject) => {
-    let headers = {};
-    
-    if (mobile) {
-      // Mobile headers
-      headers = {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Host': hostname
-      };
-    } else if (api) {
-      // API headers
-      headers = {
-        'User-Agent': 'web:myapp:v1.0.0 (by /u/testuser)',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Host': hostname
-      };
-    } else if (isRSS) {
-      // RSS/XML headers
-      headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; RSS Reader)',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
-        'Host': hostname
-      };
-    } else {
-      // Standard browser headers but simplified
-      headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/html, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Host': hostname,
-        'Connection': 'keep-alive'
-      };
-    }
-
-    const options = {
-      hostname,
-      port: 443,
-      path,
-      method: 'GET',
-      headers
-    };
-    
-    console.log(`Attempting browser-like request to: https://${hostname}${path}`);
-    
-    const req = https.request(options, (res) => {
-      let data = '';
-      
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
-      res.on('end', () => {
-        try {
-          if (res.statusCode === 200) {
-            console.log(`Request successful to ${hostname}!`);
-            resolve(data);
-          } else {
-            console.log(`Request returned status: ${res.statusCode} for ${hostname}`);
-            reject(new Error(`HTTP ${res.statusCode}`));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-    
-    req.on('error', (error) => {
-      reject(error);
-    });
-    
-    req.setTimeout(10000, () => {
-      req.destroy();
-      reject(new Error('Request timeout'));
-    });
-    
-    req.end();
-  });
+/**
+ * Decode HTML entities
+ */
+function decodeHTMLEntities(text) {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/<[^>]*>/g, ''); // Remove HTML tags
 }
 
-// Old implementation for reference (when Reddit API becomes accessible again)
-async function fetchRedditDataOld(username, subreddit = null, limit = 25) {
+/**
+ * Try direct JSON endpoints with different Reddit domains and user agents
+ */
+async function tryDirectJSONEndpoints(username, subreddit, limit) {
+  const domains = ['reddit.com', 'www.reddit.com', 'old.reddit.com'];
+  
+  // Try each domain with each user agent
+  for (const domain of domains) {
+    for (const userAgent of USER_AGENTS) {
+      try {
+        const url = subreddit 
+          ? `https://${domain}/r/${subreddit}.json?limit=${limit}`
+          : `https://${domain}/user/${username}/about.json`;
+        
+        console.log(`[Reddit] Trying ${domain} with ${userAgent.substring(0, 30)}...`);
+        
+        // First try with minimal headers (like curl)
+        let response = await fetch(url, {
+          headers: {
+            'User-Agent': userAgent
+          },
+          timeout: 3000
+        });
+        
+        if (response.ok) {
+          const text = await response.text();
+          if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+            const data = JSON.parse(text);
+            if (data && (data.data || data.kind)) {
+              console.log(`✅ SUCCESS with ${domain} using minimal headers`);
+              return data;
+            }
+          }
+        }
+        
+        // Try with browser headers
+        response = await fetch(url + '&raw_json=1', {
+          headers: {
+            'User-Agent': userAgent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+          },
+          timeout: 3000
+        });
+        
+        if (response.ok) {
+          const text = await response.text();
+          if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+            const data = JSON.parse(text);
+            if (data && (data.data || data.kind)) {
+              console.log(`✅ SUCCESS with ${domain} using browser headers`);
+              return data;
+            }
+          }
+        }
+      } catch (error) {
+        // Continue trying
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Fallback: Try multiple JSON methods (these typically fail due to blocking)
+ */
+async function fetchWithMultipleMethods(username, subreddit, limit) {
   const methods = [
-    // Method 1: Direct JSON endpoint with proper headers
+    // Method 1: node-fetch with browser headers
     async () => {
       const url = subreddit 
         ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
         : `${REDDIT_BASE}/user/${username}/about.json`;
       
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': FIREFOX_USER_AGENT,
+          'Accept': 'application/json, text/html, */*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Upgrade-Insecure-Requests': '1'
+        }
+      });
+      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    },
+    
+    // Method 2: axios with minimal headers
+    async () => {
+      const url = subreddit 
+        ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
+        : `${REDDIT_BASE}/user/${username}/about.json`;
+        
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': 'nodejs:api:v1.9.4 (by /u/casjay)',
-          'Accept': 'application/json'
+          'User-Agent': FIREFOX_USER_AGENT
         },
-        timeout: 15000
+        timeout: 10000
       });
       
       return response.data;
+    },
+    
+    // Method 3: Native HTTPS with browser simulation
+    async () => {
+      return new Promise((resolve, reject) => {
+        const url = subreddit 
+          ? `/r/${subreddit}.json?limit=${limit}`
+          : `/user/${username}/about.json`;
+          
+        const options = {
+          hostname: 'www.reddit.com',
+          port: 443,
+          path: url,
+          method: 'GET',
+          headers: {
+            'User-Agent': FIREFOX_USER_AGENT,
+            'Accept': 'application/json',
+            'Host': 'www.reddit.com',
+            'Connection': 'keep-alive'
+          }
+        };
+        
+        const req = https.request(options, (res) => {
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => {
+            if (res.statusCode === 200) {
+              try {
+                resolve(JSON.parse(data));
+              } catch (e) {
+                reject(new Error('Invalid JSON'));
+              }
+            } else {
+              reject(new Error(`HTTP ${res.statusCode}`));
+            }
+          });
+        });
+        
+        req.on('error', reject);
+        req.setTimeout(10000, () => {
+          req.destroy();
+          reject(new Error('Timeout'));
+        });
+        req.end();
+      });
     }
   ];
-  
+
+  let lastError;
   for (let i = 0; i < methods.length; i++) {
     try {
       const result = await methods[i]();
-      if (result && (result.data || result.kind === 't2')) {
+      if (result) {
+        console.log(`Method ${i + 1} successful`);
         return result;
       }
     } catch (error) {
-      console.log(`Reddit method ${i + 1} failed:`, error.message);
+      lastError = error;
+      console.log(`Method ${i + 1} failed: ${error.message}`);
     }
   }
   
-  throw new Error('Reddit API is currently unavailable');
+  throw lastError || new Error('All methods failed');
 }
 
 module.exports = { fetchRedditData };

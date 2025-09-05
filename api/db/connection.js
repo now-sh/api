@@ -16,7 +16,8 @@ const connectToDatabase = async () => {
   if (!MONGO_URI) {
     console.error('❌ MONGO_URI not set in environment variables');
     console.error('Please set MONGO_URI in your .env file');
-    process.exit(1);
+    console.warn('⚠️  Server continuing without MongoDB connection');
+    return null;
   }
 
   try {
@@ -30,11 +31,6 @@ const connectToDatabase = async () => {
 
     // Set strictQuery to false to prepare for Mongoose 7
     mongoose.set('strictQuery', false);
-    
-    // Mask connection string for security
-    const maskedUri = MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//****:****@');
-    console.log('🚀 Connecting to MongoDB...');
-    console.log(`📍 URI: ${maskedUri}`);
     
     connection = await mongoose.connect(MONGO_URI, options);
     console.log('✅ MongoDB connected successfully');
@@ -55,7 +51,8 @@ const connectToDatabase = async () => {
     return connection;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
-    process.exit(1);
+    console.warn('⚠️  Server continuing without MongoDB connection');
+    return null;
   }
 };
 

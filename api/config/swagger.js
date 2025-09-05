@@ -1,146 +1,181 @@
 const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerDocs = require('./swagger-docs');
-
-// Combine all paths from swagger-docs
-const paths = {};
-const tags = [];
-const components = { 
-  schemas: {
-    Error: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'string'
-        }
-      }
-    },
-    ValidationError: {
-      type: 'object',
-      properties: {
-        errors: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              msg: {
-                type: 'string'
-              }
-            }
-          }
-        }
-      }
-    },
-    AuthResponse: {
-      type: 'object',
-      properties: {
-        errors: {
-          type: 'array',
-          items: {}
-        },
-        data: {
-          type: 'object',
-          properties: {
-            token: {
-              type: 'string'
-            },
-            user: {
-              type: 'object',
-              properties: {
-                id: {
-                  type: 'string'
-                },
-                email: {
-                  type: 'string'
-                },
-                name: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-};
-
-// Process all documentation modules
-Object.values(swaggerDocs).forEach(doc => {
-  if (doc.tag) {
-    tags.push(doc.tag);
-  }
-  
-  if (doc.paths) {
-    Object.assign(paths, doc.paths);
-  }
-  
-  if (doc.components && doc.components.schemas) {
-    Object.assign(components.schemas, doc.components.schemas);
-  }
-});
-
-// Helper function to get server URL
-const getServerUrl = () => {
-  if (process.env.API_URL) {
-    return process.env.API_URL;
-  }
-  
-  // Default to relative URL for reverse proxy compatibility
-  return '';
-};
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Server',
-      version: process.env.npm_package_version || '1.9.2',
-      description: 'A multi-purpose Express.js API server with various endpoints',
+      title: '🚀 CasJay API',
+      version: process.env.VERSION || '1.9.4',
+      description: `
+# CasJay Backend API 🎯
+
+A comprehensive, high-performance API service built with Express.js and MongoDB, featuring:
+
+## 🛠️ **Developer Tools**
+- Base64 encoding/decoding, UUID generation, JWT handling
+- Hash generation (MD5, SHA256), QR code generation
+- Lorem ipsum generation, password utilities
+
+## 🌍 **World Data**  
+- Real-time COVID-19 statistics, timezone information
+- School closings, regional data (USA/NYS)
+
+## 🌐 **Social Integrations**
+- GitHub user/repository data
+- Reddit content via RSS feeds
+- Blog post management
+
+## 🎮 **Fun & Entertainment**
+- Jokes, facts, trivia, anime quotes
+- Various entertainment endpoints
+
+## 📊 **Data Management**
+- Personal todos, notes, URL shortening
+- Data storage and retrieval
+
+## 🎨 **Theme**: Dark mode with Dracula color scheme
+## 🚀 **Performance**: Cached responses, rate limiting, error handling
+      `,
       contact: {
-        name: 'CasjaysDev',
-        email: 'git-admin@casjaysdev.pro',
-        url: 'https://api.casjay.coffee'
+        name: 'CasJay',
+        url: 'https://github.com/casjay',
+        email: 'support@casjay.pro'
       },
       license: {
         name: 'MIT',
         url: 'https://opensource.org/licenses/MIT'
+      },
+      'x-logo': {
+        url: '/favicon.ico',
+        altText: 'CasJay API'
       }
     },
     servers: [
       {
-        url: getServerUrl(),
+        url: '{protocol}://{host}/api/v1',
         description: 'API Server',
         variables: {
           protocol: {
             enum: ['http', 'https'],
-            default: 'https'
+            default: 'http'
           },
           host: {
-            default: 'api.casjay.coffee'
-          },
-          port: {
-            default: ''
+            default: 'localhost:1919'
           }
         }
       }
     ],
-    tags: tags,
-    paths: paths,
     components: {
-      ...components,
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Enter JWT token'
+          bearerFormat: 'JWT'
+        }
+      },
+      schemas: {
+        Success: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: true
+            },
+            data: {
+              type: 'object'
+            }
+          }
+        },
+        Error: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: false
+            },
+            error: {
+              type: 'string'
+            },
+            message: {
+              type: 'string'
+            }
+          }
+        }
+      },
+      responses: {
+        Unauthorized: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              }
+            }
+          }
+        },
+        NotFound: {
+          description: 'Resource not found',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              }
+            }
+          }
+        },
+        ServerError: {
+          description: 'Internal server error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              }
+            }
+          }
         }
       }
-    }
+    },
+    tags: [
+      {
+        name: 'Tools',
+        description: 'Developer tools and utilities'
+      },
+      {
+        name: 'Social',
+        description: 'Social media integrations'
+      },
+      {
+        name: 'World',
+        description: 'World data and information'
+      },
+      {
+        name: 'Fun',
+        description: 'Entertainment endpoints'
+      },
+      {
+        name: 'Data',
+        description: 'Data storage and management'
+      },
+      {
+        name: 'Personal',
+        description: 'Personal data and profile'
+      },
+      {
+        name: 'Auth',
+        description: 'Authentication endpoints'
+      },
+      {
+        name: 'System',
+        description: 'System information and cache management'
+      }
+    ]
   },
-  apis: [] // We're using centralized docs now, not parsing route files
+  apis: [
+    './api/routes/*.js',
+    './api/docs/swagger/*.js'
+  ]
 };
 
-const specs = swaggerJsdoc(options);
+const swaggerSpec = swaggerJsdoc(options);
 
-module.exports = specs;
+module.exports = swaggerSpec;
