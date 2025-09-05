@@ -6,7 +6,7 @@ const datetime = require('node-datetime');
 const cors = require('cors');
 
 const { setStandardHeaders } = require('../utils/standardHeaders');
-const { mongoose, getDatabaseStatus } = require('../db/connection');
+const { mongoose, getDatabaseStatus, connectToDatabase } = require('../db/connection');
 
 const apiRoute = express.Router();
 const dttoday = datetime.create();
@@ -105,7 +105,19 @@ const versionHandler = async (req, res) => {
   
   // Check database connection status
   const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URI_API;
-  const dbStatusDetails = getDatabaseStatus();
+  const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+  
+  // In serverless environments, actively try to connect for health checks
+  let dbStatusDetails = getDatabaseStatus();
+  if (isVercel && !dbStatusDetails.connected) {
+    try {
+      await connectToDatabase();
+      dbStatusDetails = getDatabaseStatus();
+    } catch (error) {
+      // Connection failed, keep the original status
+    }
+  }
+  
   const dbConnected = dbStatusDetails.connected;
   const dbStatus = dbStatusDetails.connected ? 'Connected' : 'Not Connected';
   
