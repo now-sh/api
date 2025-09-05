@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function loadClosings() {
         try {
-            const response = await fetch('/api/v1/closings');
+            const response = await fetch('/api/v1/world/closings');
             
             if (response.ok) {
                 const data = await response.json();
@@ -100,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (Array.isArray(data)) {
                     allClosings = data;
                 } else {
-                    // Use mock data if API returns unexpected format
-                    allClosings = getMockClosings();
+                    // No data available
+                    allClosings = [];
                 }
                 
                 // Update last updated time
@@ -117,14 +117,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Display closings
                 filterAndDisplayClosings(searchInput.value.toLowerCase(), currentFilter);
             } else {
-                // Use mock data on error
-                allClosings = getMockClosings();
+                // No data available on error
+                allClosings = [];
                 filterAndDisplayClosings('', currentFilter);
                 console.error('Failed to load closings');
             }
         } catch (error) {
             console.error('Error loading closings:', error);
-            allClosings = getMockClosings();
+            allClosings = [];
             filterAndDisplayClosings('', currentFilter);
         }
     }
@@ -207,28 +207,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    function getMockClosings() {
-        return [
-            {
-                organization: 'Central High School',
-                status: 'closed',
-                reason: 'Snow emergency',
-                updated: new Date().toISOString()
-            },
-            {
-                organization: 'Washington Elementary',
-                status: 'delayed',
-                delay_time: '2 hour delay',
-                reason: 'Icy conditions',
-                updated: new Date().toISOString()
-            },
-            {
-                organization: 'Lincoln Middle School',
-                status: 'early',
-                delay_time: '1:00 PM dismissal',
-                reason: 'Weather conditions',
-                updated: new Date().toISOString()
-            }
-        ];
-    }
 });

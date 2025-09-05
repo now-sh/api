@@ -3,8 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const domainSearch = document.getElementById('domainSearch');
     let allDomains = [];
     
-    // Load all domains on page load
-    loadAllDomains();
+    // Don't auto-load domains
     
     // Handle domain search
     if (domainSearch) {
@@ -17,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Load all available domains
-    async function loadAllDomains() {
+    // Make loadAllDomains globally accessible
+    window.loadAllDomains = async function() {
         try {
             const response = await fetch('/api/v1/me/info/domains');
             

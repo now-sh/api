@@ -485,7 +485,7 @@ select.form-control {
 input.form-control,
 textarea.form-control,
 select.form-control {
-  color: white !important;
+  color: #FFFFFF !important;
   background-color: var(--bg-secondary) !important;
 }
 
@@ -498,7 +498,7 @@ textarea.form-control::placeholder {
 input.form-control:focus,
 textarea.form-control:focus,
 select.form-control:focus {
-  color: white !important;
+  color: #FFFFFF !important;
   background-color: var(--bg-primary) !important;
   border-color: var(--purple) !important;
 }
@@ -510,7 +510,7 @@ input.form-control:-webkit-autofill:focus,
 input.form-control:-webkit-autofill:active,
 textarea.form-control:-webkit-autofill,
 select.form-control:-webkit-autofill {
-  -webkit-text-fill-color: white !important;
+  -webkit-text-fill-color: #FFFFFF !important;
   -webkit-box-shadow: 0 0 0px 1000px var(--bg-secondary) inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
@@ -518,7 +518,7 @@ select.form-control:-webkit-autofill {
 /* Ensure select options are visible */
 select.form-control option {
   background-color: var(--bg-primary);
-  color: white;
+  color: #FFFFFF;
 }
 
 /* Fix Patreon and PayPal button visibility */

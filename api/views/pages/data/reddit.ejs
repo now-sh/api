@@ -12,7 +12,7 @@
           <form id="redditForm">
             <div class="mb-3">
               <label for="username" class="form-label">Reddit Username</label>
-              <input type="text" class="form-control" id="username" name="username" value="casjay" placeholder="Enter Reddit username...">
+              <input type="text" class="form-control" id="username" name="username" value="" placeholder="Enter Reddit username...">
             </div>
             
             <button type="submit" class="btn btn-danger">
@@ -46,11 +46,11 @@
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li><strong>My Posts:</strong> <code>/api/v1/reddit/jason</code></li>
-            <li><strong>User Posts:</strong> <code>/api/v1/reddit/u/:username</code></li>
-            <li><strong>Subreddit Posts:</strong> <code>/api/v1/reddit/r/:subreddit</code></li>
+            <li><strong>My Posts:</strong> <code>/api/v1/me/info/reddit</code></li>
+            <li><strong>User Posts:</strong> <code>/api/v1/social/reddit/u/:username</code></li>
+            <li><strong>Subreddit Posts:</strong> <code>/api/v1/social/reddit/r/:subreddit</code></li>
           </ul>
-          <a href="/api/v1/reddit/jason" class="btn btn-info btn-sm" target="_blank">
+          <a href="/api/v1/me/info/reddit" class="btn btn-info btn-sm" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i> View Casjay Posts
           </a>
         </div>
@@ -81,7 +81,7 @@ document.getElementById('redditForm').addEventListener('submit', async function(
   }
   
   try {
-    const endpoint = username === 'casjay' ? '/api/v1/reddit/jason' : `/api/v1/reddit/u/${username}`;
+    const endpoint = username === 'casjay' ? '/api/v1/me/info/reddit' : `/api/v1/social/reddit/u/${username}`;
     
     const response = await fetch(endpoint);
     const data = await response.json();

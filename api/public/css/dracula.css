@@ -102,13 +102,13 @@
 
 [data-theme="light"] .btn-primary {
   background-color: var(--purple) !important;
-  color: white !important;
+  color: #FFFFFF !important;
   border-color: var(--purple) !important;
 }
 
 [data-theme="light"] .btn-secondary {
   background-color: var(--cyan) !important;
-  color: white !important;
+  color: #FFFFFF !important;
   border-color: var(--cyan) !important;
 }
 

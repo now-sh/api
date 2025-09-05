@@ -75,17 +75,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>List all posts:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/list</code></pre>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/me/blog/list</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Search posts:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/search?q=javascript</code></pre>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/me/blog/search?q=javascript</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get specific repository posts:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/blog/repo/casjay/blog</code></pre>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/me/blog/repo/casjay/blog</code></pre>
             </div>
         </div>
     </div>
@@ -128,7 +128,7 @@ async function loadAllPosts() {
     container.innerHTML = '<div class="loading">Loading posts...</div>';
     
     try {
-        const response = await fetch('/api/v1/blog/list');
+        const response = await fetch('/api/v1/me/blog/list');
         const data = await response.json();
         
         if (response.ok && data.success && data.data.posts) {
@@ -151,7 +151,7 @@ async function searchPosts(query) {
     resultDiv.innerHTML = '<div class="loading">Searching...</div>';
     
     try {
-        const response = await fetch(`/api/v1/blog/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/v1/me/blog/search?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         
         if (response.ok && data.success) {
@@ -181,7 +181,7 @@ async function loadRepoPosts(user, repo) {
     resultDiv.innerHTML = '<div class="loading">Loading repository posts...</div>';
     
     try {
-        const response = await fetch(`/api/v1/blog/repo/${user}/${repo}`);
+        const response = await fetch(`/api/v1/me/blog/repo/${user}/${repo}`);
         const data = await response.json();
         
         if (response.ok && data.success && data.data.posts) {
