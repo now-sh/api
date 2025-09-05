@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ color, from, to: 'all' })
+                body: JSON.stringify({ color, from, to: 'rgb' })
             });
             
             const data = await response.json();
