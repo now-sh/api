@@ -14,7 +14,7 @@
                     <label for="source" class="form-label">Select Source</label>
                     <select class="form-control" id="source" name="source">
                         <option value="">Select a source...</option>
-                        <option value="casjay">Casjay's Blog</option>
+                        <option value="casjay">My Blog (malaks-us/jason)</option>
                         <option value="custom">Custom Repository</option>
                     </select>
                 </div>
@@ -193,9 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
         } else {
-            // Default to casjay's blog
-            user = 'casjay';
-            repo = 'blog';
+            // Default to malaks-us/jason (backend default)
+            user = 'malaks-us';
+            repo = 'jason';
         }
         
         await loadBlogPosts(user, repo);

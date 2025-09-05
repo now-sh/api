@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const closingsList = document.getElementById('closingsList');
     const searchInput = document.getElementById('searchInput');
     const filterButtons = document.querySelectorAll('.filter-btn');
-    const closingForm = document.getElementById('closingForm');
-    const statusSelect = document.getElementById('status');
-    const delayTimeGroup = document.getElementById('delayTimeGroup');
     const weatherAlert = document.getElementById('weatherAlert');
     const lastUpdated = document.getElementById('lastUpdated');
     
@@ -32,46 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Show/hide delay time field based on status
-    statusSelect.addEventListener('change', (e) => {
-        if (e.target.value === 'delayed' || e.target.value === 'early') {
-            delayTimeGroup.style.display = 'block';
-        } else {
-            delayTimeGroup.style.display = 'none';
-        }
-    });
-    
-    // Handle form submission
-    closingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(e.target);
-        const data = {
-            name: formData.get('schoolName'),
-            status: formData.get('status'),
-            time: formData.get('delayTime') || '',
-            reason: formData.get('reason') || ''
-        };
-        
-        // For now, just add to the list locally since we don't have a submission endpoint
-        const newClosing = {
-            organization: data.name,
-            status: data.status,
-            delay_time: data.time,
-            reason: data.reason,
-            updated: new Date().toISOString()
-        };
-        
-        allClosings.unshift(newClosing);
-        filterAndDisplayClosings(searchInput.value.toLowerCase(), currentFilter);
-        
-        // Reset form
-        closingForm.reset();
-        delayTimeGroup.style.display = 'none';
-        
-        // Show success message
-        showSuccessMessage('Closing submitted successfully!');
-    });
     
     async function loadClosings() {
         try {
@@ -196,15 +153,5 @@ document.addEventListener('DOMContentLoaded', function() {
         weatherAlert.style.display = 'block';
     }
     
-    function showSuccessMessage(message) {
-        const toast = document.createElement('div');
-        toast.className = 'success-toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
     
 });
