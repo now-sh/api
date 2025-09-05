@@ -48,10 +48,10 @@ TIMEZONE=America/New_York
 JWT_SECRET=your-very-long-secret-key
 
 # MongoDB Connections (separate databases for different features)
-MONGO_URI_API=mongodb://localhost/api?retryWrites=true&w=majority
-MONGO_URI_TODOS=mongodb://localhost/todo?retryWrites=true&w=majority
-MONGO_URI_NOTES=mongodb://localhost/notes?retryWrites=true&w=majority
-MONGO_URI_SHRTNR=mongodb://localhost/shrtnr?retryWrites=true&w=majority
+MONGODB_URI_API=mongodb://localhost/api?retryWrites=true&w=majority
+MONGODB_URI_TODOS=mongodb://localhost/todo?retryWrites=true&w=majority
+MONGODB_URI_NOTES=mongodb://localhost/notes?retryWrites=true&w=majority
+MONGODB_URI_SHRTNR=mongodb://localhost/shrtnr?retryWrites=true&w=majority
 
 # External APIs
 GITHUB_API_KEY=your-github-token
