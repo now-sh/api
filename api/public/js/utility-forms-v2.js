@@ -72,7 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Build request based on form type
-            const { url, options } = await buildRequest(form.id, formData, config);
+            const request = await buildRequest(form.id, formData, config);
+            
+            // Skip if form is handled elsewhere
+            if (!request) return;
+            
+            const { url, options } = request;
             
             const response = await fetch(url, options);
             const contentType = response.headers.get('content-type');
@@ -167,32 +172,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
 
             case 'gitForm':
-                const username = data.username || 'casjay';
-                const dataType = data.dataType || 'user';
-                
-                if (dataType === 'repos') {
-                    url = username === 'casjay' ? '/api/v1/me/info/github/repos' : `/api/v1/social/github/user/${username}/repos`;
-                } else if (dataType === 'orgs') {
-                    url = username === 'casjay' ? '/api/v1/me/info/github/orgs' : `/api/v1/social/github/user/${username}/orgs`;
-                } else {
-                    url = username === 'casjay' ? '/api/v1/me/info/github' : `/api/v1/social/github/user/${username}`;
-                }
-                options.method = 'GET';
-                delete options.body;
-                delete options.headers;
-                break;
+                // SKIP - handled inline in git.ejs
+                return null;
 
             case 'redditForm':
-                const redditUser = data.username;
-                if (redditUser) {
-                    url = redditUser === 'casjay' ? '/api/v1/me/info/reddit' : `/api/v1/social/reddit/u/${redditUser}`;
-                } else if (data.subreddit) {
-                    url = `/api/v1/social/reddit/r/${data.subreddit}`;
-                }
-                options.method = 'GET';
-                delete options.body;
-                delete options.headers;
-                break;
+                // SKIP - handled inline in reddit.ejs
+                return null;
 
             case 'covidForm':
                 const country = data.country;
