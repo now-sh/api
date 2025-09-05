@@ -26,18 +26,22 @@ const convertColor = (color, fromFormat, toFormat) => {
     throw new Error('Invalid color value');
   }
   
+  // Generate all formats
+  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const hslString = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+  
   // Convert RGB to target format
   let result;
   switch (toFormat.toLowerCase()) {
     case 'hex':
-      result = rgbToHex(rgb.r, rgb.g, rgb.b);
+      result = hex;
       break;
     case 'rgb':
       result = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
       break;
     case 'hsl':
-      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-      result = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+      result = hslString;
       break;
     default:
       throw new Error('Unsupported output format. Supported: hex, rgb, hsl');
@@ -48,7 +52,10 @@ const convertColor = (color, fromFormat, toFormat) => {
     inputFormat: fromFormat,
     output: result,
     outputFormat: toFormat,
-    rgb: rgb
+    converted: result,
+    rgb: rgb,
+    hex: hex,
+    hsl: hslString
   };
 };
 
@@ -142,6 +149,154 @@ const hslToRgb = (hslStr) => {
   };
 };
 
+/**
+ * Generate a color palette based on a base color
+ */
+const generatePalette = (baseColor, type = 'monochromatic', count = 5) => {
+  // First convert base color to RGB
+  let rgb;
+  if (baseColor.startsWith('#')) {
+    rgb = hexToRgb(baseColor);
+  } else if (baseColor.startsWith('rgb')) {
+    rgb = parseRgb(baseColor);
+  } else if (baseColor.startsWith('hsl')) {
+    rgb = hslToRgb(baseColor);
+  } else {
+    throw new Error('Invalid color format');
+  }
+  
+  if (!rgb) {
+    throw new Error('Invalid color value');
+  }
+  
+  const colors = [];
+  const baseHex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  
+  switch (type) {
+    case 'monochromatic':
+      // Generate different lightness values
+      for (let i = 0; i < count; i++) {
+        const lightness = Math.round((i + 1) * (100 / (count + 1)));
+        const newRgb = hslToRgb(`hsl(${hsl.h}, ${hsl.s}%, ${lightness}%)`);
+        colors.push(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
+      }
+      break;
+      
+    case 'complementary':
+      colors.push(baseHex);
+      const compHue = (hsl.h + 180) % 360;
+      const compRgb = hslToRgb(`hsl(${compHue}, ${hsl.s}%, ${hsl.l}%)`);
+      colors.push(rgbToHex(compRgb.r, compRgb.g, compRgb.b));
+      
+      // Fill remaining with variations
+      for (let i = 2; i < count; i++) {
+        const variation = i % 2 === 0 ? hsl.h : compHue;
+        const lightness = 50 + (i - 2) * 10;
+        const varRgb = hslToRgb(`hsl(${variation}, ${hsl.s}%, ${lightness}%)`);
+        colors.push(rgbToHex(varRgb.r, varRgb.g, varRgb.b));
+      }
+      break;
+      
+    case 'analogous':
+      const step = 30;
+      for (let i = 0; i < count; i++) {
+        const hue = (hsl.h + (i - Math.floor(count / 2)) * step + 360) % 360;
+        const analogRgb = hslToRgb(`hsl(${hue}, ${hsl.s}%, ${hsl.l}%)`);
+        colors.push(rgbToHex(analogRgb.r, analogRgb.g, analogRgb.b));
+      }
+      break;
+      
+    case 'triadic':
+      for (let i = 0; i < Math.min(count, 3); i++) {
+        const hue = (hsl.h + i * 120) % 360;
+        const triadRgb = hslToRgb(`hsl(${hue}, ${hsl.s}%, ${hsl.l}%)`);
+        colors.push(rgbToHex(triadRgb.r, triadRgb.g, triadRgb.b));
+      }
+      // Fill remaining with variations
+      for (let i = 3; i < count; i++) {
+        const baseHue = (hsl.h + ((i - 3) % 3) * 120) % 360;
+        const lightness = 50 + (Math.floor((i - 3) / 3) * 10);
+        const varRgb = hslToRgb(`hsl(${baseHue}, ${hsl.s}%, ${lightness}%)`);
+        colors.push(rgbToHex(varRgb.r, varRgb.g, varRgb.b));
+      }
+      break;
+      
+    case 'tetradic':
+      for (let i = 0; i < Math.min(count, 4); i++) {
+        const hue = (hsl.h + i * 90) % 360;
+        const tetRgb = hslToRgb(`hsl(${hue}, ${hsl.s}%, ${hsl.l}%)`);
+        colors.push(rgbToHex(tetRgb.r, tetRgb.g, tetRgb.b));
+      }
+      // Fill remaining with variations
+      for (let i = 4; i < count; i++) {
+        const baseHue = (hsl.h + ((i - 4) % 4) * 90) % 360;
+        const lightness = 50 + (Math.floor((i - 4) / 4) * 10);
+        const varRgb = hslToRgb(`hsl(${baseHue}, ${hsl.s}%, ${lightness}%)`);
+        colors.push(rgbToHex(varRgb.r, varRgb.g, varRgb.b));
+      }
+      break;
+      
+    default:
+      // Default to monochromatic
+      return generatePalette(baseColor, 'monochromatic', count);
+  }
+  
+  return {
+    baseColor: baseHex,
+    type: type,
+    colors: colors
+  };
+};
+
+/**
+ * Get detailed color information
+ */
+const getColorInfo = (color) => {
+  // Convert color to RGB
+  let rgb;
+  if (color.startsWith('#')) {
+    rgb = hexToRgb(color);
+  } else if (color.startsWith('rgb')) {
+    rgb = parseRgb(color);
+  } else if (color.startsWith('hsl')) {
+    rgb = hslToRgb(color);
+  } else {
+    throw new Error('Invalid color format');
+  }
+  
+  if (!rgb) {
+    throw new Error('Invalid color value');
+  }
+  
+  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  
+  // Calculate relative luminance
+  const rSrgb = rgb.r / 255;
+  const gSrgb = rgb.g / 255;
+  const bSrgb = rgb.b / 255;
+  
+  const r = rSrgb <= 0.03928 ? rSrgb / 12.92 : Math.pow((rSrgb + 0.055) / 1.055, 2.4);
+  const g = gSrgb <= 0.03928 ? gSrgb / 12.92 : Math.pow((gSrgb + 0.055) / 1.055, 2.4);
+  const b = bSrgb <= 0.03928 ? bSrgb / 12.92 : Math.pow((bSrgb + 0.055) / 1.055, 2.4);
+  
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const brightness = Math.round((rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000);
+  
+  return {
+    hex: hex,
+    rgb: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+    hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
+    brightness: brightness,
+    luminance: luminance.toFixed(4),
+    isLight: luminance > 0.5,
+    isDark: luminance <= 0.5
+  };
+};
+
 module.exports = {
-  convertColor
+  convertColor,
+  generatePalette,
+  getColorInfo
 };

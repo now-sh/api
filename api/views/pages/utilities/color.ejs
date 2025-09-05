@@ -192,20 +192,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok && data.success) {
-                const colors = data.data;
+                const result = data.data;
+                const rgb = result.rgb;
+                
+                // Calculate HSL from RGB
+                const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
                 
                 // Update preview
-                preview.style.backgroundColor = colors.hex || color;
+                const hexColor = rgbToHex(rgb.r, rgb.g, rgb.b);
+                preview.style.backgroundColor = hexColor;
                 
                 // Update all format displays
-                updateColorDisplay('hex', colors.hex || color);
-                updateColorDisplay('rgb', colors.rgb || `rgb(${colors.r}, ${colors.g}, ${colors.b})`);
-                updateColorDisplay('rgba', colors.rgba || `rgba(${colors.r}, ${colors.g}, ${colors.b}, 1)`);
-                updateColorDisplay('hsl', colors.hsl || `hsl(${colors.h}, ${colors.s}%, ${colors.l}%)`);
-                updateColorDisplay('hsla', colors.hsla || `hsla(${colors.h}, ${colors.s}%, ${colors.l}%, 1)`);
+                updateColorDisplay('hex', hexColor);
+                updateColorDisplay('rgb', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+                updateColorDisplay('rgba', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`);
+                updateColorDisplay('hsl', `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`);
+                updateColorDisplay('hsla', `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 1)`);
                 
                 // Generate complementary palette
-                generatePalette(colors.hex || color);
+                generatePalette(hexColor);
                 
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
@@ -267,6 +272,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Color conversion helpers
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
+
+function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6 * 360; break;
+            case g: h = ((b - r) / d + 2) / 6 * 360; break;
+            case b: h = ((r - g) / d + 4) / 6 * 360; break;
+        }
+    }
+    
+    return {
+        h: Math.round(h),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+    };
+}
 
 function updateColorDisplay(format, value) {
     const element = document.querySelector(`.color-value[data-format="${format}"]`);

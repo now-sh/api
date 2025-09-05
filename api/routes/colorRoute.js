@@ -128,22 +128,22 @@ colorRoute.post('/convert/text',
  */
 colorRoute.post('/palette',
   cors(),
-  body('color').notEmpty().withMessage('Base color is required'),
+  body('baseColor').notEmpty().withMessage('Base color is required'),
   body('type').optional().isIn(['monochromatic', 'analogous', 'complementary', 'triadic', 'tetradic']).withMessage('Invalid palette type'),
   body('count').optional().isInt({ min: 2, max: 20 }).withMessage('Count must be between 2 and 20'),
   validateRequest,
   (req, res) => {
     try {
       const result = colorController.generatePalette(
-        req.body.color,
+        req.body.baseColor,
         req.body.type || 'monochromatic',
         parseInt(req.body.count) || 5
       );
       sendJSON(res, formatSuccess({
-        baseColor: req.body.color,
-        paletteType: req.body.type || 'monochromatic',
+        baseColor: result.baseColor,
+        paletteType: result.type,
         count: result.colors.length,
-        colors: result.colors
+        palette: result.colors
       }));
     } catch (error) {
       sendJSON(res, formatError(error.message), { status: 400 });
