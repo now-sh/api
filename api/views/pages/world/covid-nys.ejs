@@ -1,0 +1,263 @@
+<div class="hero fade-in">
+    <h1>🗽 New York State COVID-19 Statistics</h1>
+    <p class="lead">New York State COVID-19 pandemic statistics and county breakdown</p>
+    <div class="nav-links">
+        <a href="/world/covid-global" class="btn btn-outline-primary">🌍 Global Stats</a>
+        <a href="/world/covid-usa" class="btn btn-outline-primary">🇺🇸 USA Stats</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- NYS Stats -->
+        <div class="card mb-4">
+            <h2 class="card-title">🗽 New York State Overview</h2>
+            <div id="nysStats" class="stats-grid">
+                <div class="loading">Loading New York State statistics...</div>
+            </div>
+        </div>
+        
+        <!-- Top Counties -->
+        <div class="card">
+            <h2 class="card-title">🏙️ Most Affected Counties</h2>
+            <div id="topCounties" class="counties-grid">
+                <div class="loading">Loading counties data...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-links {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(6, 182, 212, 0.05) 100%);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 0.5rem;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.stat-emoji {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.counties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.county-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.county-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+}
+
+.county-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--cyan);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.county-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadNYSStats();
+    await loadTopCounties();
+});
+
+async function loadNYSStats() {
+    const nysDiv = document.getElementById('nysStats');
+    
+    try {
+        const response = await fetch('/api/v1/world/nys');
+        const data = await response.json();
+        
+        if (data.success && data.nys) {
+            const stats = data.nys;
+            nysDiv.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-emoji">😷</span>
+                    <div class="stat-number">${formatNumber(stats.cases)}</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💀</span>
+                    <div class="stat-number">${formatNumber(stats.deaths)}</div>
+                    <div class="stat-label">Deaths</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💚</span>
+                    <div class="stat-number">${formatNumber(stats.recovered || 0)}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">🏥</span>
+                    <div class="stat-number">${formatNumber(stats.active || (stats.cases - stats.deaths - (stats.recovered || 0)))}</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+            `;
+        } else {
+            nysDiv.innerHTML = '<div class="error">Unable to load New York State statistics</div>';
+        }
+    } catch (error) {
+        nysDiv.innerHTML = '<div class="error">Error loading New York State statistics</div>';
+    }
+}
+
+async function loadTopCounties() {
+    const countiesDiv = document.getElementById('topCounties');
+    
+    try {
+        const response = await fetch('/api/v1/world/nys');
+        const data = await response.json();
+        
+        if (data.success && data.counties && data.counties.length > 0) {
+            const topCounties = data.counties.slice(0, 12);
+            const html = topCounties.map(county => `
+                <div class="county-card">
+                    <div class="county-name">
+                        <span>${getCountyEmoji(county.county)}</span>
+                        ${county.county}
+                    </div>
+                    <div class="county-stats">
+                        <div>
+                            <strong>${formatNumber(county.cases)}</strong><br>
+                            <small>Cases</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(county.deaths)}</strong><br>
+                            <small>Deaths</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(county.active || 0)}</strong><br>
+                            <small>Active</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            countiesDiv.innerHTML = html;
+        } else {
+            countiesDiv.innerHTML = '<div class="error">Unable to load counties data</div>';
+        }
+    } catch (error) {
+        countiesDiv.innerHTML = '<div class="error">Error loading counties data</div>';
+    }
+}
+
+function formatNumber(num) {
+    if (!num) return '0';
+    return new Intl.NumberFormat().format(num);
+}
+
+function getCountyEmoji(countyName) {
+    const countyEmojis = {
+        'New York City': '🗽',
+        'NYC': '🗽',
+        'Manhattan': '🏙️',
+        'Brooklyn': '🌉',
+        'Queens': '✈️',
+        'Bronx': '⚾',
+        'Staten Island': '🚢',
+        'Nassau': '🏖️',
+        'Suffolk': '🦞',
+        'Westchester': '🏘️',
+        'Erie': '🌊',
+        'Monroe': '🎭',
+        'Onondaga': '🏛️',
+        'Orange': '🍊',
+        'Rockland': '🪨',
+        'Albany': '🏛️',
+        'Dutchess': '👑',
+        'Saratoga': '🐎'
+    };
+    
+    return countyEmojis[countyName] || '🏛️';
+}
+</script>
