@@ -284,8 +284,63 @@ async function getDateFact(month, day) {
   };
 }
 
+// Base route - returns a random fact
+factsRoute.get('/', cors(), async (req, res) => {
+  try {
+    const source = req.query.source || 'any';
+    let fact = null;
+    
+    switch (source) {
+      case 'useless':
+        fact = await getUselessFact();
+        break;
+      
+      case 'cat':
+      case 'cats':
+        fact = await getCatFact();
+        break;
+      
+      case 'dog':
+      case 'dogs':
+        fact = await getDogFact();
+        break;
+      
+      case 'numbers':
+        fact = await getNumberFact();
+        break;
+      
+      case 'year':
+        fact = await getYearFact();
+        break;
+      
+      case 'date':
+        fact = await getDateFact();
+        break;
+      
+      case 'any':
+      default:
+        // Randomly pick a source
+        const sources = [getUselessFact, getCatFact, getDogFact, getNumberFact];
+        const randomSource = sources[Math.floor(Math.random() * sources.length)];
+        fact = await randomSource();
+        break;
+    }
+    
+    const data = { ...fact, source: fact.source || source };
+    setStandardHeaders(res, data, { noCache: true });
+    res.json(data);
+  } catch (error) {
+    const data = { 
+      error: 'Failed to fetch fact',
+      message: error.message 
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
+  }
+});
+
 // Help endpoint
-factsRoute.get(['/', '/help'], cors(), (req, res) => {
+factsRoute.get('/help', cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
   const data = {
     title: 'Facts API',

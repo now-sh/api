@@ -91,8 +91,8 @@
             </div>
             
             <div class="code-block">
-                <h4>Get multiple jokes:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/batch/5</code></pre>
+                <h4>Get a dad joke:</h4>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/dad</code></pre>
             </div>
         </div>
     </div>
@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(endpoint);
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                currentJoke = data.data;
+            if (response.ok && data.joke) {
+                currentJoke = data;
                 displayJoke(currentJoke);
                 jokeResult.style.display = 'block';
                 jokeResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -159,11 +159,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function fetchBatchJokes() {
-        const count = document.getElementById('jokeCount').value;
+        const count = parseInt(document.getElementById('jokeCount').value);
         const button = getBatchBtn;
         const originalText = button.innerHTML;
         const batchResult = document.getElementById('batchResult');
         const batchDisplay = document.getElementById('batchJokesDisplay');
+        
+        if (!count || count < 1 || count > 10) {
+            showError('Please enter a number between 1 and 10');
+            return;
+        }
         
         // Show loading
         button.disabled = true;
@@ -172,11 +177,17 @@ document.addEventListener('DOMContentLoaded', function() {
         batchResult.style.display = 'block';
         
         try {
-            const response = await fetch(`/api/v1/fun/jokes/batch/${count}`);
-            const data = await response.json();
+            // Fetch multiple jokes by making multiple requests
+            const jokePromises = [];
+            for (let i = 0; i < count; i++) {
+                jokePromises.push(fetch('/api/v1/fun/jokes/random').then(r => r.json()));
+            }
             
-            if (response.ok && data.success) {
-                displayBatchJokes(data.data.jokes || data.data);
+            const jokes = await Promise.all(jokePromises);
+            const validJokes = jokes.filter(joke => joke.joke);
+            
+            if (validJokes.length > 0) {
+                displayBatchJokes(validJokes);
                 batchResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
                 batchDisplay.innerHTML = '<div class="error">Failed to fetch jokes.</div>';

@@ -238,8 +238,68 @@ function shuffleArray(array) {
   return shuffled;
 }
 
+// Base route - returns a single random question
+triviaRoute.get('/', cors(), async (req, res) => {
+  try {
+    const { category = '', difficulty = '', type = '' } = req.query;
+    
+    const params = { amount: 1 };
+    
+    if (category && CATEGORIES[category]) {
+      params.category = CATEGORIES[category];
+    }
+    
+    if (difficulty && ['easy', 'medium', 'hard'].includes(difficulty)) {
+      params.difficulty = difficulty;
+    }
+    
+    if (type && ['multiple', 'boolean'].includes(type)) {
+      params.type = type;
+    }
+    
+    const response = await axios.get('https://opentdb.com/api.php', { params });
+    
+    if (response.data.response_code !== 0 || response.data.results.length === 0) {
+      const data = { error: 'No questions found' };
+      setStandardHeaders(res, data);
+      return res.status(404).json(data);
+    }
+    
+    const q = response.data.results[0];
+    const question = {
+      category: decodeHTML(q.category),
+      type: q.type,
+      difficulty: q.difficulty,
+      question: decodeHTML(q.question),
+      correct_answer: decodeHTML(q.correct_answer),
+      incorrect_answers: q.incorrect_answers.map(a => decodeHTML(a)),
+      all_answers: shuffleArray([
+        decodeHTML(q.correct_answer),
+        ...q.incorrect_answers.map(a => decodeHTML(a))
+      ])
+    };
+    
+    setStandardHeaders(res, question, { noCache: true });
+    res.json(question);
+  } catch (error) {
+    const data = { 
+      error: 'Failed to fetch trivia question',
+      message: error.message 
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
+  }
+});
+
+// Random alias for base route
+triviaRoute.get('/random', cors(), async (req, res) => {
+  // Just redirect to base route with same query parameters
+  req.url = '/';
+  return triviaRoute.handle(req, res);
+});
+
 // Help endpoint
-triviaRoute.get(['/', '/help'], cors(), (req, res) => {
+triviaRoute.get('/help', cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
   const data = {
     title: 'Trivia API',
