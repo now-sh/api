@@ -86,9 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        e.stopPropagation();
         
         const username = form.username.value || 'casjay';
         const dataType = form.dataType.value;
+        
+        // Update URL without reloading
+        const newUrl = `${window.location.pathname}?username=${username}&dataType=${dataType}`;
+        window.history.pushState({}, '', newUrl);
         
         await fetchGitHubData(username, dataType);
     });
@@ -120,7 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            console.log('Fetching:', url);
             const response = await fetch(url);
+            console.log('Response status:', response.status);
             const data = await response.json();
             
             if (response.ok) {
@@ -130,7 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to fetch data'}</div>`;
             }
         } catch (error) {
-            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            console.error('GitHub API Error:', error);
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message || 'Network error occurred'}</div>`;
         }
     }
     
@@ -221,27 +229,55 @@ document.addEventListener('DOMContentLoaded', function() {
         resultOutput.innerHTML = html;
     }
     
-    // Auto-load my profile on page load
-    loadMyProfile();
+    // Auto-load profile or handle URL parameters
+    setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const dataType = urlParams.get('dataType');
+        
+        if (username && dataType) {
+            // Load from URL parameters
+            document.getElementById('username').value = username;
+            document.getElementById('dataType').value = dataType;
+            console.log(`Loading from URL: ${username} - ${dataType}`);
+            fetchGitHubData(username, dataType);
+        } else {
+            // Default: load my profile
+            console.log('Auto-loading profile...');
+            loadMyProfile();
+        }
+    }, 100);
 });
 
 // Quick access functions
-function loadMyProfile() {
+async function loadMyProfile() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'user';
-    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+    await fetchGitHubData('casjay', 'user');
+    
+    // Update URL without reloading
+    const newUrl = `${window.location.pathname}?username=casjay&dataType=user`;
+    window.history.pushState({}, '', newUrl);
 }
 
-function loadMyRepos() {
+async function loadMyRepos() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'repos';
-    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+    await fetchGitHubData('casjay', 'repos');
+    
+    // Update URL without reloading
+    const newUrl = `${window.location.pathname}?username=casjay&dataType=repos`;
+    window.history.pushState({}, '', newUrl);
 }
 
-function loadMyOrgs() {
+async function loadMyOrgs() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'orgs';
-    document.getElementById('gitForm').dispatchEvent(new Event('submit'));
+    await fetchGitHubData('casjay', 'orgs');
+    
+    // Update URL without reloading
+    const newUrl = `${window.location.pathname}?username=casjay&dataType=orgs`;
+    window.history.pushState({}, '', newUrl);
 }
 </script>
 
