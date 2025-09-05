@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // For now, we'll simulate loading blog posts since the API endpoint might not exist
             // In a real implementation, this would call the appropriate API endpoint
-            const response = await fetch(`/api/v1/data/blogs/${user}/${repo}`);
+            const response = await fetch(`/api/v1/social/blogs/${user}/${repo}/posts`);
             
             if (response.ok) {
                 const data = await response.json();
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayBlogPosts(posts);
             } else {
                 // If the API doesn't exist, show sample data
-                displaySamplePosts();
+                blogPostsDiv.innerHTML = '<div class="error">No blog posts found</div>';
             }
         } catch (error) {
             // Show sample posts if there's an error
@@ -267,37 +267,6 @@ document.addEventListener('DOMContentLoaded', function() {
         blogPostsDiv.innerHTML = html;
     }
     
-    // Display sample posts
-    function displaySamplePosts() {
-        const samplePosts = [
-            {
-                title: 'Welcome to My Blog',
-                date: new Date().toISOString(),
-                author: 'Casjay',
-                tags: ['welcome', 'introduction'],
-                excerpt: 'Welcome to my technical blog where I share insights about development, DevOps, and cloud technologies.',
-                content: 'Welcome to my technical blog where I share insights about development, DevOps, and cloud technologies. This blog is powered by a custom API that fetches content from GitHub repositories. You can view posts from any public GitHub repository by selecting "Custom Repository" above.'
-            },
-            {
-                title: 'Building Modern APIs with Node.js',
-                date: new Date(Date.now() - 86400000).toISOString(),
-                author: 'Casjay',
-                tags: ['nodejs', 'api', 'javascript'],
-                excerpt: 'Learn how to build scalable and maintainable APIs using Node.js and Express.',
-                content: 'In this post, we explore best practices for building modern APIs with Node.js. We cover topics like route organization, middleware patterns, error handling, and response formatting. The goal is to create APIs that are not only functional but also maintainable and scalable.'
-            },
-            {
-                title: 'DevOps Best Practices',
-                date: new Date(Date.now() - 172800000).toISOString(),
-                author: 'Casjay',
-                tags: ['devops', 'ci/cd', 'automation'],
-                excerpt: 'Explore essential DevOps practices for modern software development.',
-                content: 'DevOps is more than just tools - it\'s a culture. In this article, we discuss key DevOps practices including continuous integration, continuous deployment, infrastructure as code, monitoring, and collaboration between development and operations teams.'
-            }
-        ];
-        
-        displayBlogPosts(samplePosts);
-    }
     
     // Format date
     function formatDate(dateString) {
@@ -309,8 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Load default blog on page load
-    loadBlogPosts('casjay', 'blog');
+    // Do not load any default blog
 });
 
 // Toggle full content
