@@ -96,6 +96,38 @@ jokesRoute.get('/programming', cors(), async (req, res) => {
   }
 });
 
+// Get pun jokes
+jokesRoute.get('/puns', cors(), async (req, res) => {
+  try {
+    const joke = await getPunJoke();
+    setStandardHeaders(res, joke, { noCache: true });
+    res.json(joke);
+  } catch (error) {
+    const data = { 
+      error: 'Failed to fetch pun joke',
+      message: error.message 
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
+  }
+});
+
+// Get knock-knock jokes
+jokesRoute.get('/knock-knock', cors(), async (req, res) => {
+  try {
+    const joke = await getKnockKnockJoke();
+    setStandardHeaders(res, joke, { noCache: true });
+    res.json(joke);
+  } catch (error) {
+    const data = { 
+      error: 'Failed to fetch knock-knock joke',
+      message: error.message 
+    };
+    setStandardHeaders(res, data);
+    res.status(500).json(data);
+  }
+});
+
 // Search jokes
 jokesRoute.get('/search', cors(), async (req, res) => {
   try {
@@ -212,6 +244,96 @@ async function getProgrammingJoke() {
   }
 }
 
+async function getPunJoke() {
+  try {
+    // Try to get puns from JokeAPI
+    const response = await axios.get('https://v2.jokeapi.dev/joke/Pun', {
+      params: {
+        blacklistFlags: 'nsfw,religious,political,racist,sexist',
+        type: 'single'
+      }
+    });
+    
+    if (response.data.type === 'single') {
+      return {
+        joke: response.data.joke,
+        id: response.data.id,
+        source: 'jokeapi.dev',
+        type: 'pun',
+        category: response.data.category
+      };
+    } else {
+      return {
+        setup: response.data.setup,
+        delivery: response.data.delivery,
+        joke: `${response.data.setup} ... ${response.data.delivery}`,
+        id: response.data.id,
+        source: 'jokeapi.dev',
+        type: 'pun',
+        category: response.data.category
+      };
+    }
+  } catch (error) {
+    // Fallback to searching dad jokes for puns
+    const response = await axios.get('https://icanhazdadjoke.com/search', {
+      headers: { 'Accept': 'application/json' },
+      params: { term: 'pun', limit: 30 }
+    });
+    
+    if (response.data.results.length > 0) {
+      const randomJoke = response.data.results[Math.floor(Math.random() * response.data.results.length)];
+      return {
+        joke: randomJoke.joke,
+        id: randomJoke.id,
+        source: 'icanhazdadjoke',
+        type: 'pun'
+      };
+    }
+    
+    throw new Error('No pun jokes found');
+  }
+}
+
+async function getKnockKnockJoke() {
+  const knockKnockJokes = [
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nInterrupting cow.\nInterrupting cow w—\nMOO!"
+    },
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nBoo.\nBoo who?\nDon't cry, it's just a joke!"
+    },
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nOrange.\nOrange who?\nOrange you glad I didn't say banana?"
+    },
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nLettuce.\nLettuce who?\nLettuce in, it's cold out here!"
+    },
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nDonut.\nDonut who?\nDonut ask, it's a surprise!"
+    },
+    {
+      setup: "Knock knock!",
+      punchline: "Who's there?\nCanoe.\nCanoe who?\nCanoe help me with my homework?"
+    }
+  ];
+  
+  const randomJoke = knockKnockJokes[Math.floor(Math.random() * knockKnockJokes.length)];
+  
+  return {
+    joke: `${randomJoke.setup}\n${randomJoke.punchline}`,
+    setup: randomJoke.setup,
+    punchline: randomJoke.punchline,
+    source: 'built-in',
+    type: 'knock-knock',
+    id: Date.now().toString()
+  };
+}
+
 // Help endpoint
 jokesRoute.get(['/', '/help'], cors(), (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
@@ -223,6 +345,8 @@ jokesRoute.get(['/', '/help'], cors(), (req, res) => {
       dad: `${host}/api/v1/fun/jokes/dad`,
       chuck: `${host}/api/v1/fun/jokes/chuck`,
       programming: `${host}/api/v1/fun/jokes/programming`,
+      puns: `${host}/api/v1/fun/jokes/puns`,
+      knockknock: `${host}/api/v1/fun/jokes/knock-knock`,
       search: `${host}/api/v1/fun/jokes/search?term=keyword`
     },
     sources: {
