@@ -91,10 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = form.username.value || 'casjay';
         const dataType = form.dataType.value;
         
-        // Update URL without reloading
-        const newUrl = `${window.location.pathname}?username=${username}&dataType=${dataType}`;
-        window.history.pushState({}, '', newUrl);
-        
         await fetchGitHubData(username, dataType);
     });
     
@@ -229,23 +225,10 @@ document.addEventListener('DOMContentLoaded', function() {
         resultOutput.innerHTML = html;
     }
     
-    // Auto-load profile or handle URL parameters
+    // Auto-load my profile on page load
     setTimeout(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const username = urlParams.get('username');
-        const dataType = urlParams.get('dataType');
-        
-        if (username && dataType) {
-            // Load from URL parameters
-            document.getElementById('username').value = username;
-            document.getElementById('dataType').value = dataType;
-            console.log(`Loading from URL: ${username} - ${dataType}`);
-            fetchGitHubData(username, dataType);
-        } else {
-            // Default: load my profile
-            console.log('Auto-loading profile...');
-            loadMyProfile();
-        }
+        console.log('Auto-loading profile...');
+        loadMyProfile();
     }, 100);
 });
 
@@ -254,30 +237,18 @@ async function loadMyProfile() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'user';
     await fetchGitHubData('casjay', 'user');
-    
-    // Update URL without reloading
-    const newUrl = `${window.location.pathname}?username=casjay&dataType=user`;
-    window.history.pushState({}, '', newUrl);
 }
 
 async function loadMyRepos() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'repos';
     await fetchGitHubData('casjay', 'repos');
-    
-    // Update URL without reloading
-    const newUrl = `${window.location.pathname}?username=casjay&dataType=repos`;
-    window.history.pushState({}, '', newUrl);
 }
 
 async function loadMyOrgs() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'orgs';
     await fetchGitHubData('casjay', 'orgs');
-    
-    // Update URL without reloading
-    const newUrl = `${window.location.pathname}?username=casjay&dataType=orgs`;
-    window.history.pushState({}, '', newUrl);
 }
 </script>
 
