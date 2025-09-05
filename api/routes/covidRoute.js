@@ -22,11 +22,11 @@ covidRoute.get('/help', cors(), async (req, res) => {
   try {
     const helpData = {
       title: 'Global COVID-19 Statistics API',
-      endpoint: `${host}/api/v1/global`,
+      endpoint: `${host}/api/v1/world/covid`,
       description: 'Get current global COVID-19 statistics from disease.sh',
       data_source: 'https://disease.sh/v3/covid-19/all',
-      cli_example: `curl ${host}/api/v1/global`,
-      bash_function: `covid_stats() { curl -s "${host}/api/v1/global" | jq -r '.global | "Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)"'; }`
+      cli_example: `curl ${host}/api/v1/world/covid`,
+      bash_function: `covid_stats() { curl -s "${host}/api/v1/world/covid" | jq -r '.global | "Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)"'; }`
     };
     setStandardHeaders(res, helpData);
     res.json(helpData);

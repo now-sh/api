@@ -45,11 +45,11 @@
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li><strong>Global Data:</strong> <code>/api/v1/global</code></li>
+            <li><strong>Global Data:</strong> <code>/api/v1/world/covid</code></li>
             <li><strong>NY State:</strong> <code>/api/v1/world/nys</code></li>
             <li><strong>Disease Tracker:</strong> <code>/api/v1/world/disease</code></li>
           </ul>
-          <a href="/api/v1/global" class="btn btn-info btn-sm" target="_blank">
+          <a href="/api/v1/world/covid" class="btn btn-info btn-sm" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i> View Global API
           </a>
         </div>
@@ -105,7 +105,7 @@ async function loadCovidData(endpoint, buttonId) {
 }
 
 document.getElementById('loadGlobalData').addEventListener('click', () => {
-  loadCovidData('/api/v1/global', 'loadGlobalData');
+  loadCovidData('/api/v1/world/covid', 'loadGlobalData');
 });
 
 document.getElementById('loadNYSData').addEventListener('click', () => {

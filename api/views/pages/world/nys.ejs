@@ -70,7 +70,7 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get NYS COVID data:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/nys</code></pre>
+                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/nys</code></pre>
             </div>
             
             <div class="code-block">
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
         
         try {
-            const response = await fetch('/api/v1/nys');
+            const response = await fetch('/api/v1/world/nys');
             const data = await response.json();
             
             if (response.ok && data.nys) {
