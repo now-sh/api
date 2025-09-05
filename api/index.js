@@ -14,6 +14,14 @@ app.set('layout', 'layouts/main');
 
 const { connectToDatabase } = require('./db/connection');
 
+// Initialize database connection immediately for serverless environments
+const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+if (isVercel) {
+  connectToDatabase().catch(error => {
+    console.warn('⚠️  Serverless database connection failed at startup:', error.message);
+  });
+}
+
 const middlewares = require('./middleware/errorHandler');
 const handlers = require('./middleware/defaultHandler');
 const { defaultLimiter } = require('./middleware/rateLimiter');
@@ -101,6 +109,7 @@ app.use('/api/v1/profile', require('./routes/profileRoute'));
 app.use('/api/v1/version', require('./routes/apiRoute'));
 app.use('/api/v1/cache', require('./routes/cacheRoute'));
 app.use('/api/v1/docs', require('./routes/swaggerRoute'));
+app.use('/api/v1/debug', require('./routes/debugRoute'));
 
 
 
