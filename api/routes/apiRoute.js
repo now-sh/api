@@ -6,7 +6,7 @@ const datetime = require('node-datetime');
 const cors = require('cors');
 
 const { setStandardHeaders } = require('../utils/standardHeaders');
-const { mongoose } = require('../db/connection');
+const { mongoose, getDatabaseStatus } = require('../db/connection');
 
 const apiRoute = express.Router();
 const dttoday = datetime.create();
@@ -105,8 +105,9 @@ const versionHandler = async (req, res) => {
   
   // Check database connection status
   const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URI_API;
-  const dbConnected = mongoose.connection && mongoose.connection.readyState === 1;
-  const dbStatus = dbConnected ? 'Connected' : 'Not Connected';
+  const dbStatusDetails = getDatabaseStatus();
+  const dbConnected = dbStatusDetails.connected;
+  const dbStatus = dbStatusDetails.connected ? 'Connected' : 'Not Connected';
   
   // Sanitize MongoDB URI
   let sanitizedUri = 'Not Set';
@@ -179,7 +180,12 @@ const versionHandler = async (req, res) => {
       RedditAuth: redditAuthStatus,
       Database: {
         Status: dbStatus,
-        URI: sanitizedUri
+        URI: sanitizedUri,
+        Details: {
+          State: dbStatusDetails.status,
+          Configured: dbStatusDetails.uri,
+          ConnectionAttempts: dbStatusDetails.attempts
+        }
       },
       System: {
         NodeVersion: nodeVersion,
