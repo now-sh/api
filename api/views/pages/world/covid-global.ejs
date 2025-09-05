@@ -1,0 +1,264 @@
+<div class="hero fade-in">
+    <h1>🌍 Global COVID-19 Statistics</h1>
+    <p class="lead">Worldwide COVID-19 pandemic statistics and trends</p>
+    <div class="nav-links">
+        <a href="/world/covid-usa" class="btn btn-outline-primary">🇺🇸 USA Stats</a>
+        <a href="/world/covid-nys" class="btn btn-outline-primary">🗽 NY State</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- Global Stats -->
+        <div class="card mb-4">
+            <h2 class="card-title">🌍 Worldwide Overview</h2>
+            <div id="globalStats" class="stats-grid">
+                <div class="loading">Loading global statistics...</div>
+            </div>
+        </div>
+        
+        <!-- Top Countries -->
+        <div class="card">
+            <h2 class="card-title">📊 Most Affected Countries</h2>
+            <div id="topCountries" class="countries-grid">
+                <div class="loading">Loading countries data...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-links {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(139, 69, 233, 0.05) 100%);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--purple);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.stat-emoji {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.countries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.country-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.country-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+}
+
+.country-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--cyan);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.country-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+
+.last-updated {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadGlobalStats();
+    await loadTopCountries();
+});
+
+async function loadGlobalStats() {
+    const globalDiv = document.getElementById('globalStats');
+    
+    try {
+        const response = await fetch('/api/v1/world/covid');
+        const data = await response.json();
+        
+        if (data.global) {
+            const stats = data.global;
+            globalDiv.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-emoji">😷</span>
+                    <div class="stat-number">${formatNumber(stats.cases)}</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💀</span>
+                    <div class="stat-number">${formatNumber(stats.deaths)}</div>
+                    <div class="stat-label">Deaths</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💚</span>
+                    <div class="stat-number">${formatNumber(stats.recovered)}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">🏥</span>
+                    <div class="stat-number">${formatNumber(stats.active)}</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+            `;
+        } else {
+            globalDiv.innerHTML = '<div class="error">Unable to load global statistics</div>';
+        }
+    } catch (error) {
+        globalDiv.innerHTML = '<div class="error">Error loading global statistics</div>';
+    }
+}
+
+async function loadTopCountries() {
+    const countriesDiv = document.getElementById('topCountries');
+    
+    try {
+        const response = await fetch('/api/v1/world/disease');
+        const data = await response.json();
+        
+        if (data.countries && data.countries.length > 0) {
+            const topCountries = data.countries.slice(0, 12);
+            const html = topCountries.map(country => `
+                <div class="country-card">
+                    <div class="country-name">
+                        <span>${getCountryEmoji(country.country)}</span>
+                        ${country.country}
+                    </div>
+                    <div class="country-stats">
+                        <div>
+                            <strong>${formatNumber(country.cases)}</strong><br>
+                            <small>Cases</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(country.deaths)}</strong><br>
+                            <small>Deaths</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(country.recovered || 0)}</strong><br>
+                            <small>Recovered</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            countriesDiv.innerHTML = html;
+        } else {
+            countriesDiv.innerHTML = '<div class="error">Unable to load countries data</div>';
+        }
+    } catch (error) {
+        countriesDiv.innerHTML = '<div class="error">Error loading countries data</div>';
+    }
+}
+
+function formatNumber(num) {
+    if (!num) return '0';
+    return new Intl.NumberFormat().format(num);
+}
+
+function getCountryEmoji(countryName) {
+    const countryEmojis = {
+        'USA': '🇺🇸', 'US': '🇺🇸',
+        'India': '🇮🇳',
+        'Brazil': '🇧🇷',
+        'Russia': '🇷🇺',
+        'France': '🇫🇷',
+        'Turkey': '🇹🇷',
+        'Iran': '🇮🇷',
+        'Germany': '🇩🇪',
+        'UK': '🇬🇧', 'United Kingdom': '🇬🇧',
+        'Italy': '🇮🇹',
+        'Spain': '🇪🇸',
+        'China': '🇨🇳'
+    };
+    
+    return countryEmojis[countryName] || '🌍';
+}
+</script>
