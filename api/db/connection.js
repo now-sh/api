@@ -7,11 +7,23 @@ dotenv.config();
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URI_API;
 
 let connection = null;
+
+// Global connection cache for serverless environments
+if (typeof global !== 'undefined') {
+  global._mongoConnection = global._mongoConnection || null;
+}
 let connectionAttempts = 0;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 5000; // 5 seconds
 
 const connectToDatabase = async (retryOnFail = true) => {
+  // Check global connection cache for serverless environments
+  const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+  
+  if (isVercel && global._mongoConnection && mongoose.connection.readyState === 1) {
+    return global._mongoConnection;
+  }
+  
   if (connection && connection.readyState === 1) {
     return connection;
   }
@@ -26,12 +38,22 @@ const connectToDatabase = async (retryOnFail = true) => {
   try {
     connectionAttempts++;
     
+    // Detect if running on Vercel serverless
+    const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+    
     const options = {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: isVercel ? 5000 : 10000,
+      socketTimeoutMS: isVercel ? 20000 : 45000,
+      connectTimeoutMS: isVercel ? 5000 : 10000,
       bufferCommands: false,
-      maxPoolSize: 10,
+      maxPoolSize: isVercel ? 1 : 10,
+      maxIdleTimeMS: isVercel ? 10000 : 30000,
+      // Serverless-specific optimizations
+      ...(isVercel && {
+        maxConnecting: 1,
+        heartbeatFrequencyMS: 30000,
+        serverSelectionTimeoutMS: 3000,
+      }),
     };
 
     // Set strictQuery to false to prepare for Mongoose 7
@@ -40,7 +62,13 @@ const connectToDatabase = async (retryOnFail = true) => {
     console.log(`🔄 Attempting to connect to MongoDB (attempt ${connectionAttempts}/${MAX_RETRY_ATTEMPTS})...`);
     
     connection = await mongoose.connect(MONGODB_URI, options);
-    console.log('✅ MongoDB connected successfully');
+    
+    // Cache connection globally for serverless environments
+    if (isVercel) {
+      global._mongoConnection = connection;
+    }
+    
+    console.log(`✅ MongoDB connected successfully${isVercel ? ' (serverless)' : ''}`);
     connectionAttempts = 0; // Reset attempts on success
     
     // Handle connection events
