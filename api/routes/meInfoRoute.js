@@ -271,7 +271,11 @@ meInfoRoute.get(['/', '/help'], cors(), (req, res) => {
         view: `GET ${host}/api/v1/me/info/resume/view`,
         download: `GET ${host}/api/v1/me/info/resume/download`
       },
-      github: `GET ${host}/api/v1/me/info/github`,
+      github: {
+        user: `GET ${host}/api/v1/me/info/github`,
+        repos: `GET ${host}/api/v1/me/info/github/repos`,
+        orgs: `GET ${host}/api/v1/me/info/github/orgs`
+      },
       reddit: `GET ${host}/api/v1/me/info/reddit`
     },
     sources: {
@@ -294,6 +298,54 @@ meInfoRoute.get(['/', '/help'], cors(), (req, res) => {
 meInfoRoute.get('/github', cors(), async (req, res) => {
   try {
     const api = 'https://api.github.com/users/casjay';
+    const headers = {
+      'Accept': 'application/vnd.github+json',
+      'User-Agent': 'Node.js API Client'
+    };
+    
+    // Add GitHub token if available
+    const githubToken = process.env.GITHUB_API_KEY;
+    if (githubToken && githubToken.trim() !== '' && githubToken !== 'myverylonggithubapikey') {
+      headers['Authorization'] = `token ${githubToken}`;
+    }
+    
+    const response = await axios.get(api, { headers });
+    res.json(response.data);
+  } catch (error) {
+    res.status(503).json({ error: error.message });
+  }
+});
+
+/**
+ * Get GitHub repos - JSON response (casjay)
+ */
+meInfoRoute.get('/github/repos', cors(), async (req, res) => {
+  try {
+    const api = 'https://api.github.com/users/casjay/repos?sort=updated&per_page=50';
+    const headers = {
+      'Accept': 'application/vnd.github+json',
+      'User-Agent': 'Node.js API Client'
+    };
+    
+    // Add GitHub token if available
+    const githubToken = process.env.GITHUB_API_KEY;
+    if (githubToken && githubToken.trim() !== '' && githubToken !== 'myverylonggithubapikey') {
+      headers['Authorization'] = `token ${githubToken}`;
+    }
+    
+    const response = await axios.get(api, { headers });
+    res.json(response.data);
+  } catch (error) {
+    res.status(503).json({ error: error.message });
+  }
+});
+
+/**
+ * Get GitHub orgs - JSON response (casjay)
+ */
+meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
+  try {
+    const api = 'https://api.github.com/users/casjay/orgs';
     const headers = {
       'Accept': 'application/vnd.github+json',
       'User-Agent': 'Node.js API Client'
