@@ -16,9 +16,7 @@
         />
     </div>
     
-    <button type="button" class="btn btn-primary" onclick="loadAllDomains()">
-        <i class="bi bi-cloud-download"></i> Load Domains
-    </button>
+    <div id="loadingStatus" class="loading">Loading domains...</div>
 </div>
 
 <div class="card mt-6">
@@ -27,7 +25,7 @@
         <span id="domainCount" class="badge bg-purple"></span>
     </div>
     <div id="domainsList" class="domains-grid">
-        <div class="empty-state">Click "Load Domains" to view all domains</div>
+        <div class="empty-state">Loading domains...</div>
     </div>
 </div>
 

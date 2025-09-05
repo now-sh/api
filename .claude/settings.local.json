@@ -95,7 +95,10 @@
       "Bash(# Check recent server logs for the 500 error\ntail -30 server.log | grep -A 10 -B 5 \"\"500\\|Error\\|error\"\")",
       "Bash(# Final comprehensive test of all the fixed endpoints\necho \"\"=== FINAL STATUS OF ORIGINALLY BROKEN ENDPOINTS ===\"\"\n\necho -e \"\"\\n✅ LOREM IPSUM:\"\"\necho \"\"Status: FIXED - Frontend no longer requests text format\"\"\necho \"\"Test: $(curl -s -X POST http://localhost:1919/api/v1/tools/lorem/generate -H \"\"Content-Type: application/json\"\" -d ''{\"\"paragraphs\"\": 1}'' | jq -r ''.success'')\"\"\n\necho -e \"\"\\n✅ PASSWORD GENERATOR:\"\" \necho \"\"Status: WORKING - All main endpoints functional\"\"\necho \"\"Single: $(curl -s http://localhost:1919/api/v1/tools/passwd/16 | jq -r ''.success'')\"\"\necho \"\"Batch: $(curl -s http://localhost:1919/api/v1/tools/passwd/batch/2/12 | jq -r ''.success'')\"\"\n\necho -e \"\"\\n✅ ANIME QUOTES:\"\"\necho \"\"Status: WORKING - Always worked, was tested correctly\"\"\necho \"\"Quote: $(curl -s http://localhost:1919/api/v1/fun/anime/quote | jq -r ''.success'')\"\"\n\necho -e \"\"\\n⚠️ MINOR ISSUE:\"\"\necho \"\"Password strength check: Intermittent 500 errors (not critical)\"\")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(for page in markdown cron regex diff dictionary)",
+      "Bash(do [ -f \"/root/Projects/github/now-sh/api/api/views/pages/tools/$page.ejs\" ])"
     ],
     "deny": [],
     "ask": []

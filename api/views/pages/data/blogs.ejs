@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (isPersonal) {
                     // Personal blog endpoint returns posts in data.posts
-                    posts = data.data?.posts || data.posts || [];
+                    posts = data.posts || [];
                 } else {
                     // Social blogs endpoint returns array directly
                     posts = data.success ? data.data : data;

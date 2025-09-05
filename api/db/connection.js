@@ -28,6 +28,9 @@ const connectToDatabase = async () => {
       maxPoolSize: 10,
     };
 
+    // Set strictQuery to false to prepare for Mongoose 7
+    mongoose.set('strictQuery', false);
+    
     // Mask connection string for security
     const maskedUri = MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//****:****@');
     console.log('🚀 Connecting to MongoDB...');

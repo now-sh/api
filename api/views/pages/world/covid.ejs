@@ -1,0 +1,201 @@
+<div class="hero fade-in">
+    <h1>COVID-19 Statistics</h1>
+    <p class="lead">Global COVID-19 pandemic statistics and data</p>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- Global Stats -->
+        <div class="card mb-4">
+            <h2 class="card-title">🌍 Global Statistics</h2>
+            <div id="globalStats" class="stats-grid">
+                <div class="loading">Loading global statistics...</div>
+            </div>
+        </div>
+        
+        <!-- USA Stats -->
+        <div class="card">
+            <h2 class="card-title">🇺🇸 United States Statistics</h2>
+            <div id="usaStats" class="stats-grid">
+                <div class="loading">Loading USA statistics...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.stat-card.cases .stat-value {
+    color: var(--cyan);
+}
+
+.stat-card.deaths .stat-value {
+    color: var(--red);
+}
+
+.stat-card.recovered .stat-value {
+    color: var(--green);
+}
+
+.stat-card.active .stat-value {
+    color: var(--yellow);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+    grid-column: 1 / -1;
+}
+
+.error {
+    color: var(--red);
+    text-align: center;
+    padding: 2rem;
+    grid-column: 1 / -1;
+}
+
+.last-updated {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    grid-column: 1 / -1;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load global stats
+    loadGlobalStats();
+    // Load USA stats
+    loadUSAStats();
+});
+
+async function loadGlobalStats() {
+    const statsDiv = document.getElementById('globalStats');
+    
+    try {
+        const response = await fetch('/api/v1/world/covid');
+        const data = await response.json();
+        
+        if (data.success && data.global) {
+            const stats = data.global;
+            statsDiv.innerHTML = `
+                <div class="stat-card cases">
+                    <div class="stat-value">${formatNumber(stats.cases)}</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card deaths">
+                    <div class="stat-value">${formatNumber(stats.deaths)}</div>
+                    <div class="stat-label">Total Deaths</div>
+                </div>
+                <div class="stat-card recovered">
+                    <div class="stat-value">${formatNumber(stats.recovered)}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card active">
+                    <div class="stat-value">${formatNumber(stats.active)}</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+                ${stats.updated ? `<div class="last-updated">Last updated: ${new Date(stats.updated).toLocaleString()}</div>` : ''}
+            `;
+        } else {
+            statsDiv.innerHTML = '<div class="error">Unable to load global statistics</div>';
+        }
+    } catch (error) {
+        statsDiv.innerHTML = '<div class="error">Error loading global statistics</div>';
+    }
+}
+
+async function loadUSAStats() {
+    const statsDiv = document.getElementById('usaStats');
+    
+    try {
+        const response = await fetch('/api/v1/world/usa');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            const stats = data.data;
+            statsDiv.innerHTML = `
+                <div class="stat-card cases">
+                    <div class="stat-value">${formatNumber(stats.cases || 0)}</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card deaths">
+                    <div class="stat-value">${formatNumber(stats.deaths || 0)}</div>
+                    <div class="stat-label">Total Deaths</div>
+                </div>
+                <div class="stat-card recovered">
+                    <div class="stat-value">${formatNumber(stats.recovered || 0)}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card active">
+                    <div class="stat-value">${formatNumber(stats.active || 0)}</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+            `;
+        } else {
+            // Try alternative endpoint
+            const diseaseResponse = await fetch('/api/v1/world/disease');
+            const diseaseData = await diseaseResponse.json();
+            
+            if (diseaseData.success || diseaseData.cases) {
+                statsDiv.innerHTML = `
+                    <div class="stat-card cases">
+                        <div class="stat-value">${formatNumber(diseaseData.cases || 0)}</div>
+                        <div class="stat-label">Total Cases</div>
+                    </div>
+                    <div class="stat-card deaths">
+                        <div class="stat-value">${formatNumber(diseaseData.deaths || 0)}</div>
+                        <div class="stat-label">Total Deaths</div>
+                    </div>
+                    <div class="stat-card recovered">
+                        <div class="stat-value">${formatNumber(diseaseData.recovered || 0)}</div>
+                        <div class="stat-label">Recovered</div>
+                    </div>
+                    <div class="stat-card active">
+                        <div class="stat-value">${formatNumber(diseaseData.active || 0)}</div>
+                        <div class="stat-label">Active Cases</div>
+                    </div>
+                `;
+            } else {
+                statsDiv.innerHTML = '<div class="error">Unable to load USA statistics</div>';
+            }
+        }
+    } catch (error) {
+        statsDiv.innerHTML = '<div class="error">Error loading USA statistics</div>';
+    }
+}
+
+function formatNumber(num) {
+    if (!num) return '0';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+</script>

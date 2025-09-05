@@ -6,34 +6,6 @@
   <div class="mt-5">
     <h2 class="text-center text-warning mb-4">📂 My Data</h2>
     <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
-      <!-- GitHub Data -->
-      <div class="col">
-        <div class="card h-100 border-success">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title text-success">💻 My GitHub Data</h5>
-            <p class="card-text flex-grow-1">View my GitHub repositories and organizations</p>
-            <div class="mt-auto">
-              <a href="/data/git" class="btn btn-success btn-sm me-2">Frontend</a>
-              <a href="/api/v1/me/info/github" class="btn btn-success btn-sm me-2" target="_blank">Backend</a>
-              <a href="https://github.com/casjay" class="btn btn-secondary btn-sm" target="_blank">My GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reddit Data -->
-      <div class="col">
-        <div class="card h-100 border-primary">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title text-primary">🤖 My Reddit Activity</h5>
-            <p class="card-text flex-grow-1">View my Reddit posts and activity</p>
-            <div class="mt-auto">
-              <a href="/data/reddit" class="btn btn-success btn-sm me-2">Frontend</a>
-              <a href="/api/v1/me/info/reddit" class="btn btn-primary btn-sm" target="_blank">Backend</a>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Domains -->
       <div class="col">
@@ -246,20 +218,61 @@
     </div>
   </div>
 
-  <!-- External APIs Section -->
+  <!-- Fun & Entertainment Section -->
   <div class="mt-5">
-    <h2 class="text-center text-success mb-4">🌐 External APIs</h2>
+    <h2 class="text-center text-success mb-4">🎮 Fun & Entertainment</h2>
     <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
-      <!-- Anime -->
+      <!-- Anime Quotes -->
       <div class="col">
         <div class="card h-100 border-secondary">
           <div class="card-body d-flex flex-column">
             <h5 class="card-title text-secondary">🎌 Anime Quotes</h5>
             <p class="card-text flex-grow-1">Get random anime quotes and inspiration</p>
             <div class="mt-auto">
-              <a href="/data/anime" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/fun/anime" class="btn btn-success btn-sm me-2">Frontend</a>
               <a href="/api/v1/fun/anime/quote" class="btn btn-secondary btn-sm me-2" target="_blank">Backend</a>
-              <a href="http://quotes.casjay.coffee" class="btn btn-secondary btn-sm" target="_blank">Quotes Site</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Jokes -->
+      <div class="col">
+        <div class="card h-100 border-primary">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-primary">😂 Jokes</h5>
+            <p class="card-text flex-grow-1">Get random jokes to brighten your day</p>
+            <div class="mt-auto">
+              <a href="/fun/jokes" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/fun/jokes" class="btn btn-primary btn-sm" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fun Facts -->
+      <div class="col">
+        <div class="card h-100 border-info">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-info">🎯 Fun Facts</h5>
+            <p class="card-text flex-grow-1">Learn interesting and fun facts</p>
+            <div class="mt-auto">
+              <a href="/fun/facts" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/fun/facts" class="btn btn-info btn-sm" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Trivia -->
+      <div class="col">
+        <div class="card h-100 border-warning">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-warning">🧩 Trivia Quiz</h5>
+            <p class="card-text flex-grow-1">Test your knowledge with trivia questions</p>
+            <div class="mt-auto">
+              <a href="/fun/trivia" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/fun/trivia" class="btn btn-warning btn-sm" target="_blank">Backend</a>
             </div>
           </div>
         </div>
@@ -267,9 +280,85 @@
     </div>
   </div>
 
-  <!-- Information Section -->
+  <!-- Social Media Explorer Section -->
   <div class="mt-5">
-    <h2 class="text-center text-info mb-4">📊 Information & Statistics</h2>
+    <h2 class="text-center text-primary mb-4">🌐 Social Media Explorer</h2>
+    <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+      <!-- GitHub Explorer -->
+      <div class="col">
+        <div class="card h-100 border-success">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-success">💻 GitHub Explorer</h5>
+            <p class="card-text flex-grow-1">Explore GitHub users, repositories and organizations</p>
+            <div class="mt-auto">
+              <a href="/social/github" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/social/github/user/octocat" class="btn btn-success btn-sm me-2" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reddit Browser -->
+      <div class="col">
+        <div class="card h-100 border-orange">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-orange">🤖 Reddit Browser</h5>
+            <p class="card-text flex-grow-1">Browse Reddit posts from subreddits and users</p>
+            <div class="mt-auto">
+              <a href="/social/reddit" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/social/reddit/r/programming" class="btn btn-orange btn-sm" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog Explorer -->
+      <div class="col">
+        <div class="card h-100 border-info">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-info">📰 Blog Explorer</h5>
+            <p class="card-text flex-grow-1">Read blog posts from Jekyll GitHub repositories</p>
+            <div class="mt-auto">
+              <a href="/social/blogs" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/social/blogs/casjay/blog/posts" class="btn btn-info btn-sm" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My GitHub Data -->
+      <div class="col">
+        <div class="card h-100 border-purple">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-purple">👤 My GitHub Profile</h5>
+            <p class="card-text flex-grow-1">View my personal GitHub data and repositories</p>
+            <div class="mt-auto">
+              <a href="/data/git" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/me/info/github" class="btn btn-purple btn-sm me-2" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Reddit Activity -->
+      <div class="col">
+        <div class="card h-100 border-cyan">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-cyan">👤 My Reddit Activity</h5>
+            <p class="card-text flex-grow-1">View my personal Reddit posts and activity</p>
+            <div class="mt-auto">
+              <a href="/data/reddit" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/api/v1/me/info/reddit" class="btn btn-cyan btn-sm" target="_blank">Backend</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World Information Section -->
+  <div class="mt-5">
+    <h2 class="text-center text-info mb-4">🌍 World Information</h2>
     <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
       <!-- COVID Global -->
       <div class="col">
@@ -278,7 +367,7 @@
             <h5 class="card-title text-danger">🦠 COVID-19 Global Stats</h5>
             <p class="card-text flex-grow-1">Global COVID-19 statistics and data</p>
             <div class="mt-auto">
-              <a href="/data/covid" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/world/covid" class="btn btn-success btn-sm me-2">Frontend</a>
               <a href="/api/v1/world/disease" class="btn btn-danger btn-sm me-2" target="_blank">Backend</a>
               <a href="https://covid.casjay.coffee" class="btn btn-secondary btn-sm" target="_blank">COVID Site</a>
             </div>
@@ -293,7 +382,7 @@
             <h5 class="card-title text-warning">🗽 COVID-19 NY State</h5>
             <p class="card-text flex-grow-1">New York State COVID-19 statistics</p>
             <div class="mt-auto">
-              <a href="/data/covid" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/world/nys" class="btn btn-success btn-sm me-2">Frontend</a>
               <a href="/api/v1/world/covid" class="btn btn-warning btn-sm" target="_blank">Backend</a>
             </div>
           </div>
@@ -307,7 +396,7 @@
             <h5 class="card-title text-primary">🏫 School Closings</h5>
             <p class="card-text flex-grow-1">Local school closure information</p>
             <div class="mt-auto">
-              <a href="/data/closings" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/world/closings" class="btn btn-success btn-sm me-2">Frontend</a>
               <a href="/api/v1/world/closings" class="btn btn-primary btn-sm" target="_blank">Backend</a>
             </div>
           </div>
@@ -321,7 +410,7 @@
             <h5 class="card-title text-info">🕐 World Time Zones</h5>
             <p class="card-text flex-grow-1">View current time in different time zones</p>
             <div class="mt-auto">
-              <a href="/data/timezones" class="btn btn-success btn-sm me-2">Frontend</a>
+              <a href="/world/timezones" class="btn btn-success btn-sm me-2">Frontend</a>
               <a href="/api/v1/world/timezones" class="btn btn-info btn-sm" target="_blank">Backend</a>
             </div>
           </div>

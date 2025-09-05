@@ -43,8 +43,8 @@ const generateQRCode = async (text, options = {}) => {
     }
     
     return {
-      type: config.type,
-      data: result,
+      format: config.type,
+      qrCode: result,
       text: text,
       size: config.size
     };

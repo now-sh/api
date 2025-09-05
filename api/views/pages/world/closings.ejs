@@ -1,0 +1,106 @@
+<div class="hero fade-in">
+    <h1>School Closings</h1>
+    <p class="lead">View local school closure information</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h2 class="card-title">Current Closings</h2>
+            <p class="card-text">Check for school closures in your area</p>
+            
+            <div id="closingsResult" class="result-container mt-4">
+                <div class="loading">Loading school closings...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.closings-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.closing-item {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.closing-item h5 {
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+}
+
+.closing-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 85, 85, 0.2);
+    color: var(--red);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.closing-reason {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--cyan);
+}
+
+.error {
+    color: var(--red);
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const resultDiv = document.getElementById('closingsResult');
+    
+    try {
+        const response = await fetch('/api/v1/world/closings');
+        const data = await response.json();
+        
+        if (data.success && data.data && data.data.closings) {
+            const closings = data.data.closings;
+            
+            if (closings.length === 0) {
+                resultDiv.innerHTML = '<div class="empty-state">No school closings reported at this time</div>';
+            } else {
+                const html = closings.map(closing => `
+                    <div class="closing-item">
+                        <h5>${closing.name || 'Unknown School'}</h5>
+                        <div class="closing-status">${closing.status || 'Closed'}</div>
+                        ${closing.reason ? `<div class="closing-reason">Reason: ${closing.reason}</div>` : ''}
+                        ${closing.date ? `<div class="closing-reason">Date: ${new Date(closing.date).toLocaleDateString()}</div>` : ''}
+                    </div>
+                `).join('');
+                
+                resultDiv.innerHTML = `
+                    <h4 class="mb-3">Found ${closings.length} closings</h4>
+                    <div class="closings-list">${html}</div>
+                `;
+            }
+        } else {
+            resultDiv.innerHTML = '<div class="empty-state">No school closings data available</div>';
+        }
+    } catch (error) {
+        resultDiv.innerHTML = '<div class="error">Error loading school closings</div>';
+    }
+});
+</script>

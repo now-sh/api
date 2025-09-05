@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const domainSearch = document.getElementById('domainSearch');
     let allDomains = [];
     
-    // Don't auto-load domains
+    // Auto-load domains on page load
+    loadAllDomains();
     
     // Handle domain search
     if (domainSearch) {
@@ -33,14 +34,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         allDomains.push(...validSubDomains);
                     }
                     displayDomains(allDomains);
+                    // Hide loading status
+                    const loadingEl = document.getElementById('loadingStatus');
+                    if (loadingEl) loadingEl.style.display = 'none';
                 } else {
                     domainsList.innerHTML = '<div class="error-message">Unexpected data format from API</div>';
+                    document.getElementById('loadingStatus').style.display = 'none';
                 }
             } else {
                 domainsList.innerHTML = '<div class="error-message">Failed to load domains</div>';
+                document.getElementById('loadingStatus').style.display = 'none';
             }
         } catch (error) {
             domainsList.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            document.getElementById('loadingStatus').style.display = 'none';
         }
     }
     
@@ -58,8 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const html = domains.map(domain => {
-            // Determine if it's a subdomain
-            const isSubdomain = domain.includes('.') && !domain.startsWith('.');
+            // Check if it's a subdomain based on having more than one dot
+            const parts = domain.split('.');
+            const isSubdomain = parts.length > 2;
             const type = isSubdomain ? 'Subdomain' : 'Domain';
             
             return `
@@ -67,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="domain-name">${domain}</div>
                     <div class="domain-status status-taken">${type}</div>
                     <div class="domain-details">
-                        ${isSubdomain ? 'Active subdomain' : 'Registered domain'}
+                        Click to copy
                     </div>
                 </div>
             `;
