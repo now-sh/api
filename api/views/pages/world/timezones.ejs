@@ -1,6 +1,10 @@
 <div class="hero fade-in">
-    <h1>World Time Zones</h1>
-    <p class="lead">View current time in different time zones around the world</p>
+    <h1>🌍 World Time Zones</h1>
+    <p class="lead">Live world clocks from major cities around the globe</p>
+    <div class="local-time">
+        <span class="local-label">Your Local Time:</span>
+        <span id="localTime" class="local-clock"></span>
+    </div>
 </div>
 
 <div class="row">
@@ -30,28 +34,101 @@
     gap: 1rem;
 }
 
+.local-time {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--cyan) 100%);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    color: white;
+}
+
+.local-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-right: 0.5rem;
+}
+
+.local-clock {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
 .timezone-card {
     background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.timezone-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--cyan), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .timezone-card:hover {
     border-color: var(--purple);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.timezone-card:hover::before {
+    opacity: 1;
 }
 
 .timezone-name {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--cyan);
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .timezone-time {
-    font-size: 1.5rem;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 2rem;
     font-weight: 700;
+    color: var(--purple);
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(139, 69, 233, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+    border-radius: var(--radius-md);
+    margin: 1rem 0;
+    border: 1px solid rgba(139, 69, 233, 0.2);
+}
+
+.timezone-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.timezone-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.timezone-emoji {
+    font-size: 1.5rem;
+}
     color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
@@ -104,6 +181,10 @@ let allTimezones = [];
 let updateInterval;
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // Update local time immediately and then every second
+    updateLocalTime();
+    setInterval(updateLocalTime, 1000);
+    
     await loadTimezones();
     
     // Update times every second
@@ -115,11 +196,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         const searchTerm = e.target.value.toLowerCase();
         const filtered = allTimezones.filter(tz => 
             tz.name.toLowerCase().includes(searchTerm) ||
-            tz.offset.toLowerCase().includes(searchTerm)
+            tz.offset.toLowerCase().includes(searchTerm) ||
+            (tz.city && tz.city.toLowerCase().includes(searchTerm))
         );
         displayTimezones(filtered);
     });
 });
+
+function updateLocalTime() {
+    const now = new Date();
+    const localTimeElement = document.getElementById('localTime');
+    if (localTimeElement) {
+        localTimeElement.textContent = now.toLocaleTimeString();
+    }
+}
 
 async function loadTimezones() {
     const resultDiv = document.getElementById('timezonesResult');
@@ -175,11 +265,14 @@ async function loadTimezones() {
 function displayTimezones(timezones) {
     const resultDiv = document.getElementById('timezonesResult');
     
-    const html = timezones.map(tz => `
+    const html = timezones.map(tz => {
+        const cityInfo = getCityInfo(tz.name);
+        return `
         <div class="timezone-card ${isCurrentTimezone(tz.name) ? 'current-location' : ''}">
             <div class="timezone-name">
-                ${tz.name.replace('_', ' ')}
-                ${isCurrentTimezone(tz.name) ? ' (Current)' : ''}
+                <span class="timezone-emoji">${cityInfo.emoji}</span>
+                ${cityInfo.displayName}
+                ${isCurrentTimezone(tz.name) ? ' 🏠' : ''}
             </div>
             <div class="timezone-time" data-timezone="${tz.name}">
                 ${formatTime(tz.time)}
@@ -187,11 +280,38 @@ function displayTimezones(timezones) {
             <div class="timezone-date">
                 ${formatDate(tz.time)}
             </div>
-            <div class="timezone-offset">${tz.offset}</div>
-        </div>
-    `).join('');
+            <div class="timezone-info">
+                <span>UTC${tz.offset}</span>
+                <span>${cityInfo.region}</span>
+            </div>`;
+    }).join('');
     
     resultDiv.innerHTML = html;
+}
+
+function getCityInfo(timezoneName) {
+    const cityMap = {
+        'America/New_York': { emoji: '🗽', displayName: 'New York', region: 'Eastern US' },
+        'America/Chicago': { emoji: '🌾', displayName: 'Chicago', region: 'Central US' },
+        'America/Denver': { emoji: '⛰️', displayName: 'Denver', region: 'Mountain US' },
+        'America/Los_Angeles': { emoji: '🌴', displayName: 'Los Angeles', region: 'Pacific US' },
+        'Europe/London': { emoji: '🇬🇧', displayName: 'London', region: 'UK' },
+        'Europe/Paris': { emoji: '🇫🇷', displayName: 'Paris', region: 'France' },
+        'Europe/Berlin': { emoji: '🇩🇪', displayName: 'Berlin', region: 'Germany' },
+        'Europe/Rome': { emoji: '🇮🇹', displayName: 'Rome', region: 'Italy' },
+        'Asia/Tokyo': { emoji: '🇯🇵', displayName: 'Tokyo', region: 'Japan' },
+        'Asia/Shanghai': { emoji: '🇨🇳', displayName: 'Shanghai', region: 'China' },
+        'Asia/Dubai': { emoji: '🇦🇪', displayName: 'Dubai', region: 'UAE' },
+        'Asia/Kolkata': { emoji: '🇮🇳', displayName: 'Mumbai', region: 'India' },
+        'Australia/Sydney': { emoji: '🇦🇺', displayName: 'Sydney', region: 'Australia' },
+        'Pacific/Auckland': { emoji: '🇳🇿', displayName: 'Auckland', region: 'New Zealand' }
+    };
+    
+    return cityMap[timezoneName] || {
+        emoji: '🌍',
+        displayName: timezoneName.split('/').pop().replace('_', ' '),
+        region: timezoneName.split('/')[0].replace('_', ' ')
+    };
 }
 
 function updateTimes() {
