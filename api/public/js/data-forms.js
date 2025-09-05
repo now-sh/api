@@ -54,7 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Handle Reddit form
+    // Handle Reddit form - DISABLED (handled inline in reddit.ejs)
+    /*
     const redditForm = document.getElementById('redditForm');
     if (redditForm) {
         redditForm.addEventListener('submit', async (e) => {
@@ -168,8 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    */
     
-    // Handle GitHub data form
+    // Handle GitHub data form - DISABLED (handled inline in git.ejs)
+    /*
     const gitForm = document.getElementById('gitForm');
     if (gitForm) {
         gitForm.addEventListener('submit', async (e) => {
@@ -222,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    */
     
     // Handle Timezones display
     const timezonesList = document.getElementById('timezonesList');
