@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Single MongoDB URI
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI_API;
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URI_API;
 
 let connection = null;
 
@@ -13,9 +13,9 @@ const connectToDatabase = async () => {
     return connection;
   }
 
-  if (!MONGO_URI) {
-    console.error('❌ MONGO_URI not set in environment variables');
-    console.error('Please set MONGO_URI in your .env file');
+  if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI not set in environment variables');
+    console.error('Please set MONGODB_URI in your .env file');
     console.warn('⚠️  Server continuing without MongoDB connection');
     return null;
   }
@@ -32,7 +32,7 @@ const connectToDatabase = async () => {
     // Set strictQuery to false to prepare for Mongoose 7
     mongoose.set('strictQuery', false);
     
-    connection = await mongoose.connect(MONGO_URI, options);
+    connection = await mongoose.connect(MONGODB_URI, options);
     console.log('✅ MongoDB connected successfully');
     
     // Handle connection events
