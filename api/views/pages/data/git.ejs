@@ -1,13 +1,13 @@
 <div class="hero fade-in">
-    <h1>GitHub Repository Data</h1>
-    <p class="lead">View GitHub user information, repositories, and organizations</p>
+    <h1>My GitHub Data</h1>
+    <p class="lead">View my GitHub profile, repositories, and organizations</p>
 </div>
 
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card">
-            <h2 class="card-title">GitHub User Lookup</h2>
-            <p class="card-text">Search for any GitHub user or view my profile</p>
+            <h2 class="card-title">GitHub Profile Explorer</h2>
+            <p class="card-text">View my GitHub profile or search for other users</p>
             
             <form id="gitForm" class="api-form">
                 <div class="form-group">
@@ -17,7 +17,7 @@
                         id="username" 
                         name="username" 
                         class="form-control" 
-                        value="" 
+                        value="casjay" 
                         placeholder="Enter GitHub username..."
                     >
                 </div>
@@ -221,19 +221,26 @@ document.addEventListener('DOMContentLoaded', function() {
         resultOutput.innerHTML = html;
     }
     
-    // Don't auto-load any data
+    // Auto-load my profile on page load
+    loadMyProfile();
 });
 
 // Quick access functions
 function loadMyProfile() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'user';
     document.getElementById('gitForm').dispatchEvent(new Event('submit'));
 }
 
 function loadMyRepos() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'repos';
     document.getElementById('gitForm').dispatchEvent(new Event('submit'));
 }
 
 function loadMyOrgs() {
+    document.getElementById('username').value = 'casjay';
+    document.getElementById('dataType').value = 'orgs';
     document.getElementById('gitForm').dispatchEvent(new Event('submit'));
 }
 </script>

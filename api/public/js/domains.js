@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (domainSearch) {
         domainSearch.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
-            const filtered = allDomains.filter(domain => 
-                domain.toLowerCase().includes(searchTerm)
+            const filtered = allDomains.filter(item => 
+                item.name.toLowerCase().includes(searchTerm)
             );
             displayDomains(filtered);
         });
@@ -27,12 +27,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // The API returns { domains: [...], subDomains: [...] }
                 if (data.domains && Array.isArray(data.domains)) {
-                    allDomains = [...data.domains];
+                    // Create domain objects with proper type
+                    const domainsList = data.domains.map(domain => ({
+                        name: domain,
+                        type: 'domain'
+                    }));
+                    
+                    const subDomainsList = [];
                     if (data.subDomains && Array.isArray(data.subDomains)) {
                         // Filter out empty strings from subdomains
                         const validSubDomains = data.subDomains.filter(domain => domain && domain.trim() !== '');
-                        allDomains.push(...validSubDomains);
+                        validSubDomains.forEach(subdomain => {
+                            subDomainsList.push({
+                                name: subdomain,
+                                type: 'subdomain'
+                            });
+                        });
                     }
+                    
+                    allDomains = [...domainsList, ...subDomainsList];
                     displayDomains(allDomains);
                     // Hide loading status
                     const loadingEl = document.getElementById('loadingStatus');
@@ -64,11 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const html = domains.map(domain => {
-            // Check if it's a subdomain based on having more than one dot
-            const parts = domain.split('.');
-            const isSubdomain = parts.length > 2;
-            const type = isSubdomain ? 'Subdomain' : 'Domain';
+        const html = domains.map(item => {
+            // Use the type from the data structure
+            const domain = typeof item === 'string' ? item : item.name;
+            const type = typeof item === 'string' ? 'Domain' : (item.type === 'subdomain' ? 'Subdomain' : 'Domain');
             
             return `
                 <div class="domain-item" data-domain="${domain}">

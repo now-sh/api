@@ -1,6 +1,6 @@
 <div class="v-100">
-  <h1 class="text-danger">📊 Reddit User Data</h1>
-  <p class="lead">View Reddit user posts and activity</p>
+  <h1 class="text-danger">📊 My Reddit Data</h1>
+  <p class="lead">View my Reddit posts and activity or search other users</p>
 
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -12,7 +12,7 @@
           <form id="redditForm">
             <div class="mb-3">
               <label for="username" class="form-label">Reddit Username</label>
-              <input type="text" class="form-control" id="username" name="username" value="" placeholder="Enter Reddit username...">
+              <input type="text" class="form-control" id="username" name="username" value="casjay" placeholder="Enter Reddit username...">
             </div>
             
             <button type="submit" class="btn btn-danger">
@@ -66,6 +66,11 @@ function copyToClipboard(selector) {
     navigator.clipboard.writeText(element.textContent);
   }
 }
+
+// Auto-load my Reddit data on page load
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('redditForm').dispatchEvent(new Event('submit'));
+});
 
 document.getElementById('redditForm').addEventListener('submit', async function(e) {
   e.preventDefault();
