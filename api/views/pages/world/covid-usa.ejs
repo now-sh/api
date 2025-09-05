@@ -1,0 +1,275 @@
+<div class="hero fade-in">
+    <h1>🇺🇸 USA COVID-19 Statistics</h1>
+    <p class="lead">United States COVID-19 pandemic statistics and state breakdown</p>
+    <div class="nav-links">
+        <a href="/world/covid-global" class="btn btn-outline-primary">🌍 Global Stats</a>
+        <a href="/world/covid-nys" class="btn btn-outline-primary">🗽 NY State</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <!-- USA National Stats -->
+        <div class="card mb-4">
+            <h2 class="card-title">🇺🇸 National Overview</h2>
+            <div id="usaStats" class="stats-grid">
+                <div class="loading">Loading USA statistics...</div>
+            </div>
+        </div>
+        
+        <!-- Top States -->
+        <div class="card">
+            <h2 class="card-title">📍 Most Affected States</h2>
+            <div id="topStates" class="states-grid">
+                <div class="loading">Loading states data...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-links {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(220, 38, 127, 0.05) 100%);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #dc2767, #9333ea);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--pink);
+    margin-bottom: 0.5rem;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.stat-emoji {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.states-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.state-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.state-card:hover {
+    border-color: var(--pink);
+    transform: translateY(-2px);
+}
+
+.state-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--pink);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.state-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--red);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadUSAStats();
+    await loadTopStates();
+});
+
+async function loadUSAStats() {
+    const usaDiv = document.getElementById('usaStats');
+    
+    try {
+        // Get USA data from disease API
+        const response = await fetch('/api/v1/world/disease');
+        const data = await response.json();
+        
+        // Find USA in countries array
+        let usaData = null;
+        if (data.countries && data.countries.length > 0) {
+            usaData = data.countries.find(country => 
+                country.country === 'USA' || 
+                country.country === 'US' || 
+                country.country === 'United States'
+            );
+        }
+        
+        if (usaData) {
+            usaDiv.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-emoji">😷</span>
+                    <div class="stat-number">${formatNumber(usaData.cases)}</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💀</span>
+                    <div class="stat-number">${formatNumber(usaData.deaths)}</div>
+                    <div class="stat-label">Deaths</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">💚</span>
+                    <div class="stat-number">${formatNumber(usaData.recovered || 0)}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-emoji">🏥</span>
+                    <div class="stat-number">${formatNumber(usaData.active || (usaData.cases - usaData.deaths - (usaData.recovered || 0)))}</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+            `;
+        } else {
+            usaDiv.innerHTML = '<div class="error">Unable to load USA statistics</div>';
+        }
+    } catch (error) {
+        usaDiv.innerHTML = '<div class="error">Error loading USA statistics</div>';
+    }
+}
+
+async function loadTopStates() {
+    const statesDiv = document.getElementById('topStates');
+    
+    try {
+        const response = await fetch('/api/v1/world/usa');
+        const data = await response.json();
+        
+        if (data.success && data.states && data.states.length > 0) {
+            const topStates = data.states.slice(0, 12);
+            const html = topStates.map(state => `
+                <div class="state-card">
+                    <div class="state-name">
+                        <span>${getStateEmoji(state.state)}</span>
+                        ${state.state}
+                    </div>
+                    <div class="state-stats">
+                        <div>
+                            <strong>${formatNumber(state.cases)}</strong><br>
+                            <small>Cases</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(state.deaths)}</strong><br>
+                            <small>Deaths</small>
+                        </div>
+                        <div>
+                            <strong>${formatNumber(state.active || 0)}</strong><br>
+                            <small>Active</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            statesDiv.innerHTML = html;
+        } else {
+            statesDiv.innerHTML = '<div class="error">Unable to load states data</div>';
+        }
+    } catch (error) {
+        statesDiv.innerHTML = '<div class="error">Error loading states data</div>';
+    }
+}
+
+function formatNumber(num) {
+    if (!num) return '0';
+    return new Intl.NumberFormat().format(num);
+}
+
+function getStateEmoji(stateName) {
+    const stateEmojis = {
+        'California': '🏖️',
+        'Texas': '🤠',
+        'Florida': '🌴',
+        'New York': '🗽',
+        'Pennsylvania': '🔔',
+        'Illinois': '🏙️',
+        'Ohio': '🌽',
+        'Georgia': '🍑',
+        'North Carolina': '🏔️',
+        'Michigan': '🚗',
+        'New Jersey': '🏖️',
+        'Virginia': '🏛️',
+        'Washington': '🏔️',
+        'Arizona': '🌵',
+        'Massachusetts': '🦞',
+        'Tennessee': '🎸',
+        'Indiana': '🏁',
+        'Maryland': '🦀',
+        'Missouri': '🍖',
+        'Wisconsin': '🧀'
+    };
+    
+    return stateEmojis[stateName] || '🏛️';
+}
+</script>
