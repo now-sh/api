@@ -104,7 +104,7 @@ const versionHandler = async (req, res) => {
   const redditAuthStatus = hasRedditAuth ? 'Set and Valid' : 'Not Set';
   
   // Check database connection status
-  const mongoUri = process.env.MONGO_URI || process.env.MONGO_URI_API;
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URI_API;
   const dbConnected = mongoose.connection && mongoose.connection.readyState === 1;
   const dbStatus = dbConnected ? 'Connected' : 'Not Connected';
   
