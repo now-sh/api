@@ -4,11 +4,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Get all MongoDB URIs
-const MONGO_URIS = {
-  api: process.env.MONGO_URI_API,
-  todos: process.env.MONGO_URI_TODOS,
-  notes: process.env.MONGO_URI_NOTES,
-  shrtnr: process.env.MONGO_URI_SHRTNR
+const MONGODB_URIS = {
+  api: process.env.MONGODB_URI_API,
+  todos: process.env.MONGODB_URI_TODOS,
+  notes: process.env.MONGODB_URI_NOTES,
+  shrtnr: process.env.MONGODB_URI_SHRTNR
 };
 
 // Create connections object
@@ -16,7 +16,7 @@ const connections = {};
 
 const connectToDatabase = async (name, uri) => {
   if (!uri) {
-    console.warn(`⚠️  MONGO_URI_${name.toUpperCase()} not set, skipping ${name} database`);
+    console.warn(`⚠️  MONGODB_URI_${name.toUpperCase()} not set, skipping ${name} database`);
     return null;
   }
 
@@ -61,7 +61,7 @@ const initializeDatabases = async () => {
   console.log('🚀 Initializing MongoDB connections...\n');
   
   // Connect to each database
-  for (const [name, uri] of Object.entries(MONGO_URIS)) {
+  for (const [name, uri] of Object.entries(MONGODB_URIS)) {
     if (uri) {
       connections[name] = await connectToDatabase(name, uri);
     }
@@ -72,8 +72,8 @@ const initializeDatabases = async () => {
   if (activeConnections.length === 0) {
     console.warn('⚠️  WARNING: No database connections established!');
     console.warn('Most personal features (todos, notes, auth) will not work without MongoDB.');
-    console.warn('To enable these features, set MONGO_URI_* environment variables in your .env file');
-    console.warn('Available options: MONGO_URI_API, MONGO_URI_TODOS, MONGO_URI_NOTES, MONGO_URI_SHRTNR');
+    console.warn('To enable these features, set MONGODB_URI_* environment variables in your .env file');
+    console.warn('Available options: MONGODB_URI_API, MONGODB_URI_TODOS, MONGODB_URI_NOTES, MONGODB_URI_SHRTNR');
     console.warn('\n🚀 Starting server with limited functionality (utilities only)...\n');
   }
   
