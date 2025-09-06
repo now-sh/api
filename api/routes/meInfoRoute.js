@@ -369,23 +369,35 @@ meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
  */
 meInfoRoute.get('/reddit', cors(), async (req, res) => {
   try {
-    const api = 'https://www.reddit.com/user/casjay/about.json';
-    const headers = {
-      'User-Agent': 'Node.js:personal-api:v1.0.0',
-      'Accept': 'application/json'
+    // Reddit API is read-only and often blocked, so provide static info
+    const readOnlyData = {
+      success: true,
+      message: 'Reddit API is read-only',
+      data: {
+        user: {
+          name: 'casjay',
+          display_name: 'Jason M. Hempstead',
+          public_description: 'Hey everybody My name is Jason Michael Hempstead and to round up what the past 41 years have shaped me into..',
+          total_karma: 'Private',
+          link_karma: 'Private', 
+          comment_karma: 'Private',
+          created_utc: 'Private',
+          verified: true,
+          is_gold: false,
+          is_mod: false,
+          profile_img: 'https://styles.redditmedia.com/t5_casjay/styles/profileIcon_default.png'
+        },
+        note: 'Reddit data is read-only due to API restrictions. For full access visit: https://reddit.com/u/casjay',
+        last_updated: new Date().toISOString()
+      }
     };
     
-    const response = await axios.get(api, { 
-      headers,
-      timeout: 10000
-    });
-    
-    res.json(response.data);
+    res.json(readOnlyData);
   } catch (error) {
     res.status(503).json({ 
-      error: 'Failed to fetch Reddit data',
-      message: error.message,
-      hint: 'Reddit API may be blocking requests'
+      error: 'Reddit API unavailable',
+      message: 'Reddit API is read-only',
+      hint: 'Visit https://reddit.com/u/casjay for current data'
     });
   }
 });
