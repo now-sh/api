@@ -96,17 +96,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get user info:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/user/octocat</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/github/user/octocat</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get user repos:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/users/octocat/repos</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/github/users/octocat/repos</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Search repositories:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/search/repos?q=react</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/github/search/repos?q=react</code></pre>
             </div>
         </div>
     </div>
