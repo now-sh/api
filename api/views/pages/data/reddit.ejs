@@ -47,9 +47,22 @@
         <div class="card-body">
           <ul class="list-unstyled">
             <li><strong>My Posts:</strong> <code>/api/v1/me/info/reddit</code></li>
-            <li><strong>User Posts:</strong> <code>/api/v1/social/reddit/u/:username</code></li>
-            <li><strong>Subreddit Posts:</strong> <code>/api/v1/social/reddit/r/:subreddit</code></li>
+            <li><strong>User Posts:</strong> <code>/api/v1/social/reddit/u/spez</code></li>
+            <li><strong>Subreddit Posts:</strong> <code>/api/v1/social/reddit/r/programming</code></li>
           </ul>
+          
+          <div class="code-examples mt-3">
+            <h6>Example curl commands:</h6>
+            <div class="code-block mb-2">
+              <pre><code>curl -q -LSsf ${API_URL}/api/v1/me/info/reddit</code></pre>
+            </div>
+            <div class="code-block mb-2">
+              <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/reddit/u/spez</code></pre>
+            </div>
+            <div class="code-block mb-2">
+              <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/reddit/r/programming</code></pre>
+            </div>
+          </div>
           <a href="/api/v1/me/info/reddit" class="btn btn-info btn-sm" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i> View Casjay Posts
           </a>
