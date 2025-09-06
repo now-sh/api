@@ -129,14 +129,14 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Convert color:</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/color/convert \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/color/convert \
   -H "Content-Type: application/json" \
   -d '{"color": "#FF5733", "from": "hex", "to": "rgb"}'</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Generate palette:</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/color/palette \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/color/palette \
   -H "Content-Type: application/json" \
   -d '{"baseColor": "#FF5733", "count": 5}'</code></pre>
             </div>
