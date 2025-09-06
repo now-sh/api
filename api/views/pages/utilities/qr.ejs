@@ -172,23 +172,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function displayQRCode(data, format) {
+        // Handle different API response field names
+        const qrData = data.qrCode || data.qr;
+        
         if (format === 'png') {
-            // Display PNG image
-            currentQRData = data.qr;
-            qrDisplay.innerHTML = `<img src="data:image/png;base64,${data.qr}" alt="QR Code">`;
+            // Display PNG image - extract base64 from data URL if needed
+            const base64Data = qrData.includes('base64,') ? qrData.split('base64,')[1] : qrData;
+            currentQRData = base64Data;
+            qrDisplay.innerHTML = `<img src="${qrData}" alt="QR Code">`;
             downloadBtn.style.display = 'inline-block';
-            downloadBtn.onclick = () => downloadQR(data.qr, 'png');
-            copyBtn.onclick = () => copyToClipboard(data.qr, 'Base64 image data');
+            downloadBtn.onclick = () => downloadQR(base64Data, 'png');
+            copyBtn.onclick = () => copyToClipboard(base64Data, 'Base64 image data');
         } else if (format === 'svg') {
             // Display SVG
-            currentQRData = data.qr;
-            qrDisplay.innerHTML = data.qr;
+            currentQRData = qrData;
+            qrDisplay.innerHTML = qrData;
             downloadBtn.style.display = 'inline-block';
-            downloadBtn.onclick = () => downloadQR(data.qr, 'svg');
-            copyBtn.onclick = () => copyToClipboard(data.qr, 'SVG code');
+            downloadBtn.onclick = () => downloadQR(qrData, 'svg');
+            copyBtn.onclick = () => copyToClipboard(qrData, 'SVG code');
         } else if (format === 'ascii') {
             // Display ASCII art
-            currentQRData = typeof data === 'string' ? data : data.qr;
+            currentQRData = typeof data === 'string' ? data : qrData;
             qrDisplay.innerHTML = `<pre class="qr-ascii">${currentQRData}</pre>`;
             downloadBtn.style.display = 'none';
             copyBtn.onclick = () => copyToClipboard(currentQRData, 'ASCII QR code');
