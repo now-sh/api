@@ -286,9 +286,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const filtered = allTimezones.filter(tz => 
-            tz.name.toLowerCase().includes(searchTerm) ||
-            tz.offset.toLowerCase().includes(searchTerm) ||
-            (tz.city && tz.city.toLowerCase().includes(searchTerm))
+            (tz.name && tz.name.toLowerCase().includes(searchTerm)) ||
+            (tz.displayName && tz.displayName.toLowerCase().includes(searchTerm)) ||
+            (tz.offset && tz.offset.toString().includes(searchTerm))
         );
         displayTimezones(filtered);
     });
@@ -309,16 +309,22 @@ async function loadTimezones() {
         const response = await fetch('/api/v1/world/timezones');
         const data = await response.json();
         
-        if (data.success && data.timezones) {
-            // Create timezone objects with current times
-            allTimezones = data.timezones.map(tz => {
+        if (Array.isArray(data) && data.length > 0) {
+            // Handle actual timezone API response format
+            allTimezones = data.map(tz => {
                 const now = new Date();
+                // Use the first UTC zone if available, or create a reasonable timezone name
+                const zoneName = tz.utc && tz.utc.length > 0 ? tz.utc[0] : 
+                    (tz.value ? tz.value.replace(/\s+Standard\s+Time|\s+Daylight\s+Time/g, '') : 'UTC');
+                
                 return {
-                    name: tz.name || tz,
-                    offset: tz.offset || getTimezoneOffset(tz.name || tz),
-                    time: getTimeInTimezone(now, tz.name || tz)
+                    name: zoneName,
+                    displayName: tz.text || tz.value,
+                    offset: tz.offset,
+                    time: getTimeInTimezone(now, zoneName),
+                    isDST: tz.isdst
                 };
-            });
+            }).slice(0, 20); // Limit to first 20 for better mobile experience
             
             displayTimezones(allTimezones);
         } else {
@@ -358,12 +364,16 @@ function displayTimezones(timezones) {
     
     const html = timezones.map(tz => {
         const cityInfo = getCityInfo(tz.name);
+        const offsetText = typeof tz.offset === 'number' ? 
+            (tz.offset >= 0 ? `+${tz.offset}` : `${tz.offset}`) : tz.offset;
+        
         return `
         <div class="timezone-card ${isCurrentTimezone(tz.name) ? 'current-location' : ''}">
             <div class="timezone-name">
                 <span class="timezone-emoji">${cityInfo.emoji}</span>
-                ${cityInfo.displayName}
+                ${tz.displayName ? tz.displayName.replace(/\(UTC[^)]*\)\s*/, '') : cityInfo.displayName}
                 ${isCurrentTimezone(tz.name) ? ' 🏠' : ''}
+                ${tz.isDST ? ' ☀️' : ''}
             </div>
             <div class="timezone-time" data-timezone="${tz.name}">
                 ${formatTime(tz.time)}
@@ -372,9 +382,10 @@ function displayTimezones(timezones) {
                 ${formatDate(tz.time)}
             </div>
             <div class="timezone-info">
-                <span>UTC${tz.offset}</span>
+                <span>UTC${offsetText}</span>
                 <span>${cityInfo.region}</span>
-            </div>`;
+            </div>
+        </div>`;
     }).join('');
     
     resultDiv.innerHTML = html;
