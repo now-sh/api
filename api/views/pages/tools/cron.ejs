@@ -106,14 +106,14 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Parse cron expression:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/cron/parse \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/cron/parse \
   -H "Content-Type: application/json" \
   -d '{"expression": "0 0 * * *"}'</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Validate cron expression:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/cron/validate \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/cron/validate \
   -H "Content-Type: application/json" \
   -d '{"expression": "0 0 * * *"}'</code></pre>
             </div>
