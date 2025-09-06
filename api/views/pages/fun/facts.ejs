@@ -131,8 +131,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(endpoint);
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                currentFact = data.data;
+            if (response.ok) {
+                // Handle different API response structures
+                if (data.success && data.data) {
+                    currentFact = data.data;
+                } else if (data.fact || data.text) {
+                    currentFact = data;
+                } else {
+                    currentFact = { fact: String(data) };
+                }
                 displayFact(currentFact);
                 factResult.style.display = 'block';
                 factResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -154,8 +161,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/v1/fun/facts/daily');
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                const fact = data.data;
+            if (response.ok) {
+                // Handle different API response structures
+                let fact;
+                if (data.success && data.data) {
+                    fact = data.data;
+                } else if (data.fact || data.text) {
+                    fact = data;
+                } else {
+                    fact = { fact: String(data) };
+                }
+                
                 dailyFactDiv.innerHTML = `
                     <div class="daily-fact-content">
                         <div class="daily-fact-date">${new Date().toLocaleDateString()}</div>
