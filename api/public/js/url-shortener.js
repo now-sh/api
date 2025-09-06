@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (response.ok) {
                 const result = await response.json();
-                if (result.success && result.data.length > 0) {
-                    displayRecentUrls(result.data);
+                if (result.success && result.data.urls && result.data.urls.length > 0) {
+                    displayRecentUrls(result.data.urls);
                 } else {
                     recentUrlsDiv.innerHTML = '<div class="empty-state">No URLs found. Create your first short URL above!</div>';
                 }
