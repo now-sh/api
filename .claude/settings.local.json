@@ -139,7 +139,8 @@
       "Bash(chmod:*)",
       "Bash(/root/Projects/github/now-sh/api/fix-hardcoded-domains.sh:*)",
       "Bash(/root/Projects/github/now-sh/api/fix-curl-examples.sh:*)",
-      "Bash(/root/Projects/github/now-sh/api/standardize-curl.sh:*)"
+      "Bash(/root/Projects/github/now-sh/api/standardize-curl.sh:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []
