@@ -78,14 +78,14 @@
     <h3 class="card-title">API Usage</h3>
     <div class="code-block">
         <h4>Generate SHA256 hash:</h4>
-        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/hash/sha256 \
+        <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/hash/sha256 \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello World"}'</code></pre>
     </div>
     
     <div class="code-block">
         <h4>Verify a hash:</h4>
-        <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/hash/sha256/verify \
+        <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/hash/sha256/verify \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello World", "hash": "a591a6..."}'</code></pre>
     </div>
