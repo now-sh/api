@@ -123,17 +123,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Generate password:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/passwd/16</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/passwd/16</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Generate multiple passwords:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/passwd/batch/5/16</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/passwd/batch/5/16</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Check password strength:</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/passwd/check \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/passwd/check \
   -H "Content-Type: application/json" \
   -d '{"password": "MyP@ssw0rd123!"}'</code></pre>
             </div>
