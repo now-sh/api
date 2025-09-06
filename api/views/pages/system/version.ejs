@@ -13,6 +13,22 @@
             </div>
         </div>
 
+        <!-- Authentication Status -->
+        <div class="card mb-4">
+            <h2 class="card-title">🔐 Authentication Status</h2>
+            <div id="authStatus" class="auth-status">
+                <div class="loading">Checking authentication...</div>
+            </div>
+        </div>
+
+        <!-- Health Status -->
+        <div class="card mb-4">
+            <h2 class="card-title">🏥 Health Status</h2>
+            <div id="healthStatus" class="health-status">
+                <div class="loading">Checking health status...</div>
+            </div>
+        </div>
+
         <!-- Database Status -->
         <div class="card mb-4">
             <h2 class="card-title">🗄️ Database Status</h2>
@@ -21,11 +37,11 @@
             </div>
         </div>
 
-        <!-- API Routes -->
+        <!-- Environment Information -->
         <div class="card mb-4">
-            <h2 class="card-title">🛣️ Available Routes</h2>
-            <div id="routesList" class="routes-list">
-                <div class="loading">Loading routes...</div>
+            <h2 class="card-title">🌍 Environment</h2>
+            <div id="environmentInfo" class="environment-info">
+                <div class="loading">Loading environment info...</div>
             </div>
         </div>
 
@@ -78,19 +94,63 @@ function displayVersionInfo(data) {
                 <span class="info-value">${data.Version || 'Unknown'}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Node Version</span>
-                <span class="info-value">${data.System?.NodeVersion || 'Unknown'}</span>
+                <span class="info-label">Time Zone</span>
+                <span class="info-value">${data.TimeZone || 'Unknown'}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Environment</span>
-                <span class="info-value">${data.Environment?.NodeEnv || 'production'}</span>
+                <span class="info-label">Current Time</span>
+                <span class="info-value">${data.Time || 'Unknown'}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Server Time</span>
-                <span class="info-value">${data.Time || new Date().toLocaleString()}</span>
+                <span class="info-label">Today</span>
+                <span class="info-value">${data.Today || 'Unknown'}</span>
+            </div>
+        </div>
+        <div class="greeting-banner">
+            ${data.Greetings || 'Welcome to the API Server'}
+        </div>
+    `;
+
+    // Display authentication status
+    const authDiv = document.getElementById('authStatus');
+    authDiv.innerHTML = `
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Authentication</span>
+                <span class="info-value ${data.Auth === 'yes' ? 'success' : 'warning'}">${data.Auth || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">GitHub Token</span>
+                <span class="info-value ${data.GitHubToken ? 'success' : 'error'}">${data.GitHubToken || 'Not Set'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Reddit Auth</span>
+                <span class="info-value ${data.RedditAuth === 'Set and Valid' ? 'success' : 'error'}">${data.RedditAuth || 'Not Set'}</span>
             </div>
         </div>
     `;
+
+    // Display health status
+    const healthDiv = document.getElementById('healthStatus');
+    if (data.Health) {
+        const statusClass = data.Health.Status === 'healthy' ? 'success' : 'warning';
+        healthDiv.innerHTML = `
+            <div class="status-indicator ${statusClass}">
+                <span class="status-dot"></span>
+                <span class="status-text">${data.Health.Status}</span>
+            </div>
+            <div class="info-item mt-3">
+                <span class="info-label">Issues</span>
+                <span class="info-value">${data.Health.Issues?.length || 0} issues</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Check</span>
+                <span class="info-value">${new Date(data.Health.Timestamp).toLocaleString()}</span>
+            </div>
+        `;
+    } else {
+        healthDiv.innerHTML = '<div class="no-data">Health information not available</div>';
+    }
 
     // Display database status
     const dbDiv = document.getElementById('databaseStatus');
@@ -167,24 +227,58 @@ function displayVersionInfo(data) {
         proxyDiv.innerHTML = '<div class="no-data">Proxy configuration not available</div>';
     }
 
+    // Display environment information
+    const envDiv = document.getElementById('environmentInfo');
+    if (data.Environment) {
+        envDiv.innerHTML = `
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Node Environment</span>
+                    <span class="info-value">${data.Environment.NodeEnv || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Port</span>
+                    <span class="info-value">${data.Environment.Port || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Yesterday</span>
+                    <span class="info-value">${data.Yesterday || 'Unknown'}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        envDiv.innerHTML = '<div class="no-data">Environment information not available</div>';
+    }
+
     // Display system information
     const systemDiv = document.getElementById('systemInfo');
-    const systemInfo = [];
-    
-    if (data.System?.Platform) systemInfo.push(['Platform', data.System.Platform]);
-    if (data.System?.Architecture) systemInfo.push(['Architecture', data.System.Architecture]);
-    if (data.System?.Uptime) systemInfo.push(['Uptime', data.System.Uptime]);
-    if (data.System?.Memory) systemInfo.push(['Memory Usage', `Heap: ${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal} (${data.System.Memory.HeapPercentage})`]);
-    
-    if (systemInfo.length > 0) {
+    if (data.System) {
         systemDiv.innerHTML = `
             <div class="info-grid">
-                ${systemInfo.map(([label, value]) => `
-                    <div class="info-item">
-                        <span class="info-label">${label}</span>
-                        <span class="info-value">${value}</span>
-                    </div>
-                `).join('')}
+                <div class="info-item">
+                    <span class="info-label">Node Version</span>
+                    <span class="info-value">${data.System.NodeVersion || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Platform</span>
+                    <span class="info-value">${data.System.Platform || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Architecture</span>
+                    <span class="info-value">${data.System.Architecture || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Uptime</span>
+                    <span class="info-value">${data.System.Uptime || 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Memory Usage</span>
+                    <span class="info-value">${data.System.Memory ? `${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal} (${data.System.Memory.HeapPercentage})` : 'Unknown'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">RSS Memory</span>
+                    <span class="info-value">${data.System.Memory?.RSS || 'Unknown'}</span>
+                </div>
             </div>
         `;
     } else {
@@ -380,6 +474,31 @@ function formatMemory(memory) {
     color: var(--text-secondary);
     padding: 2rem;
     font-style: italic;
+}
+
+.greeting-banner {
+    background: linear-gradient(135deg, var(--purple) 0%, var(--cyan) 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+.info-value.success {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.info-value.error {
+    color: var(--red);
+    font-weight: 600;
+}
+
+.info-value.warning {
+    color: var(--yellow);
+    font-weight: 600;
 }
 
 .error-message {
