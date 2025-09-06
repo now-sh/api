@@ -30,8 +30,27 @@
 <style>
 .timezones-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
+}
+
+/* Mobile-first responsive grid */
+@media (min-width: 576px) {
+    .timezones-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .timezones-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+@media (min-width: 992px) {
+    .timezones-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
 }
 
 .local-time {
@@ -99,15 +118,30 @@
 
 .timezone-time {
     font-family: 'Monaco', 'Consolas', monospace;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--purple);
     text-align: center;
-    padding: 1rem;
+    padding: 0.75rem;
     background: linear-gradient(135deg, rgba(139, 69, 233, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
     border-radius: var(--radius-md);
-    margin: 1rem 0;
+    margin: 0.75rem 0;
     border: 1px solid rgba(139, 69, 233, 0.2);
+}
+
+/* Responsive font sizes */
+@media (min-width: 768px) {
+    .timezone-time {
+        font-size: 1.75rem;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+}
+
+@media (min-width: 992px) {
+    .timezone-time {
+        font-size: 2rem;
+    }
 }
 
 .timezone-date {
@@ -119,11 +153,21 @@
 
 .timezone-info {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.25rem;
     margin-top: 0.5rem;
     font-size: 0.85rem;
     color: var(--text-secondary);
+    text-align: center;
+}
+
+@media (min-width: 576px) {
+    .timezone-info {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
 }
 
 .timezone-emoji {
