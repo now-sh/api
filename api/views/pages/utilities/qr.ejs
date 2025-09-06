@@ -100,14 +100,14 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Generate QR code (PNG):</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/qr/generate \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/qr/generate \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello World", "format": "png"}'</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Generate QR code (ASCII):</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/qr/generate/text \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/qr/generate/text \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello World"}'</code></pre>
             </div>
