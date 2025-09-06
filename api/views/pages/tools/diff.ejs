@@ -57,7 +57,7 @@ A new line was added here.</textarea>
                             <span>Ignore whitespace</span>
                         </label>
                         <label class="option-label">
-                            <input type="radio" name="viewMode" value="inline">
+                            <input type="radio" name="viewMode" value="inline" checked>
                             <span>Inline view</span>
                         </label>
                         <label class="option-label">
@@ -103,7 +103,7 @@ A new line was added here.</textarea>
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Compare texts:</h4>
-                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/diff/compare \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/diff/lines \
   -H "Content-Type: application/json" \
   -d '{
     "text1": "Original text here",
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         try {
-            const response = await fetch('/api/v1/tools/diff/compare', {
+            const response = await fetch('/api/v1/tools/diff/lines', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
