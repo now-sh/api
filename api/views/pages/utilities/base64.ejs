@@ -49,14 +49,14 @@
     <h3 class="card-title">API Usage</h3>
     <div class="code-block">
         <h4>Encode to Base64:</h4>
-        <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/base64/encode \
+        <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/base64/encode \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello World"}'</code></pre>
     </div>
     
     <div class="code-block">
         <h4>Decode from Base64:</h4>
-        <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/base64/decode \
+        <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/base64/decode \
   -H "Content-Type: application/json" \
   -d '{"text": "SGVsbG8gV29ybGQ="}'</code></pre>
     </div>
