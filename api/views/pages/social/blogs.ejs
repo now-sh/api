@@ -75,17 +75,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>List all posts:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/me/blog/list</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/me/blog/list</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Search posts:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/me/blog/search?q=javascript</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/me/blog/search?q=javascript</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get specific repository posts:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/me/blog/repo/casjay/blog</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/me/blog/repo/casjay/blog</code></pre>
             </div>
         </div>
     </div>
