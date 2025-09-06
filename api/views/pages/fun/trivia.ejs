@@ -128,12 +128,12 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get trivia questions:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/fun/trivia/questions?category=science&difficulty=medium&amount=10</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/fun/trivia/questions?category=science&difficulty=medium&amount=10</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get single question:</h4>
-                <pre><code>curl -q -LSsf ${API_URL}/api/v1/fun/trivia/random</code></pre>
+                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/fun/trivia/random</code></pre>
             </div>
         </div>
     </div>
