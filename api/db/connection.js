@@ -45,7 +45,7 @@ const connectToDatabase = async (retryOnFail = true) => {
       serverSelectionTimeoutMS: isVercel ? 5000 : 10000,
       socketTimeoutMS: isVercel ? 20000 : 45000,
       connectTimeoutMS: isVercel ? 5000 : 10000,
-      bufferCommands: false,
+      bufferCommands: true, // Allow buffering until connection is established
       maxPoolSize: isVercel ? 1 : 10,
       maxIdleTimeMS: isVercel ? 10000 : 30000,
       // Serverless-specific optimizations
@@ -137,9 +137,19 @@ const getDatabaseStatus = () => {
   };
 };
 
+// Helper function to ensure database connection before operations
+const ensureConnection = async () => {
+  if (!isDatabaseConnected()) {
+    console.log('🔄 Database not connected, attempting connection...');
+    await connectToDatabase();
+  }
+  return mongoose.connection;
+};
+
 // Export the connection function and mongoose instance
 module.exports = {
   connectToDatabase,
+  ensureConnection,
   mongoose,
   isDatabaseConnected,
   getDatabaseStatus
