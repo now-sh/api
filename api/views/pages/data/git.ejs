@@ -121,11 +121,11 @@ window.fetchGitHubData = async function(username, dataType) {
                 url = '/api/v1/me/info/github';
             }
         } else {
-            // Use social endpoints
+            // Use social endpoints (corrected paths)
             if (dataType === 'repos') {
-                url = `/api/v1/social/github/users/${username}/repos`;
+                url = `/api/v1/social/github/repos/${username}`;
             } else if (dataType === 'orgs') {
-                url = `/api/v1/social/github/users/${username}/orgs`;
+                url = `/api/v1/social/github/orgs/${username}`;
             } else {
                 url = `/api/v1/social/github/user/${username}`;
             }
@@ -188,8 +188,8 @@ window.displayGitHubData = function(data, dataType) {
             </div>
         `;
     } else if (dataType === 'repos') {
-        // Repositories
-        const repos = data.success ? data.data : data;
+        // Repositories - GitHub API returns array directly
+        const repos = Array.isArray(data) ? data : (data.success ? data.data : data);
         if (Array.isArray(repos) && repos.length > 0) {
             html = '<div class="repos-list">';
             repos.slice(0, 10).forEach(repo => {
@@ -213,8 +213,8 @@ window.displayGitHubData = function(data, dataType) {
             html = '<p>No repositories found.</p>';
         }
     } else if (dataType === 'orgs') {
-        // Organizations
-        const orgs = data.success ? data.data : data;
+        // Organizations - GitHub API returns array directly
+        const orgs = Array.isArray(data) ? data : (data.success ? data.data : data);
         if (Array.isArray(orgs) && orgs.length > 0) {
             html = '<div class="orgs-list">';
             orgs.forEach(org => {
