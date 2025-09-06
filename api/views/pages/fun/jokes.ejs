@@ -82,17 +82,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get a random joke:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/random</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/fun/jokes/random</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get jokes by type:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/programming</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/fun/jokes/programming</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get a dad joke:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/fun/jokes/dad</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/fun/jokes/dad</code></pre>
             </div>
         </div>
     </div>
