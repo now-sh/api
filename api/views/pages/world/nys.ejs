@@ -70,7 +70,7 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get NYS COVID data:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/nys</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/world/nys</code></pre>
             </div>
             
             <div class="code-block">
