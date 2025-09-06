@@ -61,7 +61,7 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Decode JWT:</h4>
-                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/jwt/decode \
+                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/jwt/decode \
   -H "Content-Type: application/json" \
   -d '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}'</code></pre>
             </div>
