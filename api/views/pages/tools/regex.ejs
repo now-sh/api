@@ -382,8 +382,21 @@ function setPattern(pattern) {
 
 .pattern-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
+}
+
+/* Mobile-first responsive */
+@media (min-width: 576px) {
+    .pattern-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .pattern-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
 }
 
 .pattern-btn {
