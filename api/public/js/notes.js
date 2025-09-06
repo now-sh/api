@@ -172,7 +172,12 @@ async function loadNotes() {
         }
         
         const data = await response.json();
-        notes = data.notes || data || [];
+        // Handle different API response structures
+        if (data.data && data.data.notes) {
+            notes = data.data.notes;
+        } else {
+            notes = data.notes || data || [];
+        }
         renderNotes();
     } catch (error) {
         document.getElementById('notesList').innerHTML = 
