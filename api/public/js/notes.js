@@ -156,7 +156,7 @@ async function loadNotes() {
     }
     
     try {
-        const response = await fetch('/api/v1/data/notes', {
+        const response = await fetch('/api/v1/data/notes/list', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
