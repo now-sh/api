@@ -33,7 +33,8 @@ defaultRoute.get('/utilities/:tool', cors(), (req, res) => {
     res.render(`pages/utilities/${tool}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} utility tool`,
-      activePage: 'utilities'
+      activePage: 'utilities',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     // Send 404 if specific page doesn't exist
@@ -54,7 +55,8 @@ defaultRoute.get('/tools/:tool', cors(), (req, res) => {
     res.render(`pages/tools/${tool}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} tool`,
-      activePage: 'tools'
+      activePage: 'tools',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
@@ -75,7 +77,8 @@ defaultRoute.get('/data/:source', cors(), (req, res) => {
     res.render(`pages/data/${source}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} data source`,
-      activePage: 'data'
+      activePage: 'data',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
@@ -158,7 +161,8 @@ defaultRoute.get('/world/:source', cors(), (req, res) => {
     res.render(`pages/world/${source}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} world data`,
-      activePage: 'world'
+      activePage: 'world',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     res.status(404).json({
@@ -178,7 +182,8 @@ defaultRoute.get('/social/:platform', cors(), (req, res) => {
     res.render(`pages/social/${platform}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} social platform`,
-      activePage: 'social'
+      activePage: 'social',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     res.status(404).json({
@@ -198,7 +203,8 @@ defaultRoute.get('/fun/:activity', cors(), (req, res) => {
     res.render(`pages/fun/${activity}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} fun activity`,
-      activePage: 'fun'
+      activePage: 'fun',
+      baseUrl: `${req.protocol}://${req.get('host')}`
     });
   } catch (error) {
     res.status(404).json({
