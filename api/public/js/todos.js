@@ -93,7 +93,12 @@ async function loadTodos() {
         }
         
         const data = await response.json();
-        todos = data.todos || data || [];
+        // Handle different API response structures
+        if (data.data && data.data.todos) {
+            todos = data.data.todos;
+        } else {
+            todos = data.todos || data || [];
+        }
         renderTodos();
     } catch (error) {
         document.getElementById('todosList').innerHTML = 
