@@ -74,17 +74,17 @@
     <h3 class="card-title">API Usage</h3>
     <div class="code-block">
         <h4>Generate UUID v4:</h4>
-        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/v4</code></pre>
+        <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/uuid/v4</code></pre>
     </div>
     
     <div class="code-block">
         <h4>Generate multiple UUIDs:</h4>
-        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/generate/5</code></pre>
+        <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/uuid/generate/5</code></pre>
     </div>
     
     <div class="code-block">
         <h4>Validate UUID:</h4>
-        <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/uuid/validate/550e8400-e29b-41d4-a716-446655440000</code></pre>
+        <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/uuid/validate/550e8400-e29b-41d4-a716-446655440000</code></pre>
     </div>
 </div>
 
