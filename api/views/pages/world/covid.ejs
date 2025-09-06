@@ -252,10 +252,20 @@ async function loadQuickStats() {
 
 function formatNumber(num) {
     if (!num) return '0';
-    // Handle both string and number inputs
+    
+    // Handle string numbers with commas (like "704,753,890")
     if (typeof num === 'string') {
-        return num; // Already formatted from API
+        // If it's already formatted with commas, return as-is
+        if (num.includes(',')) {
+            return num;
+        }
+        // If it's a string number without commas, parse and format
+        const parsed = parseInt(num.replace(/,/g, ''));
+        if (isNaN(parsed)) return num; // Return original if can't parse
+        return new Intl.NumberFormat().format(parsed);
     }
+    
+    // Handle actual numbers
     return new Intl.NumberFormat().format(num);
 }
 </script>
