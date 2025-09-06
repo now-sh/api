@@ -1,15 +1,39 @@
 <div class="hero fade-in">
-    <h1>📊 System Version & Status</h1>
-    <p class="lead">API version information and authentication status</p>
+    <h1>📊 API Version & Status</h1>
+    <p class="lead">Complete API version information and system status</p>
 </div>
 
 <div class="row">
     <div class="col-md-10 mx-auto">
-        <!-- Authentication Status -->
+        <!-- API Version Information -->
         <div class="card mb-4">
-            <h2 class="card-title">🔐 Authentication Status</h2>
-            <div id="authStatus" class="auth-status">
-                <div class="loading">Checking authentication...</div>
+            <h2 class="card-title">🔖 Version Information</h2>
+            <div id="versionInfo" class="version-info">
+                <div class="loading">Loading version information...</div>
+            </div>
+        </div>
+
+        <!-- Database Status -->
+        <div class="card mb-4">
+            <h2 class="card-title">🗄️ Database Status</h2>
+            <div id="databaseStatus" class="database-status">
+                <div class="loading">Checking database status...</div>
+            </div>
+        </div>
+
+        <!-- API Routes -->
+        <div class="card mb-4">
+            <h2 class="card-title">🛣️ Available Routes</h2>
+            <div id="routesList" class="routes-list">
+                <div class="loading">Loading routes...</div>
+            </div>
+        </div>
+
+        <!-- Proxy Configuration -->
+        <div class="card mb-4">
+            <h2 class="card-title">🔗 Proxy Configuration</h2>
+            <div id="proxyConfig" class="proxy-config">
+                <div class="loading">Loading proxy configuration...</div>
             </div>
         </div>
 
@@ -20,375 +44,375 @@
                 <div class="loading">Loading system information...</div>
             </div>
         </div>
-
-        <!-- API Health -->
-        <div class="card mb-4">
-            <h2 class="card-title">🏥 API Health Status</h2>
-            <div id="healthStatus" class="health-status">
-                <div class="loading">Checking API health...</div>
-            </div>
-        </div>
-
-        <!-- User Data Summary (if authenticated) -->
-        <div id="userDataCard" class="card mb-4" style="display: none;">
-            <h2 class="card-title">📄 Your Data Summary</h2>
-            <div id="userDataSummary" class="user-data-grid">
-                <div class="loading">Loading your data summary...</div>
-            </div>
-        </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadVersionInfo();
+});
+
+async function loadVersionInfo() {
+    try {
+        const response = await fetch('/api/v1/version');
+        const data = await response.json();
+        
+        if (response.ok && data) {
+            displayVersionInfo(data);
+        } else {
+            showError('versionInfo', 'Unable to load version information');
+        }
+    } catch (error) {
+        console.error('Error loading version:', error);
+        showError('versionInfo', 'Failed to load version information');
+    }
+}
+
+function displayVersionInfo(data) {
+    // Display version information
+    const versionDiv = document.getElementById('versionInfo');
+    versionDiv.innerHTML = `
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">API Version</span>
+                <span class="info-value">${data.Version || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Node Version</span>
+                <span class="info-value">${data.System?.NodeVersion || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Environment</span>
+                <span class="info-value">${data.Environment?.NodeEnv || 'production'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Server Time</span>
+                <span class="info-value">${data.Time || new Date().toLocaleString()}</span>
+            </div>
+        </div>
+    `;
+
+    // Display database status
+    const dbDiv = document.getElementById('databaseStatus');
+    if (data.Database) {
+        const dbStatus = data.Database.Status || 'Unknown';
+        const statusClass = dbStatus === 'Connected' ? 'success' : dbStatus === 'Disconnected' ? 'error' : 'warning';
+        dbDiv.innerHTML = `
+            <div class="status-indicator ${statusClass}">
+                <span class="status-dot"></span>
+                <span class="status-text">${dbStatus}</span>
+            </div>
+            ${data.Database.ConnectionString ? `
+                <div class="info-item mt-3">
+                    <span class="info-label">Connection</span>
+                    <span class="info-value">${data.Database.ConnectionString}</span>
+                </div>
+            ` : ''}
+            ${data.Database.Message ? `
+                <div class="info-item">
+                    <span class="info-label">Message</span>
+                    <span class="info-value">${data.Database.Message}</span>
+                </div>
+            ` : ''}
+        `;
+    } else {
+        dbDiv.innerHTML = '<div class="no-data">Database information not available</div>';
+    }
+
+    // Display routes
+    const routesDiv = document.getElementById('routesList');
+    if (data.routes && typeof data.routes === 'object') {
+        const routeCategories = Object.entries(data.routes);
+        if (routeCategories.length > 0) {
+            routesDiv.innerHTML = routeCategories.map(([category, routes]) => `
+                <div class="route-category">
+                    <h4 class="category-title">${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                    <div class="route-grid">
+                        ${Array.isArray(routes) ? routes.map(route => `
+                            <div class="route-item">
+                                <code>${route}</code>
+                            </div>
+                        `).join('') : `<div class="route-item"><code>${routes}</code></div>`}
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            routesDiv.innerHTML = '<div class="no-data">No routes information available</div>';
+        }
+    } else {
+        routesDiv.innerHTML = '<div class="no-data">Routes information not available</div>';
+    }
+
+    // Display proxy configuration
+    const proxyDiv = document.getElementById('proxyConfig');
+    if (data.Proxies && typeof data.Proxies === 'object') {
+        const proxyEntries = Object.entries(data.Proxies);
+        if (proxyEntries.length > 0) {
+            proxyDiv.innerHTML = `
+                <div class="proxy-list">
+                    ${proxyEntries.map(([name, config]) => `
+                        <div class="proxy-item">
+                            <span class="proxy-path">${name}</span>
+                            <span class="proxy-arrow">→</span>
+                            <span class="proxy-target">${config.target || config}</span>
+                            ${config.status ? `<span class="badge bg-success ms-2">${config.status}</span>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            proxyDiv.innerHTML = '<div class="no-data">No proxy configuration available</div>';
+        }
+    } else {
+        proxyDiv.innerHTML = '<div class="no-data">Proxy configuration not available</div>';
+    }
+
+    // Display system information
+    const systemDiv = document.getElementById('systemInfo');
+    const systemInfo = [];
+    
+    if (data.System?.Platform) systemInfo.push(['Platform', data.System.Platform]);
+    if (data.System?.Architecture) systemInfo.push(['Architecture', data.System.Architecture]);
+    if (data.System?.Uptime) systemInfo.push(['Uptime', data.System.Uptime]);
+    if (data.System?.Memory) systemInfo.push(['Memory Usage', `Heap: ${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal} (${data.System.Memory.HeapPercentage})`]);
+    
+    if (systemInfo.length > 0) {
+        systemDiv.innerHTML = `
+            <div class="info-grid">
+                ${systemInfo.map(([label, value]) => `
+                    <div class="info-item">
+                        <span class="info-label">${label}</span>
+                        <span class="info-value">${value}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        systemDiv.innerHTML = '<div class="no-data">System information not available</div>';
+    }
+}
+
+function showError(elementId, message) {
+    document.getElementById(elementId).innerHTML = `
+        <div class="error-message">
+            <i class="bi bi-exclamation-triangle"></i> ${message}
+        </div>
+    `;
+}
+
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    
+    return parts.join(' ') || '< 1m';
+}
+
+function formatMemory(memory) {
+    if (!memory) return 'Unknown';
+    const used = memory.heapUsed || 0;
+    const total = memory.heapTotal || 0;
+    const usedMB = (used / 1024 / 1024).toFixed(2);
+    const totalMB = (total / 1024 / 1024).toFixed(2);
+    return `${usedMB} MB / ${totalMB} MB`;
+}
+</script>
+
 <style>
-.auth-status {
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    text-align: center;
-}
-
-.auth-status.authenticated {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.auth-status.unauthenticated {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.auth-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.auth-message {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.user-email {
-    color: var(--cyan);
-    font-family: 'Monaco', 'Consolas', monospace;
-    background: var(--bg-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    display: inline-block;
-    margin-top: 0.5rem;
-}
-
+.version-info,
+.database-status,
+.routes-list,
+.proxy-config,
 .system-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-}
-
-.info-card {
-    background: var(--bg-secondary);
     padding: 1.5rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    text-align: center;
-    transition: all 0.2s ease;
 }
 
-.info-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--purple);
-}
-
-.info-icon {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.info-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--purple);
-    margin-bottom: 0.5rem;
-    font-family: 'Monaco', 'Consolas', monospace;
-}
-
-.info-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    font-weight: 500;
-}
-
-.health-status {
+.info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
 }
 
-.health-card {
-    background: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    text-align: center;
-    transition: all 0.2s ease;
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.health-card.healthy {
-    border-color: rgba(34, 197, 94, 0.5);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(34, 197, 94, 0.05) 100%);
-}
-
-.health-card.degraded {
-    border-color: rgba(245, 158, 11, 0.5);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%);
-}
-
-.health-card.unhealthy {
-    border-color: rgba(239, 68, 68, 0.5);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(239, 68, 68, 0.05) 100%);
-}
-
-.user-data-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-}
-
-.data-card {
-    background: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    text-align: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.data-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--cyan);
-}
-
-.data-count {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--cyan);
-    margin-bottom: 0.5rem;
-    font-family: 'Monaco', 'Consolas', monospace;
-}
-
-.loading, .error {
-    text-align: center;
-    padding: 2rem;
+.info-label {
     color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.error {
+.info-value {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 400;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.success .status-dot {
+    background-color: var(--green);
+}
+
+.status-indicator.error .status-dot {
+    background-color: var(--red);
+}
+
+.status-indicator.warning .status-dot {
+    background-color: var(--yellow);
+}
+
+.status-indicator.success .status-text {
+    color: var(--green);
+}
+
+.status-indicator.error .status-text {
     color: var(--red);
 }
 
-.btn-auth {
-    background: linear-gradient(135deg, var(--purple) 0%, var(--cyan) 100%);
-    border: none;
-    color: white;
-    padding: 0.75rem 2rem;
-    border-radius: var(--radius-lg);
-    font-weight: 600;
-    margin-top: 1rem;
-    transition: all 0.3s ease;
+.status-indicator.warning .status-text {
+    color: var(--yellow);
 }
 
-.btn-auth:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(139, 69, 233, 0.3);
-    color: white;
+.route-category {
+    margin-bottom: 2rem;
+}
+
+.route-category:last-child {
+    margin-bottom: 0;
+}
+
+.category-title {
+    color: var(--purple);
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.route-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0.75rem;
+}
+
+.route-item {
+    background-color: var(--bg-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.route-item code {
+    color: var(--cyan);
+    font-size: 0.875rem;
+}
+
+.proxy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.proxy-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.proxy-path {
+    color: var(--cyan);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.875rem;
+}
+
+.proxy-arrow {
+    color: var(--text-secondary);
+}
+
+.proxy-target {
+    color: var(--purple);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.875rem;
+}
+
+.no-data {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.error-message {
+    text-align: center;
+    color: var(--red);
+    padding: 2rem;
+    font-size: 1.125rem;
+}
+
+.error-message i {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.loading {
+    text-align: center;
+    color: var(--cyan);
+    padding: 2rem;
+    font-size: 1.125rem;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 currentColor;
+    }
+    70% {
+        box-shadow: 0 0 0 10px transparent;
+    }
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .route-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .proxy-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }
 </style>
-
-<script>
-let userToken = null;
-let userEmail = null;
-
-document.addEventListener('DOMContentLoaded', async function() {
-    await checkAuthentication();
-    await loadSystemInfo();
-    await loadHealthStatus();
-    
-    if (userToken) {
-        await loadUserDataSummary();
-    }
-});
-
-async function checkAuthentication() {
-    const authDiv = document.getElementById('authStatus');
-    
-    if (!AuthCookies.isAuthenticated()) {
-        authDiv.className = 'auth-status unauthenticated';
-        authDiv.innerHTML = `
-            <span class="auth-icon">🔒</span>
-            <div class="auth-message">Not Authenticated</div>
-            <p>You are not currently signed in to the system.</p>
-            <button class="btn btn-auth" onclick="redirectToAuth()">Sign In</button>
-        `;
-        return;
-    }
-    
-    try {
-        const userInfo = AuthCookies.getUserInfo();
-        if (userInfo) {
-            userToken = AuthCookies.getToken();
-            userEmail = userInfo.email || 'Unknown User';
-            
-            authDiv.className = 'auth-status authenticated';
-            authDiv.innerHTML = `
-                <span class="auth-icon">✅</span>
-                <div class="auth-message">Authenticated</div>
-                <p>You are signed in as:</p>
-                <div class="user-email">${userEmail}</div>
-                <p class="mt-3"><small>Token expires: ${userInfo.expiresAt.toLocaleString()}</small></p>
-            `;
-            
-            // Show user data card
-            document.getElementById('userDataCard').style.display = 'block';
-        } else {
-            throw new Error('Unable to decode token');
-        }
-        
-    } catch (error) {
-        authDiv.className = 'auth-status unauthenticated';
-        authDiv.innerHTML = `
-            <span class="auth-icon">⚠️</span>
-            <div class="auth-message">Invalid Token</div>
-            <p>Your authentication token is invalid or expired.</p>
-            <button class="btn btn-auth" onclick="clearAndRedirectToAuth()">Sign In Again</button>
-        `;
-    }
-}
-
-async function loadSystemInfo() {
-    const systemDiv = document.getElementById('systemInfo');
-    
-    try {
-        const response = await fetch('/api/v1/version');
-        const data = await response.json();
-        
-        systemDiv.innerHTML = `
-            <div class="info-card">
-                <span class="info-icon">🔢</span>
-                <div class="info-value">${data.Version || 'Unknown'}</div>
-                <div class="info-label">API Version</div>
-            </div>
-            <div class="info-card">
-                <span class="info-icon">🌍</span>
-                <div class="info-value">${data.TimeZone || 'UTC'}</div>
-                <div class="info-label">Timezone</div>
-            </div>
-            <div class="info-card">
-                <span class="info-icon">📅</span>
-                <div class="info-value">${data.Today || new Date().toLocaleDateString()}</div>
-                <div class="info-label">Server Date</div>
-            </div>
-            <div class="info-card">
-                <span class="info-icon">⏰</span>
-                <div class="info-value">${data.Time || new Date().toLocaleTimeString()}</div>
-                <div class="info-label">Server Time</div>
-            </div>
-        `;
-    } catch (error) {
-        systemDiv.innerHTML = '<div class="error">Error loading system information</div>';
-    }
-}
-
-async function loadHealthStatus() {
-    const healthDiv = document.getElementById('healthStatus');
-    
-    try {
-        const response = await fetch('/api/v1/version');
-        const data = await response.json();
-        const health = data.Health || {};
-        
-        const dbStatus = data.Database?.Status || 'Unknown';
-        const healthStatus = health.Status || 'unknown';
-        
-        healthDiv.innerHTML = `
-            <div class="health-card ${healthStatus.toLowerCase()}">
-                <span class="info-icon">${getHealthIcon(healthStatus)}</span>
-                <div class="info-value">${healthStatus}</div>
-                <div class="info-label">Overall Health</div>
-            </div>
-            <div class="health-card ${dbStatus === 'Connected' ? 'healthy' : 'unhealthy'}">
-                <span class="info-icon">${dbStatus === 'Connected' ? '🟢' : '🔴'}</span>
-                <div class="info-value">${dbStatus}</div>
-                <div class="info-label">Database</div>
-            </div>
-            <div class="health-card healthy">
-                <span class="info-icon">🌐</span>
-                <div class="info-value">Online</div>
-                <div class="info-label">API Status</div>
-            </div>
-        `;
-    } catch (error) {
-        healthDiv.innerHTML = '<div class="error">Error loading health status</div>';
-    }
-}
-
-async function loadUserDataSummary() {
-    const userDataDiv = document.getElementById('userDataSummary');
-    
-    try {
-        const [todos, urls, notes] = await Promise.all([
-            AuthCookies.authenticatedFetch('/api/v1/data/todos/list'),
-            AuthCookies.authenticatedFetch('/api/v1/data/urls/list'),
-            AuthCookies.authenticatedFetch('/api/v1/data/notes/list')
-        ]);
-        
-        const todosData = todos.ok ? await todos.json() : null;
-        const urlsData = urls.ok ? await urls.json() : null;
-        const notesData = notes.ok ? await notes.json() : null;
-        
-        const todosCount = todosData?.success ? (todosData.data.todos?.length || 0) : 0;
-        const urlsCount = urlsData?.success ? (urlsData.data.urls?.length || 0) : 0;
-        const notesCount = notesData?.success ? (notesData.data.notes?.length || 0) : 0;
-        
-        userDataDiv.innerHTML = `
-            <div class="data-card" onclick="location.href='/personal/todos'">
-                <span class="info-icon">✅</span>
-                <div class="data-count">${todosCount}</div>
-                <div class="info-label">Todos</div>
-            </div>
-            <div class="data-card" onclick="location.href='/services/url'">
-                <span class="info-icon">🔗</span>
-                <div class="data-count">${urlsCount}</div>
-                <div class="info-label">Short URLs</div>
-            </div>
-            <div class="data-card" onclick="location.href='/personal/notes'">
-                <span class="info-icon">📝</span>
-                <div class="data-count">${notesCount}</div>
-                <div class="info-label">Notes</div>
-            </div>
-        `;
-    } catch (error) {
-        userDataDiv.innerHTML = '<div class="error">Error loading user data summary</div>';
-    }
-}
-
-function getHealthIcon(status) {
-    switch (status.toLowerCase()) {
-        case 'healthy': return '🟢';
-        case 'degraded': return '🟡';
-        case 'unhealthy': return '🔴';
-        default: return '❓';
-    }
-}
-
-function redirectToAuth() {
-    // You can customize this to your auth page
-    alert('Authentication system would redirect here. For now, please use the API directly.');
-}
-
-function clearAndRedirectToAuth() {
-    AuthCookies.removeToken();
-    location.reload();
-}
-</script>
