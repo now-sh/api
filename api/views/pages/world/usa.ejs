@@ -92,12 +92,12 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Get available states:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/usa</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/world/usa</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get state data:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/world/usa/California</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/world/usa/California</code></pre>
             </div>
             
             <div class="code-block">
