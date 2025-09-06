@@ -59,17 +59,17 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Look up a word:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/define/serendipity</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/dictionary/define/serendipity</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get synonyms:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/synonyms/happy</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/dictionary/synonyms/happy</code></pre>
             </div>
             
             <div class="code-block">
                 <h4>Get antonyms:</h4>
-                <pre><code>curl <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/dictionary/antonyms/happy</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/tools/dictionary/antonyms/happy</code></pre>
             </div>
         </div>
     </div>
