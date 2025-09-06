@@ -51,7 +51,7 @@
                             class="form-control" 
                             min="1" 
                             max="10" 
-                            value=""
+                            value="5"
                         >
                     </div>
                     <button id="getBatchQuotes" class="btn btn-primary">
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Batch quotes button
     getBatchBtn.addEventListener('click', fetchBatchQuotes);
     
-    async function fetchSingleQuote() {
+    async function fetchSingleQuote(event) {
         const button = event.target.closest('button');
         const originalText = button.innerHTML;
         
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    async function fetchBatchQuotes() {
+    async function fetchBatchQuotes(event) {
         const count = document.getElementById('quoteCount').value;
         const button = event.target;
         const originalText = button.innerHTML;
