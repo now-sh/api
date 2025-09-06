@@ -135,7 +135,11 @@
       "Bash(# Test all major data pages and their APIs\necho \"\"=== TESTING ALL DATA PAGES AND APIS ===\"\"\n\necho -e \"\"\\n1. GitHub Data:\"\"\necho \"\"- Page: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/data/git)\"\"\necho \"\"- API: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/api/v1/me/info/github)\"\"\n\necho -e \"\"\\n2. Reddit Data:\"\"\necho \"\"- Page: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/data/reddit)\"\"\necho \"\"- API: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/api/v1/me/info/reddit)\"\"\n\necho -e \"\"\\n3. Domains:\"\"\necho \"\"- Page: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/data/domains)\"\"\necho \"\"- API: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/api/v1/me/info/domains)\"\"\n\necho -e \"\"\\n4. Blog Posts:\"\"\necho \"\"- Page: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/data/blogs)\"\"\necho \"\"- API: $(curl -s -o /dev/null -w \"\"%{http_code}\"\" http://localhost:1919/api/v1/me/blog)\"\")",
       "Bash(# Check the Reddit API error\ncurl -s http://localhost:1919/api/v1/me/info/reddit | jq -c)",
       "Bash(vercel:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(chmod:*)",
+      "Bash(/root/Projects/github/now-sh/api/fix-hardcoded-domains.sh:*)",
+      "Bash(/root/Projects/github/now-sh/api/fix-curl-examples.sh:*)",
+      "Bash(/root/Projects/github/now-sh/api/standardize-curl.sh:*)"
     ],
     "deny": [],
     "ask": []
