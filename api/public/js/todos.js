@@ -77,7 +77,7 @@ async function loadTodos() {
     }
     
     try {
-        const response = await fetch('/api/v1/data/todos', {
+        const response = await fetch('/api/v1/data/todos/list', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
