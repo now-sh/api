@@ -103,7 +103,7 @@ A new line was added here.</textarea>
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Compare texts:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/diff/compare \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/diff/compare \
   -H "Content-Type: application/json" \
   -d '{
     "text1": "Original text here",
