@@ -63,15 +63,15 @@
             <h3 class="card-title">API Endpoints</h3>
             <div class="code-block">
                 <h4>Get user profile:</h4>
-                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/user/:username</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/github/user/:username</code></pre>
             </div>
             <div class="code-block">
                 <h4>Get user repositories:</h4>
-                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/social/github/user/:username/repos</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/social/github/users/:username/repos</code></pre>
             </div>
             <div class="code-block">
                 <h4>My GitHub data:</h4>
-                <pre><code>GET <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/me/info/github</code></pre>
+                <pre><code>curl -q -LSsf ${API_URL}/api/v1/me/info/github</code></pre>
             </div>
         </div>
     </div>
@@ -91,164 +91,169 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = form.username.value || 'casjay';
         const dataType = form.dataType.value;
         
-        await fetchGitHubData(username, dataType);
+        await window.fetchGitHubData(username, dataType);
     });
-    
-    // Fetch GitHub data
-    async function fetchGitHubData(username, dataType) {
-        resultOutput.innerHTML = '<div class="loading">Loading GitHub data...</div>';
-        resultDiv.style.display = 'block';
-        
-        try {
-            let url;
-            if (username === 'casjay') {
-                // Use personal endpoints
-                if (dataType === 'repos') {
-                    url = '/api/v1/me/info/github/repos';
-                } else if (dataType === 'orgs') {
-                    url = '/api/v1/me/info/github/orgs';
-                } else {
-                    url = '/api/v1/me/info/github';
-                }
-            } else {
-                // Use social endpoints
-                if (dataType === 'repos') {
-                    url = `/api/v1/social/github/user/${username}/repos`;
-                } else if (dataType === 'orgs') {
-                    url = `/api/v1/social/github/user/${username}/orgs`;
-                } else {
-                    url = `/api/v1/social/github/user/${username}`;
-                }
-            }
-            
-            console.log('Fetching:', url);
-            const response = await fetch(url);
-            console.log('Response status:', response.status);
-            const data = await response.json();
-            
-            if (response.ok) {
-                displayGitHubData(data, dataType);
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } else {
-                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to fetch data'}</div>`;
-            }
-        } catch (error) {
-            console.error('GitHub API Error:', error);
-            resultOutput.innerHTML = `<div class="error">Error: ${error.message || 'Network error occurred'}</div>`;
-        }
-    }
-    
-    // Display GitHub data
-    function displayGitHubData(data, dataType) {
-        let html = '';
-        
-        if (dataType === 'user') {
-            // User profile
-            const user = data.success ? data.data : data;
-            html = `
-                <div class="github-profile">
-                    <div class="profile-header">
-                        <img src="${user.avatar_url}" alt="${user.login}" class="avatar">
-                        <div class="profile-info">
-                            <h4>${user.name || user.login}</h4>
-                            <p class="text-muted">@${user.login}</p>
-                            ${user.bio ? `<p>${user.bio}</p>` : ''}
-                        </div>
-                    </div>
-                    <div class="profile-stats">
-                        <div class="stat">
-                            <strong>${user.public_repos}</strong>
-                            <span>Repositories</span>
-                        </div>
-                        <div class="stat">
-                            <strong>${user.followers}</strong>
-                            <span>Followers</span>
-                        </div>
-                        <div class="stat">
-                            <strong>${user.following}</strong>
-                            <span>Following</span>
-                        </div>
-                    </div>
-                    ${user.location ? `<p><i class="bi bi-geo-alt"></i> ${user.location}</p>` : ''}
-                    ${user.company ? `<p><i class="bi bi-building"></i> ${user.company}</p>` : ''}
-                    ${user.blog ? `<p><i class="bi bi-link"></i> <a href="${user.blog}" target="_blank">${user.blog}</a></p>` : ''}
-                    <p><a href="${user.html_url}" target="_blank" class="btn btn-sm btn-primary">View on GitHub</a></p>
-                </div>
-            `;
-        } else if (dataType === 'repos') {
-            // Repositories
-            const repos = data.success ? data.data : data;
-            if (Array.isArray(repos) && repos.length > 0) {
-                html = '<div class="repos-list">';
-                repos.slice(0, 10).forEach(repo => {
-                    html += `
-                        <div class="repo-item">
-                            <h5><a href="${repo.html_url}" target="_blank">${repo.name}</a></h5>
-                            ${repo.description ? `<p class="text-muted">${repo.description}</p>` : ''}
-                            <div class="repo-meta">
-                                ${repo.language ? `<span class="badge bg-primary">${repo.language}</span>` : ''}
-                                <span><i class="bi bi-star"></i> ${repo.stargazers_count}</span>
-                                <span><i class="bi bi-diagram-2"></i> ${repo.forks_count}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                if (repos.length > 10) {
-                    html += '<p class="text-muted">Showing first 10 repositories...</p>';
-                }
-            } else {
-                html = '<p>No repositories found.</p>';
-            }
-        } else if (dataType === 'orgs') {
-            // Organizations
-            const orgs = data.success ? data.data : data;
-            if (Array.isArray(orgs) && orgs.length > 0) {
-                html = '<div class="orgs-list">';
-                orgs.forEach(org => {
-                    html += `
-                        <div class="org-item">
-                            <img src="${org.avatar_url}" alt="${org.login}" class="org-avatar">
-                            <div class="org-info">
-                                <h5><a href="https://github.com/${org.login}" target="_blank">${org.login}</a></h5>
-                                ${org.description ? `<p class="text-muted">${org.description}</p>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-            } else {
-                html = '<p>No organizations found.</p>';
-            }
-        }
-        
-        resultOutput.innerHTML = html;
-    }
     
     // Auto-load my profile on page load
     setTimeout(() => {
         console.log('Auto-loading profile...');
-        loadMyProfile();
+        window.loadMyProfile();
     }, 100);
 });
 
-// Quick access functions
-async function loadMyProfile() {
+// Make fetchGitHubData available globally
+window.fetchGitHubData = async function(username, dataType) {
+    const resultDiv = document.getElementById('gitForm-result');
+    const resultOutput = resultDiv.querySelector('.result-output');
+    
+    resultOutput.innerHTML = '<div class="loading">Loading GitHub data...</div>';
+    resultDiv.style.display = 'block';
+    
+    try {
+        let url;
+        if (username === 'casjay') {
+            // Use personal endpoints
+            if (dataType === 'repos') {
+                url = '/api/v1/me/info/github/repos';
+            } else if (dataType === 'orgs') {
+                url = '/api/v1/me/info/github/orgs';
+            } else {
+                url = '/api/v1/me/info/github';
+            }
+        } else {
+            // Use social endpoints
+            if (dataType === 'repos') {
+                url = `/api/v1/social/github/users/${username}/repos`;
+            } else if (dataType === 'orgs') {
+                url = `/api/v1/social/github/users/${username}/orgs`;
+            } else {
+                url = `/api/v1/social/github/user/${username}`;
+            }
+        }
+        
+        console.log('Fetching:', url);
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.displayGitHubData(data, dataType);
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to fetch data'}</div>`;
+        }
+    } catch (error) {
+        console.error('GitHub API Error:', error);
+        resultOutput.innerHTML = `<div class="error">Error: ${error.message || 'Network error occurred'}</div>`;
+    }
+};
+
+// Make displayGitHubData available globally
+window.displayGitHubData = function(data, dataType) {
+    const resultDiv = document.getElementById('gitForm-result');
+    const resultOutput = resultDiv.querySelector('.result-output');
+    let html = '';
+    
+    if (dataType === 'user') {
+        // User profile
+        const user = data.success ? data.data : data;
+        html = `
+            <div class="github-profile">
+                <div class="profile-header">
+                    <img src="${user.avatar_url}" alt="${user.login}" class="avatar">
+                    <div class="profile-info">
+                        <h4>${user.name || user.login}</h4>
+                        <p class="text-muted">@${user.login}</p>
+                        ${user.bio ? `<p>${user.bio}</p>` : ''}
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <strong>${user.public_repos}</strong>
+                        <span>Repositories</span>
+                    </div>
+                    <div class="stat">
+                        <strong>${user.followers}</strong>
+                        <span>Followers</span>
+                    </div>
+                    <div class="stat">
+                        <strong>${user.following}</strong>
+                        <span>Following</span>
+                    </div>
+                </div>
+                ${user.location ? `<p><i class="bi bi-geo-alt"></i> ${user.location}</p>` : ''}
+                ${user.company ? `<p><i class="bi bi-building"></i> ${user.company}</p>` : ''}
+                ${user.blog ? `<p><i class="bi bi-link"></i> <a href="${user.blog}" target="_blank">${user.blog}</a></p>` : ''}
+                <p><a href="${user.html_url}" target="_blank" class="btn btn-sm btn-primary">View on GitHub</a></p>
+            </div>
+        `;
+    } else if (dataType === 'repos') {
+        // Repositories
+        const repos = data.success ? data.data : data;
+        if (Array.isArray(repos) && repos.length > 0) {
+            html = '<div class="repos-list">';
+            repos.slice(0, 10).forEach(repo => {
+                html += `
+                    <div class="repo-item">
+                        <h5><a href="${repo.html_url}" target="_blank">${repo.name}</a></h5>
+                        ${repo.description ? `<p class="text-muted">${repo.description}</p>` : ''}
+                        <div class="repo-meta">
+                            ${repo.language ? `<span class="badge bg-primary">${repo.language}</span>` : ''}
+                            <span><i class="bi bi-star"></i> ${repo.stargazers_count}</span>
+                            <span><i class="bi bi-diagram-2"></i> ${repo.forks_count}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            if (repos.length > 10) {
+                html += '<p class="text-muted">Showing first 10 repositories...</p>';
+            }
+        } else {
+            html = '<p>No repositories found.</p>';
+        }
+    } else if (dataType === 'orgs') {
+        // Organizations
+        const orgs = data.success ? data.data : data;
+        if (Array.isArray(orgs) && orgs.length > 0) {
+            html = '<div class="orgs-list">';
+            orgs.forEach(org => {
+                html += `
+                    <div class="org-item">
+                        <img src="${org.avatar_url}" alt="${org.login}" class="org-avatar">
+                        <div class="org-info">
+                            <h5><a href="https://github.com/${org.login}" target="_blank">${org.login}</a></h5>
+                            ${org.description ? `<p class="text-muted">${org.description}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else {
+            html = '<p>No organizations found.</p>';
+        }
+    }
+    
+    resultOutput.innerHTML = html;
+};
+
+// Quick access functions (global)
+window.loadMyProfile = async function() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'user';
-    await fetchGitHubData('casjay', 'user');
+    await window.fetchGitHubData('casjay', 'user');
 }
 
-async function loadMyRepos() {
+window.loadMyRepos = async function() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'repos';
-    await fetchGitHubData('casjay', 'repos');
+    await window.fetchGitHubData('casjay', 'repos');
 }
 
-async function loadMyOrgs() {
+window.loadMyOrgs = async function() {
     document.getElementById('username').value = 'casjay';
     document.getElementById('dataType').value = 'orgs';
-    await fetchGitHubData('casjay', 'orgs');
+    await window.fetchGitHubData('casjay', 'orgs');
 }
 </script>
 
