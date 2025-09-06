@@ -14,11 +14,20 @@ app.set('layout', 'layouts/main');
 
 const { connectToDatabase } = require('./db/connection');
 
+// Version page route - must be early to override any default handlers
+app.get('/version', (req, res) => res.render('pages/system/version'));
+
 // Initialize database connection immediately for serverless environments
 const isVercel = process.env.VERCEL || process.env.NOW_REGION;
 if (isVercel) {
+  // Start connection attempt but don't block server startup
   connectToDatabase().catch(error => {
     console.warn('⚠️  Serverless database connection failed at startup:', error.message);
+  });
+} else {
+  // For local development, ensure connection is established on startup
+  connectToDatabase().catch(error => {
+    console.error('❌ Database connection failed on startup:', error.message);
   });
 }
 
@@ -170,6 +179,8 @@ app.get('/tools/dictionary', (req, res) => res.render('pages/tools/dictionary'))
 // Personal frontend pages
 app.get('/personal/todos', (req, res) => res.render('pages/personal/todos'));
 app.get('/personal/notes', (req, res) => res.render('pages/personal/notes'));
+
+// System pages (kept as backup route)
 app.get('/personal/profile', (req, res) => res.render('pages/personal/profile'));
 
 // Service frontend pages
