@@ -86,7 +86,7 @@ This is a **bold** text and this is *italic*.
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Convert Markdown to HTML:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/markdown/convert \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/markdown/convert \
   -H "Content-Type: application/json" \
   -d '{
     "text": "# Hello World\n\nThis is **bold** text.",
@@ -97,7 +97,7 @@ This is a **bold** text and this is *italic*.
             
             <div class="code-block">
                 <h4>Convert HTML to Markdown:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/markdown/convert \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/markdown/convert \
   -H "Content-Type: application/json" \
   -d '{
     "text": "<h1>Hello World</h1><p>This is <strong>bold</strong> text.</p>",
