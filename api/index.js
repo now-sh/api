@@ -15,7 +15,12 @@ app.set('layout', 'layouts/main');
 const { connectToDatabase } = require('./db/connection');
 
 // Version page route - must be early to override any default handlers
-app.get('/version', (req, res) => res.render('pages/system/version'));
+app.get('/version', (req, res) => res.render('pages/system/version', {
+  title: 'API Version & Status - Backend API',
+  description: 'Complete API version information and system status',
+  activePage: 'version',
+  baseUrl: `${req.protocol}://${req.get('host')}`
+}));
 
 // Initialize database connection immediately for serverless environments
 const isVercel = process.env.VERCEL || process.env.NOW_REGION;
