@@ -103,7 +103,7 @@
             <h3 class="card-title">API Usage</h3>
             <div class="code-block">
                 <h4>Generate lorem ipsum:</h4>
-                <pre><code>curl -X POST <%= typeof baseUrl !== 'undefined' ? baseUrl : 'https://api.casjay.coffee' %>/api/v1/tools/lorem/generate \
+                <pre><code>curl -q -LSsf -X POST ${API_URL}/api/v1/tools/lorem/generate \
   -H "Content-Type: application/json" \
   -d '{"count": 3, "type": "paragraphs", "format": "plain"}'</code></pre>
             </div>
