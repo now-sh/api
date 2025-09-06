@@ -36,8 +36,12 @@ defaultRoute.get('/utilities/:tool', cors(), (req, res) => {
       activePage: 'utilities'
     });
   } catch (error) {
-    // Fallback to generic page if specific page doesn't exist
-    res.send(generateCategorizedEndpointPage('utilities', req.params.tool));
+    // Send 404 if specific page doesn't exist
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Utilities page not found - ${req.originalUrl}`
+    });
   }
 });
 
@@ -54,7 +58,11 @@ defaultRoute.get('/tools/:tool', cors(), (req, res) => {
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
-    res.send(generateCategorizedEndpointPage('tools', req.params.tool));
+    res.status(404).json({
+      success: false,
+      error: 'Not Found', 
+      message: `Tools page not found - ${req.originalUrl}`
+    });
   }
 });
 
@@ -71,7 +79,11 @@ defaultRoute.get('/data/:source', cors(), (req, res) => {
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
-    res.send(generateCategorizedEndpointPage('data', req.params.source));
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Data page not found - ${req.originalUrl}`
+    });
   }
 });
 
@@ -82,7 +94,11 @@ defaultRoute.get('/health/:service', cors(), (req, res) => {
     if (require('fs').existsSync(servicePath)) {
       res.sendFile(servicePath);
     } else {
-      res.send(generateCategorizedEndpointPage('health', req.params.service));
+      res.status(404).json({
+        success: false,
+        error: 'Not Found',
+        message: `Health page not found - ${req.originalUrl}`
+      });
     }
   } catch (error) {
     const data = { error: error.message };
@@ -104,7 +120,11 @@ defaultRoute.get('/personal/:service', cors(), (req, res) => {
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
-    res.send(generateCategorizedEndpointPage('personal', req.params.service));
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Personal page not found - ${req.originalUrl}`
+    });
   }
 });
 
@@ -121,7 +141,11 @@ defaultRoute.get('/services/:service', cors(), (req, res) => {
     });
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
-    res.send(generateCategorizedEndpointPage('services', req.params.service));
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Services page not found - ${req.originalUrl}`
+    });
   }
 });
 
@@ -151,21 +175,28 @@ defaultRoute.get('/commit', cors(), (req, res) => {
   res.redirect('/tools/commit');
 });
 
-// Generic legacy frontend route handler for all other endpoints
+// Generic legacy frontend route handler for specific static endpoints only
 defaultRoute.get('/:endpoint', cors(), (req, res) => {
   try {
     const endpointPath = path.join(`${__dirname}/../public/${req.params.endpoint}/index.html`);
-    // Check if specific page exists, otherwise serve generic template
+    // Only serve if specific static file exists
     if (require('fs').existsSync(endpointPath)) {
       res.sendFile(endpointPath);
     } else {
-      // Serve a generic API endpoint page
-      res.send(generateGenericEndpointPage(req.params.endpoint));
+      // No fallback - let 404 handler take over
+      res.status(404).json({
+        success: false,
+        error: 'Not Found',
+        message: `Page not found - ${req.originalUrl}`,
+        errors: [{ msg: `The requested page ${req.originalUrl} does not exist` }]
+      });
     }
   } catch (error) {
-    const data = { error: error.message };
-    setStandardHeaders(res, data);
-    res.json(data);
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Page not found - ${req.originalUrl}`
+    });
   }
 });
 
