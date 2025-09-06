@@ -32,7 +32,22 @@
         <div class="card mt-4">
             <h2 class="card-title">📊 Quick Global Overview</h2>
             <div id="quickStats" class="quick-stats">
-                <div class="loading">Loading quick statistics...</div>
+                <div class="quick-stat">
+                    <div class="quick-number">Loading...</div>
+                    <div class="quick-label">😷 Global Cases</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-number">Loading...</div>
+                    <div class="quick-label">💀 Deaths</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-number">Loading...</div>
+                    <div class="quick-label">💚 Recovered</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-number">Loading...</div>
+                    <div class="quick-label">🏥 Active</div>
+                </div>
             </div>
         </div>
     </div>
@@ -194,8 +209,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM loaded, loading stats...');
     await loadQuickStats();
 });
+
+// Also try loading after a delay in case of timing issues
+setTimeout(() => {
+    console.log('Timeout fallback loading stats...');
+    loadQuickStats();
+}, 2000);
 
 async function loadQuickStats() {
     const quickDiv = document.getElementById('quickStats');
@@ -204,36 +226,36 @@ async function loadQuickStats() {
         const response = await fetch('/api/v1/world/covid');
         const data = await response.json();
         
-        if (data.global) {
+        console.log('COVID API Response:', data); // Debug log
+        
+        if (data && data.global) {
             const stats = data.global;
-            quickDiv.innerHTML = `
-                <div class="quick-stat">
-                    <div class="quick-number">${formatNumber(stats.cases)}</div>
-                    <div class="quick-label">😷 Global Cases</div>
-                </div>
-                <div class="quick-stat">
-                    <div class="quick-number">${formatNumber(stats.deaths)}</div>
-                    <div class="quick-label">💀 Deaths</div>
-                </div>
-                <div class="quick-stat">
-                    <div class="quick-number">${formatNumber(stats.recovered)}</div>
-                    <div class="quick-label">💚 Recovered</div>
-                </div>
-                <div class="quick-stat">
-                    <div class="quick-number">${formatNumber(stats.active)}</div>
-                    <div class="quick-label">🏥 Active</div>
-                </div>
-            `;
+            console.log('Global stats:', stats); // Debug log
+            
+            // Update the numbers in existing cards instead of replacing HTML
+            const numbers = quickDiv.querySelectorAll('.quick-number');
+            if (numbers.length === 4) {
+                numbers[0].textContent = formatNumber(stats.cases);
+                numbers[1].textContent = formatNumber(stats.deaths);
+                numbers[2].textContent = formatNumber(stats.recovered);
+                numbers[3].textContent = formatNumber(stats.active);
+            }
         } else {
-            quickDiv.innerHTML = '<div class="error">Unable to load quick statistics</div>';
+            console.log('No global data found:', data);
+            quickDiv.innerHTML = '<div class="error">Unable to load global statistics - no data available</div>';
         }
     } catch (error) {
-        quickDiv.innerHTML = '<div class="error">Error loading quick statistics</div>';
+        console.error('COVID API Error:', error);
+        quickDiv.innerHTML = '<div class="error">Error loading quick statistics: ' + error.message + '</div>';
     }
 }
 
 function formatNumber(num) {
     if (!num) return '0';
+    // Handle both string and number inputs
+    if (typeof num === 'string') {
+        return num; // Already formatted from API
+    }
     return new Intl.NumberFormat().format(num);
 }
 </script>
