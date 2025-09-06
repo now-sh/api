@@ -149,6 +149,66 @@ defaultRoute.get('/services/:service', cors(), (req, res) => {
   }
 });
 
+// 🌍 World frontend routes
+defaultRoute.get('/world/:source', cors(), (req, res) => {
+  try {
+    const { source } = req.params;
+    const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
+    
+    res.render(`pages/world/${source}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} world data`,
+      activePage: 'world'
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `World page not found - ${req.originalUrl}`
+    });
+  }
+});
+
+// 🌐 Social frontend routes
+defaultRoute.get('/social/:platform', cors(), (req, res) => {
+  try {
+    const { platform } = req.params;
+    const pageTitle = platform.charAt(0).toUpperCase() + platform.slice(1).replace('-', ' ');
+    
+    res.render(`pages/social/${platform}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} social platform`,
+      activePage: 'social'
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Social page not found - ${req.originalUrl}`
+    });
+  }
+});
+
+// 🎮 Fun frontend routes
+defaultRoute.get('/fun/:activity', cors(), (req, res) => {
+  try {
+    const { activity } = req.params;
+    const pageTitle = activity.charAt(0).toUpperCase() + activity.slice(1).replace('-', ' ');
+    
+    res.render(`pages/fun/${activity}`, {
+      title: `${pageTitle} - Backend API`,
+      description: `${pageTitle} fun activity`,
+      activePage: 'fun'
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: `Fun page not found - ${req.originalUrl}`
+    });
+  }
+});
+
 // ==== LEGACY FRONTEND ROUTES (BACKWARD COMPATIBILITY) ====
 
 // Auth route (special case)
