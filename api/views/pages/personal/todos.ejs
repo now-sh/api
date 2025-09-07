@@ -230,4 +230,190 @@
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/todos.js"></script>' %>
+<script>
+let todos = [];
+let currentFilter = 'all';
+
+// Check authentication and load todos on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+});
+
+// Check authentication
+function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    loadTodos();
+}
+
+// Show authentication required message
+function showAuthRequired() {
+    document.getElementById('todosList').innerHTML = `
+        <div class="empty-state">
+            <p>Please sign in to manage your todos.</p>
+            <a href="/auth" class="btn btn-primary mt-3">Sign In</a>
+        </div>
+    `;
+    document.getElementById('todoForm').style.display = 'none';
+}
+
+// Add todo form submission
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('todoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            showToast('Please sign in to add todos', 'error');
+            return;
+        }
+        
+        const formData = new FormData(e.target);
+        const todoData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            priority: formData.get('priority'),
+            completed: false
+        };
+        
+        try {
+            const response = await fetch('/api/v1/data/todos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(todoData)
+            });
+            
+            if (response.ok) {
+                e.target.reset();
+                loadTodos();
+                showToast('Todo added successfully!');
+            } else {
+                const error = await response.json();
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        } catch (error) {
+            showToast(`Error: ${error.message}`, 'error');
+        }
+    });
+});
+
+// Load todos from API
+async function loadTodos() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showAuthRequired();
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/v1/data/todos/list', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                showAuthRequired();
+                return;
+            }
+            throw new Error('Failed to load todos');
+        }
+        
+        const data = await response.json();
+        // Handle different API response structures
+        if (data.data && data.data.todos) {
+            todos = data.data.todos;
+        } else {
+            todos = data.todos || data || [];
+        }
+        renderTodos();
+    } catch (error) {
+        document.getElementById('todosList').innerHTML = 
+            '<div class="empty-state">Error loading todos. Please try again.</div>';
+    }
+}
+
+// Render todos
+function renderTodos() {
+    const container = document.getElementById('todosList');
+    
+    const filteredTodos = todos.filter(todo => {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'pending') return !todo.completed;
+        if (currentFilter === 'completed') return todo.completed;
+    });
+    
+    if (filteredTodos.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No ${currentFilter} todos yet.</p>
+                ${currentFilter === 'all' ? '<p>Create your first todo above!</p>' : ''}
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = filteredTodos.map(todo => `
+        <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo._id || todo.id}">
+            <input 
+                type="checkbox" 
+                class="todo-checkbox" 
+                ${todo.completed ? 'checked' : ''}
+                data-todo-id="${todo._id || todo.id}"
+            >
+            <div class="todo-content">
+                <div class="todo-title">${escapeHtml(todo.title)}</div>
+                ${todo.description ? `<div class="todo-description">${escapeHtml(todo.description)}</div>` : ''}
+                <div class="todo-meta">
+                    <span class="priority-badge priority-${todo.priority}">${todo.priority}</span>
+                    ${todo.createdAt ? `<span>Created: ${new Date(todo.createdAt).toLocaleDateString()}</span>` : ''}
+                </div>
+            </div>
+            <div class="todo-actions">
+                <button class="btn-icon delete" onclick="deleteTodo('${todo._id || todo.id}')" title="Delete">
+                    ✗
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Helper functions
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message, type = 'success') {
+    alert(message); // Simple feedback
+}
+
+// Delete todo function
+async function deleteTodo(id) {
+    if (!confirm('Delete this todo?')) return;
+    
+    const token = localStorage.getItem('authToken');
+    try {
+        const response = await fetch(`/api/v1/data/todos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            loadTodos();
+            showToast('Todo deleted!');
+        }
+    } catch (error) {
+        showToast('Error deleting todo', 'error');
+    }
+}
+</script>
