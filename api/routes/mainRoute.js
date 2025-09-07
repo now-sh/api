@@ -69,17 +69,43 @@ defaultRoute.get('/tools/:tool', cors(), (req, res) => {
 });
 
 // 📊 Data frontend routes
-defaultRoute.get('/data/:source', cors(), (req, res) => {
+defaultRoute.get('/data/:source', cors(), async (req, res) => {
   try {
     const { source } = req.params;
     const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
     
-    res.render(`pages/data/${source}`, {
-      title: `${pageTitle} - Backend API`,
-      description: `${pageTitle} data source`,
-      activePage: 'data',
-      baseUrl: `${req.protocol}://${req.get('host')}`
-    });
+    // For domains page, fetch data server-side
+    if (source === 'domains') {
+      try {
+        const axios = require('axios');
+        const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/domains`;
+        const response = await axios.get(apiUrl);
+        
+        res.render(`pages/data/${source}`, {
+          title: `${pageTitle} - Backend API`,
+          description: `${pageTitle} data source`,
+          activePage: 'data',
+          baseUrl: `${req.protocol}://${req.get('host')}`,
+          domainsData: response.data
+        });
+      } catch (error) {
+        res.render(`pages/data/${source}`, {
+          title: `${pageTitle} - Backend API`,
+          description: `${pageTitle} data source`,
+          activePage: 'data',
+          baseUrl: `${req.protocol}://${req.get('host')}`,
+          domainsData: null,
+          error: 'Failed to load domains data'
+        });
+      }
+    } else {
+      res.render(`pages/data/${source}`, {
+        title: `${pageTitle} - Backend API`,
+        description: `${pageTitle} data source`,
+        activePage: 'data',
+        baseUrl: `${req.protocol}://${req.get('host')}`
+      });
+    }
   } catch (error) {
     // Fallback to generic page if specific page doesn't exist
     res.status(404).json({
