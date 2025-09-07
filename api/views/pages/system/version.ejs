@@ -8,314 +8,180 @@
         <!-- API Version Information -->
         <div class="card mb-4">
             <h2 class="card-title">🔖 Version Information</h2>
-            <div id="versionInfo" class="version-info">
-                <div class="loading">Loading version information...</div>
+            <div class="version-info">
+                <% if (typeof versionData !== 'undefined' && versionData) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">API Version</span>
+                            <span class="info-value"><%= versionData.Version || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Time Zone</span>
+                            <span class="info-value"><%= versionData.TimeZone || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Current Time</span>
+                            <span class="info-value"><%= versionData.Time || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Today</span>
+                            <span class="info-value"><%= versionData.Today || 'Unknown' %></span>
+                        </div>
+                    </div>
+                    <% if (versionData.Greetings) { %>
+                        <div class="greeting-banner">
+                            <%= versionData.Greetings %>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="error-message">Unable to load version information</div>
+                <% } %>
             </div>
         </div>
 
         <!-- Authentication Status -->
         <div class="card mb-4">
             <h2 class="card-title">🔐 Authentication Status</h2>
-            <div id="authStatus" class="auth-status">
-                <div class="loading">Checking authentication...</div>
+            <div class="auth-status">
+                <% if (typeof versionData !== 'undefined' && versionData) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Authentication</span>
+                            <span class="info-value <%= versionData.Auth === 'yes' ? 'success' : 'warning' %>"><%= versionData.Auth || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">GitHub Token</span>
+                            <span class="info-value <%= versionData.GitHubToken ? 'success' : 'error' %>"><%= versionData.GitHubToken || 'Not Set' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Reddit Auth</span>
+                            <span class="info-value <%= versionData.RedditAuth === 'Set and Valid' ? 'success' : 'error' %>"><%= versionData.RedditAuth || 'Not Set' %></span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">Unable to load authentication status</div>
+                <% } %>
             </div>
         </div>
 
         <!-- Health Status -->
         <div class="card mb-4">
             <h2 class="card-title">🏥 Health Status</h2>
-            <div id="healthStatus" class="health-status">
-                <div class="loading">Checking health status...</div>
+            <div class="health-status">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.Health) { %>
+                    <div class="status-indicator <%= versionData.Health.Status === 'healthy' ? 'success' : 'warning' %>">
+                        <span class="status-dot"></span>
+                        <span class="status-text"><%= versionData.Health.Status %></span>
+                    </div>
+                    <div class="info-item mt-3">
+                        <span class="info-label">Issues</span>
+                        <span class="info-value"><%= versionData.Health.Issues?.length || 0 %> issues</span>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">Health information not available</div>
+                <% } %>
             </div>
         </div>
 
         <!-- Database Status -->
         <div class="card mb-4">
             <h2 class="card-title">🗄️ Database Status</h2>
-            <div id="databaseStatus" class="database-status">
-                <div class="loading">Checking database status...</div>
+            <div class="database-status">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.Database) { %>
+                    <div class="status-indicator <%= versionData.Database.Status === 'Connected' ? 'success' : 'error' %>">
+                        <span class="status-dot"></span>
+                        <span class="status-text"><%= versionData.Database.Status %></span>
+                    </div>
+                    <% if (versionData.Database.Details) { %>
+                        <div class="info-item mt-3">
+                            <span class="info-label">State</span>
+                            <span class="info-value"><%= versionData.Database.Details.State %></span>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="error-message">Database information not available</div>
+                <% } %>
             </div>
         </div>
 
         <!-- Environment Information -->
         <div class="card mb-4">
             <h2 class="card-title">🌍 Environment</h2>
-            <div id="environmentInfo" class="environment-info">
-                <div class="loading">Loading environment info...</div>
-            </div>
-        </div>
-
-        <!-- Proxy Configuration -->
-        <div class="card mb-4">
-            <h2 class="card-title">🔗 Proxy Configuration</h2>
-            <div id="proxyConfig" class="proxy-config">
-                <div class="loading">Loading proxy configuration...</div>
+            <div class="environment-info">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.Environment) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Node Environment</span>
+                            <span class="info-value"><%= versionData.Environment.NodeEnv || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Port</span>
+                            <span class="info-value"><%= versionData.Environment.Port || 'Unknown' %></span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">Environment information not available</div>
+                <% } %>
             </div>
         </div>
 
         <!-- System Information -->
         <div class="card mb-4">
             <h2 class="card-title">⚙️ System Information</h2>
-            <div id="systemInfo" class="system-info">
-                <div class="loading">Loading system information...</div>
+            <div class="system-info">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.System) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Node Version</span>
+                            <span class="info-value"><%= versionData.System.NodeVersion || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Platform</span>
+                            <span class="info-value"><%= versionData.System.Platform || 'Unknown' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Uptime</span>
+                            <span class="info-value"><%= versionData.System.Uptime || 'Unknown' %></span>
+                        </div>
+                        <% if (versionData.System.Memory) { %>
+                            <div class="info-item">
+                                <span class="info-label">Memory</span>
+                                <span class="info-value"><%= versionData.System.Memory.HeapUsed %> / <%= versionData.System.Memory.HeapTotal %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">System information not available</div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Proxy Configuration -->
+        <div class="card mb-4">
+            <h2 class="card-title">🔗 Proxy Configuration</h2>
+            <div class="proxy-config">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.Proxies) { %>
+                    <div class="proxy-list">
+                        <% Object.entries(versionData.Proxies).forEach(([name, config]) => { %>
+                            <div class="proxy-item">
+                                <span class="proxy-path"><%= name %></span>
+                                <span class="proxy-arrow">→</span>
+                                <span class="proxy-target"><%= config.target || config %></span>
+                                <% if (config.status) { %>
+                                    <span class="badge bg-success ms-2"><%= config.status %></span>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">Proxy configuration not available</div>
+                <% } %>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadVersionInfo();
-});
-
-async function loadVersionInfo() {
-    try {
-        const response = await fetch('/api/v1/version');
-        const data = await response.json();
-        
-        if (response.ok && data) {
-            displayVersionInfo(data);
-        } else {
-            showError('versionInfo', 'Unable to load version information');
-        }
-    } catch (error) {
-        console.error('Error loading version:', error);
-        showError('versionInfo', 'Failed to load version information');
-    }
-}
-
-function displayVersionInfo(data) {
-    // Display version information
-    const versionDiv = document.getElementById('versionInfo');
-    versionDiv.innerHTML = `
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">API Version</span>
-                <span class="info-value">${data.Version || 'Unknown'}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Time Zone</span>
-                <span class="info-value">${data.TimeZone || 'Unknown'}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Current Time</span>
-                <span class="info-value">${data.Time || 'Unknown'}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Today</span>
-                <span class="info-value">${data.Today || 'Unknown'}</span>
-            </div>
-        </div>
-        <div class="greeting-banner">
-            ${data.Greetings || 'Welcome to the API Server'}
-        </div>
-    `;
-
-    // Display authentication status
-    const authDiv = document.getElementById('authStatus');
-    authDiv.innerHTML = `
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Authentication</span>
-                <span class="info-value ${data.Auth === 'yes' ? 'success' : 'warning'}">${data.Auth || 'Unknown'}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">GitHub Token</span>
-                <span class="info-value ${data.GitHubToken ? 'success' : 'error'}">${data.GitHubToken || 'Not Set'}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Reddit Auth</span>
-                <span class="info-value ${data.RedditAuth === 'Set and Valid' ? 'success' : 'error'}">${data.RedditAuth || 'Not Set'}</span>
-            </div>
-        </div>
-    `;
-
-    // Display health status
-    const healthDiv = document.getElementById('healthStatus');
-    if (data.Health) {
-        const statusClass = data.Health.Status === 'healthy' ? 'success' : 'warning';
-        healthDiv.innerHTML = `
-            <div class="status-indicator ${statusClass}">
-                <span class="status-dot"></span>
-                <span class="status-text">${data.Health.Status}</span>
-            </div>
-            <div class="info-item mt-3">
-                <span class="info-label">Issues</span>
-                <span class="info-value">${data.Health.Issues?.length || 0} issues</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Last Check</span>
-                <span class="info-value">${new Date(data.Health.Timestamp).toLocaleString()}</span>
-            </div>
-        `;
-    } else {
-        healthDiv.innerHTML = '<div class="no-data">Health information not available</div>';
-    }
-
-    // Display database status
-    const dbDiv = document.getElementById('databaseStatus');
-    if (data.Database) {
-        const dbStatus = data.Database.Status || 'Unknown';
-        const statusClass = dbStatus === 'Connected' ? 'success' : dbStatus === 'Disconnected' ? 'error' : 'warning';
-        dbDiv.innerHTML = `
-            <div class="status-indicator ${statusClass}">
-                <span class="status-dot"></span>
-                <span class="status-text">${dbStatus}</span>
-            </div>
-            ${data.Database.ConnectionString ? `
-                <div class="info-item mt-3">
-                    <span class="info-label">Connection</span>
-                    <span class="info-value">${data.Database.ConnectionString}</span>
-                </div>
-            ` : ''}
-            ${data.Database.Message ? `
-                <div class="info-item">
-                    <span class="info-label">Message</span>
-                    <span class="info-value">${data.Database.Message}</span>
-                </div>
-            ` : ''}
-        `;
-    } else {
-        dbDiv.innerHTML = '<div class="no-data">Database information not available</div>';
-    }
-
-    // Display routes
-    const routesDiv = document.getElementById('routesList');
-    if (data.routes && typeof data.routes === 'object') {
-        const routeCategories = Object.entries(data.routes);
-        if (routeCategories.length > 0) {
-            routesDiv.innerHTML = routeCategories.map(([category, routes]) => `
-                <div class="route-category">
-                    <h4 class="category-title">${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
-                    <div class="route-grid">
-                        ${Array.isArray(routes) ? routes.map(route => `
-                            <div class="route-item">
-                                <code>${route}</code>
-                            </div>
-                        `).join('') : `<div class="route-item"><code>${routes}</code></div>`}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            routesDiv.innerHTML = '<div class="no-data">No routes information available</div>';
-        }
-    } else {
-        routesDiv.innerHTML = '<div class="no-data">Routes information not available</div>';
-    }
-
-    // Display proxy configuration
-    const proxyDiv = document.getElementById('proxyConfig');
-    if (data.Proxies && typeof data.Proxies === 'object') {
-        const proxyEntries = Object.entries(data.Proxies);
-        if (proxyEntries.length > 0) {
-            proxyDiv.innerHTML = `
-                <div class="proxy-list">
-                    ${proxyEntries.map(([name, config]) => `
-                        <div class="proxy-item">
-                            <span class="proxy-path">${name}</span>
-                            <span class="proxy-arrow">→</span>
-                            <span class="proxy-target">${config.target || config}</span>
-                            ${config.status ? `<span class="badge bg-success ms-2">${config.status}</span>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        } else {
-            proxyDiv.innerHTML = '<div class="no-data">No proxy configuration available</div>';
-        }
-    } else {
-        proxyDiv.innerHTML = '<div class="no-data">Proxy configuration not available</div>';
-    }
-
-    // Display environment information
-    const envDiv = document.getElementById('environmentInfo');
-    if (data.Environment) {
-        envDiv.innerHTML = `
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Node Environment</span>
-                    <span class="info-value">${data.Environment.NodeEnv || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Port</span>
-                    <span class="info-value">${data.Environment.Port || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Yesterday</span>
-                    <span class="info-value">${data.Yesterday || 'Unknown'}</span>
-                </div>
-            </div>
-        `;
-    } else {
-        envDiv.innerHTML = '<div class="no-data">Environment information not available</div>';
-    }
-
-    // Display system information
-    const systemDiv = document.getElementById('systemInfo');
-    if (data.System) {
-        systemDiv.innerHTML = `
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Node Version</span>
-                    <span class="info-value">${data.System.NodeVersion || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Platform</span>
-                    <span class="info-value">${data.System.Platform || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Architecture</span>
-                    <span class="info-value">${data.System.Architecture || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Uptime</span>
-                    <span class="info-value">${data.System.Uptime || 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Memory Usage</span>
-                    <span class="info-value">${data.System.Memory ? `${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal} (${data.System.Memory.HeapPercentage})` : 'Unknown'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">RSS Memory</span>
-                    <span class="info-value">${data.System.Memory?.RSS || 'Unknown'}</span>
-                </div>
-            </div>
-        `;
-    } else {
-        systemDiv.innerHTML = '<div class="no-data">System information not available</div>';
-    }
-}
-
-function showError(elementId, message) {
-    document.getElementById(elementId).innerHTML = `
-        <div class="error-message">
-            <i class="bi bi-exclamation-triangle"></i> ${message}
-        </div>
-    `;
-}
-
-function formatUptime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    
-    const parts = [];
-    if (days > 0) parts.push(`${days}d`);
-    if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0) parts.push(`${minutes}m`);
-    
-    return parts.join(' ') || '< 1m';
-}
-
-function formatMemory(memory) {
-    if (!memory) return 'Unknown';
-    const used = memory.heapUsed || 0;
-    const total = memory.heapTotal || 0;
-    const usedMB = (used / 1024 / 1024).toFixed(2);
-    const totalMB = (total / 1024 / 1024).toFixed(2);
-    return `${usedMB} MB / ${totalMB} MB`;
-}
-</script>
+<!-- No JavaScript needed - all data rendered server-side -->
 
 <style>
 .version-info,
