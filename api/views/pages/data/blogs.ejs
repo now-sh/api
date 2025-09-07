@@ -33,10 +33,31 @@
                 <button type="submit" class="btn btn-primary">Load Blog Posts</button>
             </form>
             
-            <div id="blogForm-result" class="result-container mt-6" style="display: none;">
+            <div class="result-container mt-6">
                 <h3>Blog Posts</h3>
-                <div id="blogCount" class="text-muted mb-3"></div>
-                <div id="blogPosts" class="blog-posts"></div>
+                <% if (typeof blogData !== 'undefined' && blogData && blogData.posts) { %>
+                    <div class="text-muted mb-3">Found <%= blogData.total_posts || blogData.posts.length %> blog posts</div>
+                    <div class="blog-posts">
+                        <% blogData.posts.slice(0, 20).forEach(post => { %>
+                            <div class="blog-post">
+                                <h5><a href="<%= post.url || post.html_url %>" target="_blank"><%= post.title || post.name %></a></h5>
+                                <div class="meta">
+                                    <span>📅 <%= post.date || 'No date' %></span>
+                                    <% if (post.author) { %><span>👤 <%= post.author %></span><% } %>
+                                    <% if (post.categories && post.categories.length > 0) { %>
+                                        <span>🏷️ <%= post.categories.join(', ') %></span>
+                                    <% } %>
+                                </div>
+                                <% if (post.excerpt || post.description) { %>
+                                    <div class="blog-excerpt"><%= post.excerpt || post.description %></div>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-muted mb-3">Found 0 blog posts</div>
+                    <div class="empty-state">No blog posts found</div>
+                <% } %>
             </div>
         </div>
     </div>
