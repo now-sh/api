@@ -16,7 +16,9 @@
         />
     </div>
     
-    <div id="loadingStatus" class="loading">Loading domains...</div>
+    <div id="loadingStatus" class="loading">
+        <button onclick="loadDomainsNow()" class="btn btn-primary">Click to Load Domains</button>
+    </div>
 </div>
 
 <div class="card mt-6">
@@ -213,5 +215,63 @@
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/domains.js"></script>' %>
+<script>
+window.loadDomainsNow = async function() {
+    console.log('Loading domains...');
+    const domainsList = document.getElementById('domainsList');
+    const loadingStatus = document.getElementById('loadingStatus');
+    const domainCount = document.getElementById('domainCount');
+    
+    try {
+        const response = await fetch('/api/v1/me/info/domains');
+        console.log('Domains API response:', response.status);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Domains data:', data);
+            
+            if (data.domains && Array.isArray(data.domains)) {
+                // Hide loading
+                if (loadingStatus) loadingStatus.style.display = 'none';
+                
+                // Update count
+                if (domainCount) domainCount.textContent = `${data.domains.length} domains`;
+                
+                // Display domains
+                const html = data.domains.map(domain => `
+                    <div class="domain-item">
+                        <div class="domain-name">${domain}</div>
+                        <div class="domain-status status-taken">Domain</div>
+                        <div class="domain-details">Click to copy</div>
+                    </div>
+                `).join('');
+                
+                domainsList.innerHTML = html;
+                
+                // Add click to copy
+                document.querySelectorAll('.domain-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const domain = item.querySelector('.domain-name').textContent;
+                        navigator.clipboard.writeText(domain);
+                        const status = item.querySelector('.domain-status');
+                        const original = status.textContent;
+                        status.textContent = 'Copied!';
+                        setTimeout(() => status.textContent = original, 2000);
+                    });
+                });
+            } else {
+                domainsList.innerHTML = '<div class="error-message">No domains data</div>';
+                if (loadingStatus) loadingStatus.style.display = 'none';
+            }
+        } else {
+            domainsList.innerHTML = '<div class="error-message">Failed to load domains</div>';
+            if (loadingStatus) loadingStatus.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Domains error:', error);
+        domainsList.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+        if (loadingStatus) loadingStatus.style.display = 'none';
+    }
+}
+</script>
 
