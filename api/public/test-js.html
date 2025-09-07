@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS Test</title>
+</head>
+<body>
+    <h1>JavaScript Test</h1>
+    <div id="test">Loading...</div>
+    
+    <script>
+    console.log('Script executing...');
+    document.getElementById('test').innerHTML = 'JavaScript is working!';
+    
+    fetch('/api/v1/me/info/domains')
+        .then(r => r.json())
+        .then(data => {
+            console.log('API call successful');
+            document.getElementById('test').innerHTML = `Got ${data.domains?.length || 0} domains`;
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('test').innerHTML = 'API Error: ' + err.message;
+        });
+    </script>
+</body>
+</html>
