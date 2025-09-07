@@ -16,16 +16,34 @@
         />
     </div>
     
-    <div id="loadingStatus" class="loading">Loading domains...</div>
+    <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
+        <div class="success">✅ Loaded <%= domainsData.domains.length %> domains</div>
+    <% } else { %>
+        <div id="loadingStatus" class="loading">Loading domains...</div>
+    <% } %>
 </div>
 
 <div class="card mt-6">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>All Domains</h3>
-        <span id="domainCount" class="badge bg-purple"></span>
+        <span id="domainCount" class="badge bg-purple">
+            <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
+                <%= domainsData.domains.length %> domains
+            <% } %>
+        </span>
     </div>
     <div id="domainsList" class="domains-grid">
-        <!-- Domains will be loaded here -->
+        <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
+            <% domainsData.domains.forEach(domain => { %>
+                <div class="domain-item" onclick="copyDomain('<%= domain %>')">
+                    <div class="domain-name"><%= domain %></div>
+                    <div class="domain-status status-taken">Domain</div>
+                    <div class="domain-details">Click to copy</div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state">No domains available</div>
+        <% } %>
     </div>
 </div>
 
@@ -214,41 +232,21 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('DOM loaded, loading domains...');
-    
-    try {
-        const response = await fetch('/api/v1/me/info/domains');
-        const data = await response.json();
-        
-        if (data.domains) {
-            const domainsList = document.getElementById('domainsList');
-            const loadingStatus = document.getElementById('loadingStatus');
-            const domainCount = document.getElementById('domainCount');
-            
-            // Update count
-            domainCount.textContent = `${data.domains.length} domains`;
-            
-            // Display domains
-            const html = data.domains.map(domain => `
-                <div class="domain-item" onclick="copyDomain('${domain}')">
-                    <div class="domain-name">${domain}</div>
-                    <div class="domain-status status-taken">Domain</div>
-                    <div class="domain-details">Click to copy</div>
-                </div>
-            `).join('');
-            
-            domainsList.innerHTML = html;
-            loadingStatus.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Domains error:', error);
-    }
-});
-
 function copyDomain(domain) {
-    navigator.clipboard.writeText(domain);
-    alert('Copied: ' + domain);
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(domain).then(() => {
+            alert('Copied: ' + domain);
+        });
+    } else {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = domain;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Copied: ' + domain);
+    }
 }
 </script>
 
