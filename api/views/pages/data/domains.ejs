@@ -16,9 +16,7 @@
         />
     </div>
     
-    <div id="loadingStatus" class="loading">
-        <button onclick="loadDomainsNow()" class="btn btn-primary">Click to Load Domains</button>
-    </div>
+    <div id="loadingStatus" class="loading">Loading domains...</div>
 </div>
 
 <div class="card mt-6">
@@ -27,7 +25,7 @@
         <span id="domainCount" class="badge bg-purple"></span>
     </div>
     <div id="domainsList" class="domains-grid">
-        <div class="empty-state">Loading domains...</div>
+        <!-- Domains will be loaded here -->
     </div>
 </div>
 
@@ -216,62 +214,41 @@
 </style>
 
 <script>
-window.loadDomainsNow = async function() {
-    console.log('Loading domains...');
-    const domainsList = document.getElementById('domainsList');
-    const loadingStatus = document.getElementById('loadingStatus');
-    const domainCount = document.getElementById('domainCount');
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM loaded, loading domains...');
     
     try {
         const response = await fetch('/api/v1/me/info/domains');
-        console.log('Domains API response:', response.status);
+        const data = await response.json();
         
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Domains data:', data);
+        if (data.domains) {
+            const domainsList = document.getElementById('domainsList');
+            const loadingStatus = document.getElementById('loadingStatus');
+            const domainCount = document.getElementById('domainCount');
             
-            if (data.domains && Array.isArray(data.domains)) {
-                // Hide loading
-                if (loadingStatus) loadingStatus.style.display = 'none';
-                
-                // Update count
-                if (domainCount) domainCount.textContent = `${data.domains.length} domains`;
-                
-                // Display domains
-                const html = data.domains.map(domain => `
-                    <div class="domain-item">
-                        <div class="domain-name">${domain}</div>
-                        <div class="domain-status status-taken">Domain</div>
-                        <div class="domain-details">Click to copy</div>
-                    </div>
-                `).join('');
-                
-                domainsList.innerHTML = html;
-                
-                // Add click to copy
-                document.querySelectorAll('.domain-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const domain = item.querySelector('.domain-name').textContent;
-                        navigator.clipboard.writeText(domain);
-                        const status = item.querySelector('.domain-status');
-                        const original = status.textContent;
-                        status.textContent = 'Copied!';
-                        setTimeout(() => status.textContent = original, 2000);
-                    });
-                });
-            } else {
-                domainsList.innerHTML = '<div class="error-message">No domains data</div>';
-                if (loadingStatus) loadingStatus.style.display = 'none';
-            }
-        } else {
-            domainsList.innerHTML = '<div class="error-message">Failed to load domains</div>';
-            if (loadingStatus) loadingStatus.style.display = 'none';
+            // Update count
+            domainCount.textContent = `${data.domains.length} domains`;
+            
+            // Display domains
+            const html = data.domains.map(domain => `
+                <div class="domain-item" onclick="copyDomain('${domain}')">
+                    <div class="domain-name">${domain}</div>
+                    <div class="domain-status status-taken">Domain</div>
+                    <div class="domain-details">Click to copy</div>
+                </div>
+            `).join('');
+            
+            domainsList.innerHTML = html;
+            loadingStatus.style.display = 'none';
         }
     } catch (error) {
         console.error('Domains error:', error);
-        domainsList.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
-        if (loadingStatus) loadingStatus.style.display = 'none';
     }
+});
+
+function copyDomain(domain) {
+    navigator.clipboard.writeText(domain);
+    alert('Copied: ' + domain);
 }
 </script>
 
