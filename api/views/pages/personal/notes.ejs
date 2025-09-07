@@ -239,5 +239,61 @@
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/notes.js"></script>' %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotes();
+});
+
+async function loadNotes() {
+    try {
+        const response = await fetch('/api/v1/data/notes/list');
+        
+        if (!response.ok) {
+            throw new Error('Failed to load notes');
+        }
+        
+        const data = await response.json();
+        const notes = data.data?.notes || data.notes || [];
+        
+        const notesList = document.getElementById('notesList');
+        
+        if (notes.length === 0) {
+            notesList.innerHTML = '<div class="empty-state">No notes available. Create your first note!</div>';
+            return;
+        }
+        
+        const html = notes.map(note => `
+            <div class="note-item" onclick="selectNote('${note._id || note.id}')">
+                <div class="note-item-title">${escapeHtml(note.title || 'Untitled')}</div>
+                <div class="note-item-preview">${escapeHtml((note.content || '').substring(0, 100))}${note.content?.length > 100 ? '...' : ''}</div>
+                <div class="note-item-meta">
+                    ${note.category ? `<span class="badge">${note.category}</span>` : ''}
+                    <span class="text-muted">${formatDate(note.updatedAt || note.createdAt)}</span>
+                </div>
+            </div>
+        `).join('');
+        
+        notesList.innerHTML = html;
+    } catch (error) {
+        document.getElementById('notesList').innerHTML = 
+            '<div class="empty-state">Error loading notes. Please try again.</div>';
+    }
+}
+
+function selectNote(noteId) {
+    alert('Note selected: ' + noteId);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
+    return new Date(dateString).toLocaleDateString();
+}
+</script>
 
