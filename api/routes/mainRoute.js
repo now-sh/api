@@ -122,11 +122,44 @@ defaultRoute.get('/data/:source', cors(), async (req, res) => {
         });
       }
     } else {
+      // For other data pages, try to fetch their data server-side
+      let pageData = null;
+      let apiError = null;
+      
+      try {
+        const axios = require('axios');
+        let apiUrl = null;
+        
+        switch(source) {
+          case 'reddit':
+            apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/reddit`;
+            break;
+          case 'git':
+            apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/github`;
+            break;
+          case 'todos':
+            apiUrl = `${req.protocol}://${req.get('host')}/api/v1/data/todos/list`;
+            break;
+          case 'notes':
+            apiUrl = `${req.protocol}://${req.get('host')}/api/v1/data/notes/list`;
+            break;
+        }
+        
+        if (apiUrl) {
+          const response = await axios.get(apiUrl);
+          pageData = response.data;
+        }
+      } catch (error) {
+        apiError = error.message;
+      }
+      
       res.render(`pages/data/${source}`, {
         title: `${pageTitle} - Backend API`,
         description: `${pageTitle} data source`,
         activePage: 'data',
-        baseUrl: `${req.protocol}://${req.get('host')}`
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+        pageData: pageData,
+        apiError: apiError
       });
     }
   } catch (error) {
