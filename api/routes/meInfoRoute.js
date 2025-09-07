@@ -367,36 +367,64 @@ meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
 /**
  * Get Reddit data - JSON response (casjay)
  */
+// Import Reddit helper for OAuth functionality
+const { fetchRedditData } = require('../utils/redditHelper');
+
 meInfoRoute.get('/reddit', cors(), async (req, res) => {
   try {
-    // Reddit API is read-only and often blocked, so provide static info
-    const readOnlyData = {
-      success: true,
-      message: 'Reddit API is read-only',
-      data: {
-        user: {
-          name: 'casjay',
-          display_name: 'Jason M. Hempstead',
-          public_description: 'Hey everybody My name is Jason Michael Hempstead and to round up what the past 41 years have shaped me into..',
-          total_karma: 'Private',
-          link_karma: 'Private', 
-          comment_karma: 'Private',
-          created_utc: 'Private',
-          verified: true,
-          is_gold: false,
-          is_mod: false,
-          profile_img: 'https://styles.redditmedia.com/t5_casjay/styles/profileIcon_default.png'
-        },
-        note: 'Reddit data is read-only due to API restrictions. For full access visit: https://reddit.com/u/casjay',
-        last_updated: new Date().toISOString()
-      }
-    };
+    // Get real Reddit data using OAuth (READ-ONLY)
+    console.log('Fetching Reddit user data with OAuth (read-only)...');
+    const userData = await fetchRedditData('casjay', null, 10);
     
-    res.json(readOnlyData);
+    if (userData && userData.data) {
+      const user = userData.data;
+      
+      const readOnlyResponse = {
+        success: true,
+        message: 'Reddit data fetched successfully (read-only mode)',
+        data: {
+          user: {
+            name: user.name,
+            display_name: user.subreddit?.display_name || user.name,
+            public_description: user.subreddit?.public_description || user.name,
+            total_karma: user.total_karma || 0,
+            link_karma: user.link_karma || 0,
+            comment_karma: user.comment_karma || 0,
+            created_utc: user.created_utc,
+            verified: user.verified || false,
+            is_gold: user.is_gold || false,
+            is_mod: user.is_mod || false,
+            profile_img: user.icon_img || user.subreddit?.icon_img,
+            followers: user.subreddit?.subscribers || 0
+          },
+          note: 'Reddit API is READ-ONLY - no write operations allowed',
+          access_level: 'read-only',
+          last_updated: new Date().toISOString()
+        }
+      };
+      
+      res.json(readOnlyResponse);
+    } else {
+      // Fallback to basic info if OAuth fails
+      res.json({
+        success: true,
+        message: 'Reddit API is read-only (fallback mode)',
+        data: {
+          user: {
+            name: 'casjay',
+            display_name: 'Jason M. Hempstead',
+            note: 'Reddit OAuth not available - using fallback data'
+          },
+          access_level: 'read-only-fallback',
+          last_updated: new Date().toISOString()
+        }
+      });
+    }
   } catch (error) {
+    console.error('Reddit API Error:', error.message);
     res.status(503).json({ 
       error: 'Reddit API unavailable',
-      message: 'Reddit API is read-only',
+      message: 'Reddit API is read-only and currently unavailable',
       hint: 'Visit https://reddit.com/u/casjay for current data'
     });
   }
