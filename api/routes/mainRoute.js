@@ -74,7 +74,7 @@ defaultRoute.get('/data/:source', cors(), async (req, res) => {
     const { source } = req.params;
     const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
     
-    // For domains page, fetch data server-side
+    // For data pages, fetch data server-side
     if (source === 'domains') {
       try {
         const axios = require('axios');
@@ -96,6 +96,29 @@ defaultRoute.get('/data/:source', cors(), async (req, res) => {
           baseUrl: `${req.protocol}://${req.get('host')}`,
           domainsData: null,
           error: 'Failed to load domains data'
+        });
+      }
+    } else if (source === 'blogs') {
+      try {
+        const axios = require('axios');
+        const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/blog/jason`;
+        const response = await axios.get(apiUrl);
+        
+        res.render(`pages/data/${source}`, {
+          title: `${pageTitle} - Backend API`,
+          description: `${pageTitle} data source`,
+          activePage: 'data',
+          baseUrl: `${req.protocol}://${req.get('host')}`,
+          blogData: response.data
+        });
+      } catch (error) {
+        res.render(`pages/data/${source}`, {
+          title: `${pageTitle} - Backend API`,
+          description: `${pageTitle} data source`,
+          activePage: 'data',
+          baseUrl: `${req.protocol}://${req.get('host')}`,
+          blogData: null,
+          error: 'Failed to load blog data'
         });
       }
     } else {
