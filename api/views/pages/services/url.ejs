@@ -184,4 +184,68 @@
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/url-shortener.js"></script>' %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentUrls();
+    
+    const form = document.getElementById('urlForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const url = formData.get('url');
+            
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/data/urls/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Shortened URL: ${result.data.shortUrl}`);
+                    form.reset();
+                    loadRecentUrls();
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to shorten URL'));
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        });
+    }
+});
+
+async function loadRecentUrls() {
+    try {
+        const response = await fetch('/api/v1/data/urls');
+        const result = await response.json();
+        
+        const recentUrlsDiv = document.getElementById('recentUrls');
+        
+        if (result.success && result.data.urls && result.data.urls.length > 0) {
+            const html = result.data.urls.slice(0, 5).map(url => `
+                <div class="url-item">
+                    <div class="url-original">${url.original}</div>
+                    <div class="url-short">${url.shortUrl}</div>
+                    <div class="url-clicks">${url.clicks || 0} clicks</div>
+                </div>
+            `).join('');
+            
+            recentUrlsDiv.innerHTML = html;
+        } else {
+            recentUrlsDiv.innerHTML = '<div class="empty-state">No recent URLs</div>';
+        }
+    } catch (error) {
+        document.getElementById('recentUrls').innerHTML = 
+            '<div class="empty-state">Unable to load recent URLs.</div>';
+    }
+}
+</script>
