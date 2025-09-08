@@ -15,29 +15,56 @@ app.set('layout', 'layouts/main');
 const { connectToDatabase } = require('./db/connection');
 
 // Version page route - must be early to override any default handlers
-app.get('/version', async (req, res) => {
-  try {
-    const axios = require('axios');
-    const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/version`;
-    const response = await axios.get(apiUrl);
-    
-    res.render('pages/system/version', {
-      title: 'API Version & Status - Backend API',
-      description: 'Complete API version information and system status',
-      activePage: 'version',
-      baseUrl: `${req.protocol}://${req.get('host')}`,
-      versionData: response.data
-    });
-  } catch (error) {
-    res.render('pages/system/version', {
-      title: 'API Version & Status - Backend API',
-      description: 'Complete API version information and system status',
-      activePage: 'version',
-      baseUrl: `${req.protocol}://${req.get('host')}`,
-      versionData: null,
-      error: 'Failed to load version data'
-    });
-  }
+app.get('/version', (req, res) => {
+  // For now, render with static data to test template
+  const testVersionData = {
+    Version: "1.9.4",
+    TimeZone: "America/New_York", 
+    Time: new Date().toLocaleTimeString(),
+    Today: new Date().toLocaleDateString(),
+    Greetings: "🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞",
+    Auth: "no",
+    GitHubToken: "Token is set",
+    RedditAuth: "Set and Valid",
+    Health: {
+      Status: "healthy",
+      Issues: []
+    },
+    Database: {
+      Status: "Connected",
+      Details: {
+        State: "connected"
+      }
+    },
+    Environment: {
+      NodeEnv: "development",
+      Port: "1919"
+    },
+    System: {
+      NodeVersion: "v20.19.4",
+      Platform: "linux",
+      Architecture: "x64",
+      Uptime: "Active",
+      Memory: {
+        HeapUsed: "60 MB",
+        HeapTotal: "62 MB"
+      }
+    },
+    Proxies: {
+      disease: {
+        target: "https://disease.sh",
+        status: "Active"
+      }
+    }
+  };
+  
+  res.render('pages/system/version', {
+    title: 'API Version & Status - Backend API',
+    description: 'Complete API version information and system status',
+    activePage: 'version',
+    baseUrl: `${req.protocol}://${req.get('host')}`,
+    versionData: testVersionData
+  });
 });
 
 // Initialize database connection immediately for serverless environments
