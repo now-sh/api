@@ -198,6 +198,9 @@ async function handleDataRequest(req, res) {
         const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/blog/jason`;
         const response = await axios.get(apiUrl);
         
+        console.log('Blog API response keys:', Object.keys(response.data));
+        console.log('Blog posts count:', response.data.posts?.length || 0);
+        
         res.render(`pages/data/${source}`, {
           title: `${pageTitle} - Backend API`,
           description: `${pageTitle} data source`,
