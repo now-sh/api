@@ -6,59 +6,44 @@
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card">
-            <h2 class="card-title">Blog Source</h2>
-            <p class="card-text">Load blog posts from a GitHub repository</p>
+            <h2 class="card-title">My Blog Posts</h2>
+            <p class="card-text">Latest posts from malaks-us/jason repository</p>
             
-            <form id="blogForm" class="api-form">
-                <div class="form-group">
-                    <label for="source" class="form-label">Select Source</label>
-                    <select class="form-control" id="source" name="source">
-                        <option value="">Select a source...</option>
-                        <option value="casjay">My Blog (malaks-us/jason)</option>
-                        <option value="custom">Custom Repository</option>
-                    </select>
+            <% if (typeof blogData !== 'undefined' && blogData && blogData.posts) { %>
+                <div class="blog-info mb-4">
+                    <span class="badge bg-primary"><%= blogData.total_posts || blogData.posts.length %> total posts</span>
+                    <span class="badge bg-info">Repository: <%= blogData.repository %></span>
                 </div>
                 
-                <div id="customRepo" style="display: none;">
-                    <div class="form-group">
-                        <label for="user" class="form-label">GitHub User</label>
-                        <input type="text" class="form-control" id="user" name="user" placeholder="username">
-                    </div>
-                    <div class="form-group">
-                        <label for="repo" class="form-label">Repository Name</label>
-                        <input type="text" class="form-control" id="repo" name="repo" placeholder="repository">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Load Blog Posts</button>
-            </form>
-            
-            <div class="result-container mt-6">
-                <h3>Blog Posts</h3>
-                <% if (typeof blogData !== 'undefined' && blogData && blogData.posts) { %>
-                    <div class="text-muted mb-3">Found <%= blogData.total_posts || blogData.posts.length %> blog posts</div>
-                    <div class="blog-posts">
-                        <% blogData.posts.slice(0, 20).forEach(post => { %>
-                            <div class="blog-post">
-                                <h5><a href="<%= post.url || post.html_url %>" target="_blank"><%= post.title || post.name %></a></h5>
-                                <div class="meta">
-                                    <span>📅 <%= post.date || 'No date' %></span>
-                                    <% if (post.author) { %><span>👤 <%= post.author %></span><% } %>
-                                    <% if (post.categories && post.categories.length > 0) { %>
-                                        <span>🏷️ <%= post.categories.join(', ') %></span>
-                                    <% } %>
-                                </div>
-                                <% if (post.excerpt || post.description) { %>
-                                    <div class="blog-excerpt"><%= post.excerpt || post.description %></div>
+                <div class="blog-posts">
+                    <% blogData.posts.slice(0, 20).forEach(post => { %>
+                        <div class="blog-post">
+                            <h5><a href="<%= post.html_url %>" target="_blank"><%= post.title %></a></h5>
+                            <div class="meta">
+                                <span>📅 <%= post.date %></span>
+                                <% if (post.author) { %><span>👤 <%= post.author %></span><% } %>
+                                <% if (post.categories && post.categories !== 'null' && post.categories !== '[blog, ]') { %>
+                                    <span>🏷️ <%= post.categories %></span>
                                 <% } %>
                             </div>
-                        <% }) %>
-                    </div>
-                <% } else { %>
-                    <div class="text-muted mb-3">Found 0 blog posts</div>
-                    <div class="empty-state">No blog posts found</div>
-                <% } %>
-            </div>
+                            <% if (post.excerpt) { %>
+                                <div class="blog-excerpt"><%= post.excerpt.substring(0, 200) %>...</div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                    
+                    <% if (blogData.posts.length > 20) { %>
+                        <div class="text-muted text-center mt-4">
+                            Showing latest 20 posts of <%= blogData.total_posts %>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="loading-state">
+                    <p>Loading blog posts from GitHub repository...</p>
+                    <p class="text-muted">Fetching latest posts from malaks-us/jason</p>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>
