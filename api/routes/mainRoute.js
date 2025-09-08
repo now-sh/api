@@ -25,16 +25,79 @@ defaultRoute.get('/', cors(), (req, res) => {
 // ==== NEW CATEGORIZED FRONTEND ROUTES ====
 
 // 🔧 Utilities frontend routes
-defaultRoute.get('/utilities/:tool', cors(), (req, res) => {
+// Handle both GET and POST for utilities
+defaultRoute.get('/utilities/:tool', cors(), async (req, res) => {
+  await handleUtilityRequest(req, res);
+});
+
+defaultRoute.post('/utilities/:tool', cors(), async (req, res) => {
+  await handleUtilityRequest(req, res);
+});
+
+async function handleUtilityRequest(req, res) {
   try {
     const { tool } = req.params;
     const pageTitle = tool.charAt(0).toUpperCase() + tool.slice(1).replace('-', ' ');
+    
+    // Handle form submissions and data for utility tools
+    let toolData = null;
+    let toolResult = null;
+    let toolError = null;
+    
+    // Process form submissions
+    if (req.method === 'POST' || req.query.action) {
+      try {
+        const axios = require('axios');
+        let apiUrl = `${req.protocol}://${req.get('host')}/api/v1/tools/${tool}`;
+        let requestData = {};
+        
+        // Handle different utility tools
+        switch(tool) {
+          case 'uuid':
+            if (req.body?.action === 'generate') {
+              apiUrl = `${req.protocol}://${req.get('host')}/api/v1/tools/uuid/v4`;
+            }
+            break;
+          case 'base64':
+            if (req.body?.text) {
+              const text = req.body.text;
+              const operation = req.body.operation || 'encode';
+              apiUrl = `${req.protocol}://${req.get('host')}/api/v1/tools/base64/${operation}`;
+              requestData = { text: text };
+            }
+            break;
+          case 'passwd':
+            if (req.body?.action === 'generate') {
+              const length = req.body.length || 16;
+              apiUrl = `${req.protocol}://${req.get('host')}/api/v1/tools/passwd/${length}`;
+            }
+            break;
+        }
+        
+        // Make API call if we have a URL and data
+        if (apiUrl) {
+          let response;
+          if (Object.keys(requestData).length > 0) {
+            response = await axios.post(apiUrl, requestData);
+          } else {
+            response = await axios.get(apiUrl);
+          }
+          toolResult = response.data;
+        }
+      } catch (error) {
+        toolError = error.message;
+      }
+    }
     
     res.render(`pages/utilities/${tool}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} utility tool`,
       activePage: 'utilities',
-      baseUrl: `${req.protocol}://${req.get('host')}`
+      baseUrl: `${req.protocol}://${req.get('host')}`,
+      toolData: toolData,
+      toolResult: toolResult,
+      toolError: toolError,
+      query: req.query
     });
   } catch (error) {
     // Send 404 if specific page doesn't exist
@@ -68,8 +131,16 @@ defaultRoute.get('/tools/:tool', cors(), (req, res) => {
   }
 });
 
-// 📊 Data frontend routes
+// 📊 Data frontend routes (GET and POST)
 defaultRoute.get('/data/:source', cors(), async (req, res) => {
+  await handleDataRequest(req, res);
+});
+
+defaultRoute.post('/data/:source', cors(), async (req, res) => {
+  await handleDataRequest(req, res);
+});
+
+async function handleDataRequest(req, res) {
   try {
     const { source } = req.params;
     const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
@@ -81,12 +152,34 @@ defaultRoute.get('/data/:source', cors(), async (req, res) => {
         const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/domains`;
         const response = await axios.get(apiUrl);
         
+        let domainsData = response.data;
+        const searchTerm = req.body?.search;
+        
+        // Filter domains if search term provided via POST
+        if (searchTerm && domainsData.domains) {
+          const filteredDomains = domainsData.domains.filter(domain => 
+            domain.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          const filteredSubDomains = (domainsData.subDomains || []).filter(subdomain => 
+            subdomain && subdomain.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          
+          domainsData = {
+            ...domainsData,
+            domains: filteredDomains,
+            subDomains: filteredSubDomains,
+            originalCount: response.data.domains.length,
+            filtered: true,
+            searchTerm: searchTerm
+          };
+        }
+        
         res.render(`pages/data/${source}`, {
           title: `${pageTitle} - Backend API`,
           description: `${pageTitle} data source`,
           activePage: 'data',
           baseUrl: `${req.protocol}://${req.get('host')}`,
-          domainsData: response.data
+          domainsData: domainsData
         });
       } catch (error) {
         res.render(`pages/data/${source}`, {
@@ -95,7 +188,8 @@ defaultRoute.get('/data/:source', cors(), async (req, res) => {
           activePage: 'data',
           baseUrl: `${req.protocol}://${req.get('host')}`,
           domainsData: null,
-          error: 'Failed to load domains data'
+          error: 'Failed to load domains data',
+          search: req.query.search || ''
         });
       }
     } else if (source === 'blogs') {
