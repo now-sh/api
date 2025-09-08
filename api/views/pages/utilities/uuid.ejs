@@ -10,18 +10,24 @@
     <div class="text-center">
         <div id="uuid-display" class="mb-4">
             <code class="uuid-result">
-                Click generate to create a UUID
+                <% if (typeof toolResult !== 'undefined' && toolResult && toolResult.data) { %>
+                    <%= toolResult.data.uuid %>
+                <% } else { %>
+                    Click generate to create a UUID
+                <% } %>
             </code>
         </div>
         
-        <div class="btn-group">
-            <button id="generateBtn" class="btn btn-primary">
-                Generate New UUID
-            </button>
-            <button id="copyBtn" class="btn btn-secondary" disabled>
+        <form method="POST" action="/utilities/uuid" class="d-inline">
+            <input type="hidden" name="action" value="generate">
+            <button type="submit" class="btn btn-primary">Generate New UUID</button>
+        </form>
+        
+        <% if (typeof toolResult !== 'undefined' && toolResult && toolResult.data) { %>
+            <button onclick="copyToClipboard('<%= toolResult.data.uuid %>')" class="btn btn-secondary">
                 Copy to Clipboard
             </button>
-        </div>
+        <% } %>
         
         <div class="mt-6">
             <h3 class="mb-3">Batch Generation</h3>
@@ -156,156 +162,20 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const generateBtn = document.getElementById('generateBtn');
-    const copyBtn = document.getElementById('copyBtn');
-    const uuidDisplay = document.querySelector('.uuid-result');
-    const batchForm = document.getElementById('batchForm');
-    const validateForm = document.getElementById('validateForm');
-    let currentUuid = '';
-    
-    // Generate single UUID
-    generateBtn.addEventListener('click', async () => {
-        generateBtn.disabled = true;
-        uuidDisplay.textContent = 'Generating...';
-        
-        try {
-            const response = await fetch('/api/v1/tools/uuid/v4');
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                currentUuid = data.data.uuid;
-                uuidDisplay.textContent = currentUuid;
-                uuidDisplay.classList.add('success');
-                copyBtn.disabled = false;
-                
-                // Remove success class after animation
-                setTimeout(() => uuidDisplay.classList.remove('success'), 500);
-            } else {
-                uuidDisplay.textContent = 'Error generating UUID';
-            }
-        } catch (error) {
-            uuidDisplay.textContent = 'Error: ' + error.message;
-        } finally {
-            generateBtn.disabled = false;
-        }
-    });
-    
-    // Copy single UUID
-    copyBtn.addEventListener('click', () => {
-        if (currentUuid) {
-            navigator.clipboard.writeText(currentUuid).then(() => {
-                copyBtn.textContent = 'Copied!';
-                copyBtn.classList.add('btn-success');
-                
-                setTimeout(() => {
-                    copyBtn.textContent = 'Copy to Clipboard';
-                    copyBtn.classList.remove('btn-success');
-                }, 2000);
-            });
-        }
-    });
-    
-    // Click to copy UUID
-    uuidDisplay.addEventListener('click', () => {
-        if (currentUuid) {
-            navigator.clipboard.writeText(currentUuid);
-            showToast('UUID copied to clipboard!');
-        }
-    });
-    
-    // Batch generation
-    batchForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const count = document.getElementById('count').value;
-        const uppercase = document.getElementById('uppercase').checked;
-        const resultDiv = document.getElementById('batch-result');
-        const resultOutput = resultDiv.querySelector('.result-output');
-        
-        resultOutput.textContent = 'Generating...';
-        resultDiv.style.display = 'block';
-        
-        try {
-            const response = await fetch(`/api/v1/tools/uuid/generate/${count}`);
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                let uuids = data.data.uuids;
-                if (uppercase) {
-                    uuids = uuids.map(uuid => uuid.toUpperCase());
-                }
-                resultOutput.textContent = uuids.join('\n');
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } else {
-                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate UUIDs'}</div>`;
-            }
-        } catch (error) {
-            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-        }
-    });
-    
-    // UUID validation
-    validateForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const uuid = document.getElementById('uuidInput').value.trim();
-        const resultDiv = document.getElementById('validate-result');
-        const resultOutput = resultDiv.querySelector('.result-output');
-        
-        resultOutput.innerHTML = '<div class="loading">Validating...</div>';
-        resultDiv.style.display = 'block';
-        
-        try {
-            const response = await fetch(`/api/v1/tools/uuid/validate/${encodeURIComponent(uuid)}`);
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                const isValid = data.data.valid;
-                resultOutput.innerHTML = `
-                    <div class="validation-result ${isValid ? 'valid' : 'invalid'}">
-                        ${isValid ? '✓ Valid UUID' : '✗ Invalid UUID'}
-                        ${data.data.version ? `<br><small>Version: ${data.data.version}</small>` : ''}
-                    </div>
-                `;
-            } else {
-                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Validation failed'}</div>`;
-            }
-        } catch (error) {
-            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-        }
-    });
-});
-
-// Copy batch results
-function copyBatchResults() {
-    const output = document.querySelector('#batch-result .result-output');
-    const text = output.textContent;
-    
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('#batch-result .copy-btn');
-        btn.textContent = 'Copied!';
-        btn.classList.add('btn-success');
-        
-        setTimeout(() => {
-            btn.textContent = 'Copy All';
-            btn.classList.remove('btn-success');
-        }, 2000);
-    });
-}
-
-// Toast notification
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 2000);
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied: ' + text);
+        });
+    } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Copied: ' + text);
+    }
 }
 </script>
 
