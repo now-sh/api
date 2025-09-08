@@ -107,7 +107,7 @@ async function handleUtilityRequest(req, res) {
       message: `Utilities page not found - ${req.originalUrl}`
     });
   }
-});
+}
 
 // 🛠️ Tools frontend routes  
 defaultRoute.get('/tools/:tool', cors(), (req, res) => {
@@ -264,7 +264,7 @@ async function handleDataRequest(req, res) {
       message: `Data page not found - ${req.originalUrl}`
     });
   }
-});
+}
 
 // 🏥 Health frontend routes
 defaultRoute.get('/health/:service', cors(), (req, res) => {
