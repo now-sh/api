@@ -8,12 +8,19 @@
     <p>Below are all the domains and subdomains currently in the system.</p>
     
     <div class="search-box mb-4">
-        <input 
-            type="text" 
-            id="domainSearch" 
-            class="form-control" 
-            placeholder="Search domains..."
-        />
+        <form method="POST" action="/data/domains">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="search"
+                    class="form-control" 
+                    placeholder="Search domains..."
+                    value=""
+                />
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="/data/domains" class="btn btn-secondary">Show All</a>
+            </div>
+        </form>
     </div>
     
     <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
@@ -29,6 +36,9 @@
         <span id="domainCount" class="badge bg-purple">
             <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
                 <%= domainsData.domains.length %> domains
+                <% if (domainsData.filtered) { %>
+                    (filtered from <%= domainsData.originalCount %>)
+                <% } %>
             <% } %>
         </span>
     </div>
