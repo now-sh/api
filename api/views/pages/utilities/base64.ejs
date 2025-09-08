@@ -7,7 +7,7 @@
     <h2 class="card-title">Base64 Converter</h2>
     <p class="card-text mb-4">Enter text to encode or Base64 string to decode</p>
     
-    <form id="base64Form" class="api-form">
+    <form method="POST" action="/utilities/base64" class="api-form">
         <div class="form-group">
             <label for="text" class="form-label">Input Text</label>
             <textarea 
@@ -17,13 +17,13 @@
                 placeholder="Enter text to encode or Base64 to decode..."
                 required
                 rows="4"
-            ></textarea>
+            >Hello World</textarea>
         </div>
         
         <div class="form-group">
             <label for="action" class="form-label">Action</label>
-            <select id="action" name="action" class="form-control" required>
-                <option value="encode">Encode to Base64</option>
+            <select id="operation" name="operation" class="form-control" required>
+                <option value="encode" selected>Encode to Base64</option>
                 <option value="decode">Decode from Base64</option>
             </select>
         </div>
@@ -38,11 +38,21 @@
         </div>
     </form>
     
-    <div id="base64Form-result" class="result-container mt-6" style="display: none;">
-        <h3 class="mb-3">Result:</h3>
-        <pre class="result-output"></pre>
-        <button class="btn btn-sm copy-btn mt-2" data-form-id="base64Form">Copy Result</button>
-    </div>
+    <% if (typeof toolResult !== 'undefined' && toolResult) { %>
+        <div class="result-container mt-6">
+            <h3 class="mb-3">Result:</h3>
+            <% if (toolResult.success && toolResult.data) { %>
+                <pre class="result-output"><%= toolResult.data.encoded || toolResult.data.decoded || JSON.stringify(toolResult.data, null, 2) %></pre>
+                <button onclick="copyText('<%= (toolResult.data.encoded || toolResult.data.decoded || '').replace(/'/g, "\\'") %>')" class="btn btn-sm btn-secondary mt-2">Copy Result</button>
+            <% } else { %>
+                <div class="error-message">Error: <%= toolResult.error || 'Conversion failed' %></div>
+            <% } %>
+        </div>
+    <% } else if (typeof toolError !== 'undefined' && toolError) { %>
+        <div class="result-container mt-6">
+            <div class="error-message">Error: <%= toolError %></div>
+        </div>
+    <% } %>
 </div>
 
 <div class="card mt-4">
@@ -122,4 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function copyText(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+    }
+}
 </script>
