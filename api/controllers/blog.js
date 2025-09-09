@@ -68,7 +68,13 @@ async function fetchBlogPosts(repoUrl) {
   const cached = blogCache.get(cacheKey);
   
   if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-    return cached.data;
+    // Only return cache if it has actual posts
+    if (cached.data && cached.data.length > 0) {
+      return cached.data;
+    } else {
+      // Clear bad cache
+      blogCache.delete(cacheKey);
+    }
   }
   
   try {
@@ -207,5 +213,6 @@ module.exports = {
   getBlogPost,
   searchBlogPosts,
   getCustomRepoPosts,
-  getDefaultRepo
+  getDefaultRepo,
+  clearCache: () => blogCache.clear()
 };
