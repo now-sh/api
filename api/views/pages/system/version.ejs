@@ -5,6 +5,13 @@
 
 <div class="row">
     <div class="col-md-10 mx-auto">
+        <!-- Greeting Banner -->
+        <% if (typeof versionData !== 'undefined' && versionData && versionData.Greetings) { %>
+            <div class="greeting-banner mb-4">
+                <%= versionData.Greetings %>
+            </div>
+        <% } %>
+
         <!-- API Version Information -->
         <div class="card mb-4">
             <h2 class="card-title">🔖 Version Information</h2>
@@ -28,11 +35,6 @@
                             <span class="info-value"><%= versionData.Today || 'Unknown' %></span>
                         </div>
                     </div>
-                    <% if (versionData.Greetings) { %>
-                        <div class="greeting-banner">
-                            <%= versionData.Greetings %>
-                        </div>
-                    <% } %>
                 <% } else { %>
                     <div class="error-message">Unable to load version information</div>
                 <% } %>
