@@ -54,7 +54,35 @@
     </div>
     
     <div id="todosList" class="todos-container">
-        <div class="loading text-center">Loading todos...</div>
+        <% if (typeof pageData !== 'undefined' && pageData && pageData.data && pageData.data.todos) { %>
+            <% if (pageData.data.todos.length > 0) { %>
+                <% pageData.data.todos.forEach(todo => { %>
+                    <div class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title"><%= todo.title %></div>
+                            <% if (todo.description) { %>
+                                <div class="todo-description"><%= todo.description %></div>
+                            <% } %>
+                            <div class="todo-meta">
+                                <span class="priority-badge priority-<%= todo.priority %>"><%= todo.priority %></span>
+                                <% if (todo.createdAt) { %>
+                                    <span>Created: <%= new Date(todo.createdAt).toLocaleDateString() %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <p>No todos yet. Create your first todo above!</p>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="empty-state">
+                <p>No todos available. You have 0 todos.</p>
+                <p class="text-muted">Create your first todo using the form above.</p>
+            </div>
+        <% } %>
     </div>
 </div>
 
