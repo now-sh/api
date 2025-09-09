@@ -194,28 +194,37 @@ async function handleDataRequest(req, res) {
       }
     } else if (source === 'blogs') {
       try {
-        const axios = require('axios');
-        const apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/blog/jason`;
-        const response = await axios.get(apiUrl);
+        // Call blog controller directly instead of HTTP API
+        const blogController = require('../controllers/blog');
         
-        console.log('Blog API response keys:', Object.keys(response.data));
-        console.log('Blog posts count:', response.data.posts?.length || 0);
+        // Clear any bad cache and get fresh data
+        blogController.clearCache();
+        const posts = await blogController.getBlogPosts();
+        
+        console.log(`Direct blog controller: ${posts.length} posts fetched`);
+        
+        const blogData = {
+          repository: "malaks-us/jason",
+          total_posts: posts.length,
+          posts: posts
+        };
         
         res.render(`pages/data/${source}`, {
           title: `${pageTitle} - Backend API`,
           description: `${pageTitle} data source`,
           activePage: 'data',
           baseUrl: `${req.protocol}://${req.get('host')}`,
-          blogData: response.data
+          blogData: blogData
         });
       } catch (error) {
+        console.error('Blog controller error:', error.message);
         res.render(`pages/data/${source}`, {
           title: `${pageTitle} - Backend API`,
           description: `${pageTitle} data source`,
           activePage: 'data',
           baseUrl: `${req.protocol}://${req.get('host')}`,
           blogData: null,
-          error: 'Failed to load blog data'
+          error: 'Failed to load blog data: ' + error.message
         });
       }
     } else {
