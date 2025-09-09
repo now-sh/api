@@ -16,6 +16,20 @@ const { connectToDatabase } = require('./db/connection');
 
 // Version page route - must be early to override any default handlers
 app.get('/version', (req, res) => {
+  // Check authentication from cookies or headers
+  const authToken = req.cookies?.authToken || req.header('Authorization')?.replace('Bearer ', '');
+  let currentUser = null;
+  
+  if (authToken) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.decode(authToken);
+      currentUser = decoded?.username || decoded?.name || decoded?.sub || 'Authenticated User';
+    } catch (error) {
+      // Invalid token, leave currentUser as null
+    }
+  }
+  
   // For now, render with static data to test template
   const testVersionData = {
     Version: "1.9.4",
@@ -23,7 +37,7 @@ app.get('/version', (req, res) => {
     Time: new Date().toLocaleTimeString(),
     Today: new Date().toLocaleDateString(),
     Greetings: "🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞",
-    Auth: "no",
+    Auth: currentUser ? `Logged in as ${currentUser}` : "no",
     GitHubToken: "Token is set",
     RedditAuth: "Set and Valid",
     Health: {

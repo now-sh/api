@@ -194,14 +194,11 @@ async function handleDataRequest(req, res) {
       }
     } else if (source === 'blogs') {
       try {
-        // Call blog controller directly instead of HTTP API
+        // Use direct controller call for reliability
         const blogController = require('../controllers/blog');
-        
-        // Clear any bad cache and get fresh data
-        blogController.clearCache();
         const posts = await blogController.getBlogPosts();
         
-        console.log(`Direct blog controller: ${posts.length} posts fetched`);
+        console.log(`Blog posts loaded: ${posts.length} posts`);
         
         const blogData = {
           repository: "malaks-us/jason",

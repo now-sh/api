@@ -258,6 +258,34 @@ blogRoute.delete('/cache/clear', cors(), (req, res) => {
   }
 });
 
+// Data endpoint for personal blog (maps to malaks-us/jason)
+blogRoute.get('/', cors(), async (req, res) => {
+  try {
+    const blogController = require('../controllers/blog');
+    const posts = await blogController.getBlogPosts();
+    
+    res.json({
+      success: true,
+      data: {
+        repository: "malaks-us/jason",
+        total_posts: posts.length,
+        posts: posts
+      }
+    });
+  } catch (error) {
+    console.error('Data blogs error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      data: {
+        repository: "malaks-us/jason",
+        total_posts: 0,
+        posts: []
+      }
+    });
+  }
+});
+
 blogRoute.get('/:user/:repo', cors(), async (req, res) => {
   try {
     const posts = await blogController.getCustomRepoPosts(req.params.user, req.params.repo);
