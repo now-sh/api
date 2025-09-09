@@ -16,20 +16,37 @@
                 </div>
                 
                 <div class="blog-posts">
-                    <% blogData.posts.slice(0, 20).forEach(post => { %>
-                        <div class="blog-post">
-                            <h5><a href="<%= post.html_url %>" target="_blank"><%= post.title %></a></h5>
-                            <div class="meta">
-                                <span>📅 <%= post.date %></span>
-                                <% if (post.author) { %><span>👤 <%= post.author %></span><% } %>
-                                <% if (post.categories && post.categories !== 'null' && post.categories !== '[blog, ]') { %>
-                                    <span>🏷️ <%= post.categories %></span>
-                                <% } %>
+                    <% blogData.posts.slice(0, 20).forEach((post, index) => { %>
+                        <article class="blog-post">
+                            <div class="blog-header">
+                                <h3 class="blog-title">
+                                    <a href="<%= post.html_url %>" target="_blank"><%= post.title %></a>
+                                </h3>
+                                <div class="blog-meta">
+                                    <span class="blog-date">📅 <%= post.date %></span>
+                                    <% if (post.author) { %>
+                                        <span class="blog-author">👤 <%= post.author %></span>
+                                    <% } %>
+                                    <% if (post.categories && post.categories !== 'null' && post.categories !== '[blog, ]') { %>
+                                        <span class="blog-category">🏷️ <%= post.categories %></span>
+                                    <% } %>
+                                </div>
                             </div>
                             <% if (post.excerpt) { %>
-                                <div class="blog-excerpt"><%= post.excerpt.substring(0, 200) %>...</div>
+                                <div class="blog-excerpt">
+                                    <%= post.excerpt.substring(0, 300) %>
+                                    <% if (post.excerpt.length > 300) { %>...
+                                        <a href="<%= post.html_url %>" target="_blank" class="read-more">Read More</a>
+                                    <% } %>
+                                </div>
                             <% } %>
-                        </div>
+                            <div class="blog-footer">
+                                <a href="<%= post.html_url %>" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-box-arrow-up-right"></i> Read Post
+                                </a>
+                                <span class="post-number">#<%= index + 1 %></span>
+                            </div>
+                        </article>
                     <% }) %>
                     
                     <% if (blogData.posts.length > 20) { %>
@@ -49,23 +66,54 @@
 </div>
 
 <style>
-.blog-post {
+article.blog-post {
     border: 1px solid var(--border-color);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    border-radius: var(--radius-md);
-    background-color: var(--bg-secondary);
-    transition: all 0.2s ease;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(139, 69, 233, 0.05) 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.blog-post:hover {
+article.blog-post::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--purple), var(--cyan), var(--pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+article.blog-post:hover {
     border-color: var(--purple);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(139, 69, 233, 0.2);
 }
 
-.blog-post h5 {
-    margin-bottom: 0.75rem;
+article.blog-post:hover::before {
+    opacity: 1;
+}
+
+.blog-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.blog-title a {
     color: var(--purple);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.blog-title a:hover {
+    color: var(--cyan);
 }
 
 .blog-post h5 a {
