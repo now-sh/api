@@ -6,56 +6,62 @@
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card">
-            <h2 class="card-title">GitHub Profile Explorer</h2>
-            <p class="card-text">View my GitHub profile or search for other users</p>
+            <h2 class="card-title">My GitHub Profile</h2>
+            <p class="card-text">GitHub profile, repositories, and organizations</p>
             
-            <form id="gitForm" class="api-form">
-                <div class="form-group">
-                    <label for="username" class="form-label">GitHub Username</label>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        name="username" 
-                        class="form-control" 
-                        value="casjay" 
-                        placeholder="Enter GitHub username..."
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="dataType" class="form-label">Data Type</label>
-                    <select id="dataType" name="dataType" class="form-control">
-                        <option value="user">User Profile</option>
-                        <option value="repos">Repositories</option>
-                        <option value="orgs">Organizations</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-github"></i> Get GitHub Data
-                </button>
-            </form>
+            <!-- Quick Access buttons at top -->
+            <div class="btn-group mb-4">
+                <form method="POST" action="/data/git" class="d-inline">
+                    <input type="hidden" name="dataType" value="user">
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-person"></i> Profile
+                    </button>
+                </form>
+                <form method="POST" action="/data/git" class="d-inline">
+                    <input type="hidden" name="dataType" value="repos">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-folder"></i> Repositories
+                    </button>
+                </form>
+                <form method="POST" action="/data/git" class="d-inline">
+                    <input type="hidden" name="dataType" value="orgs">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-building"></i> Organizations
+                    </button>
+                </form>
+            </div>
             
-            <div id="gitForm-result" class="result-container mt-6" style="display: none;">
-                <h3 class="mb-3">Results:</h3>
-                <div class="result-output"></div>
-            </div>
-        </div>
-
-        <!-- Quick access buttons -->
-        <div class="card mt-4">
-            <h3 class="card-title">Quick Access</h3>
-            <div class="btn-group">
-                <button class="btn btn-info btn-sm" onclick="loadMyProfile()">
-                    <i class="bi bi-person"></i> My Profile
-                </button>
-                <button class="btn btn-success btn-sm" onclick="loadMyRepos()">
-                    <i class="bi bi-folder"></i> My Repos
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="loadMyOrgs()">
-                    <i class="bi bi-building"></i> My Orgs
-                </button>
-            </div>
+            <!-- Auto-loaded GitHub data -->
+            <% if (typeof pageData !== 'undefined' && pageData) { %>
+                <div class="github-profile">
+                    <div class="profile-header">
+                        <img src="<%= pageData.avatar_url %>" alt="<%= pageData.login %>" class="avatar">
+                        <div class="profile-info">
+                            <h4><%= pageData.name || pageData.login %></h4>
+                            <p class="text-muted">@<%= pageData.login %></p>
+                            <% if (pageData.bio) { %><p><%= pageData.bio %></p><% } %>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <strong><%= pageData.public_repos %></strong>
+                            <span>Repositories</span>
+                        </div>
+                        <div class="stat">
+                            <strong><%= pageData.followers %></strong>
+                            <span>Followers</span>
+                        </div>
+                        <div class="stat">
+                            <strong><%= pageData.following %></strong>
+                            <span>Following</span>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="loading-state">
+                    <p>Loading GitHub profile data...</p>
+                </div>
+            <% } %>
         </div>
 
         <!-- API endpoints info -->
