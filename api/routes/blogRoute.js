@@ -221,16 +221,39 @@ blogRoute.get('/repo/:user/:repo/text',
  */
 blogRoute.get('/jason', cors(), async (req, res) => {
   try {
+    // Clear cache if requested
+    if (req.query.refresh === 'true') {
+      blogController.clearCache();
+    }
+    
     const posts = await blogController.getBlogPosts();
+    console.log(`Blog posts fetched: ${posts.length} posts`);
+    
     res.json({
       repository: "malaks-us/jason",
       total_posts: posts.length,
       posts: posts
     });
   } catch (error) {
+    console.error('Blog API error:', error.message);
     res.status(500).json({ 
       error: error.message,
       repository: "malaks-us/jason"
+    });
+  }
+});
+
+// Add cache clear endpoint
+blogRoute.delete('/cache/clear', cors(), (req, res) => {
+  try {
+    blogController.clearCache();
+    res.json({
+      success: true,
+      message: 'Blog cache cleared successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
     });
   }
 });
