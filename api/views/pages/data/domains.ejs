@@ -12,6 +12,7 @@
             <div class="input-group">
                 <input 
                     type="text" 
+                    id="domainSearch"
                     name="search"
                     class="form-control" 
                     placeholder="Search domains..."
@@ -242,20 +243,45 @@
 </style>
 
 <script>
+// Real-time domain search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('domainSearch');
+    const allDomains = document.querySelectorAll('.domain-item');
+    
+    if (searchInput && allDomains.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+            
+            allDomains.forEach(domain => {
+                const domainName = domain.querySelector('.domain-name').textContent.toLowerCase();
+                if (domainName.includes(searchTerm)) {
+                    domain.style.display = '';
+                    visibleCount++;
+                } else {
+                    domain.style.display = 'none';
+                }
+            });
+            
+            // Update count
+            const countEl = document.getElementById('domainCount');
+            if (countEl) {
+                countEl.textContent = `${visibleCount} domains` + (searchTerm ? ` (filtered)` : '');
+            }
+        });
+    }
+});
+
+// Copy function without popup alerts
 function copyDomain(domain) {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(domain).then(() => {
-            alert('Copied: ' + domain);
+            // Visual feedback without alert
+            event.target.closest('.domain-item').style.backgroundColor = 'var(--green)';
+            setTimeout(() => {
+                event.target.closest('.domain-item').style.backgroundColor = '';
+            }, 300);
         });
-    } else {
-        // Fallback for older browsers
-        const textarea = document.createElement('textarea');
-        textarea.value = domain;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        alert('Copied: ' + domain);
     }
 }
 </script>
