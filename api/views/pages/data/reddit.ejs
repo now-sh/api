@@ -43,6 +43,11 @@
                 </p>
               </div>
             </div>
+          <% } else if (typeof pageData !== 'undefined' && pageData && pageData.success === false) { %>
+            <div class="error-state">
+              <p class="text-danger">Error loading Reddit data</p>
+              <p class="text-muted"><%= pageData.message || 'Unknown error' %></p>
+            </div>
           <% } else { %>
             <div class="loading-state">
               <p>Loading Reddit profile data...</p>
