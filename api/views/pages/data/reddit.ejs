@@ -6,33 +6,49 @@
     <div class="col-md-8">
       <div class="card border border-danger">
         <div class="card-header">
-          <h5 class="mb-0">Reddit User Lookup</h5>
+          <h5 class="mb-0">My Reddit Profile</h5>
         </div>
         <div class="card-body">
-          <form id="redditForm">
-            <div class="mb-3">
-              <label for="username" class="form-label">Reddit Username</label>
-              <input type="text" class="form-control" id="username" name="username" value="casjay" placeholder="Enter Reddit username...">
+          <% if (typeof pageData !== 'undefined' && pageData && pageData.data && pageData.data.user) { %>
+            <div class="reddit-profile">
+              <div class="profile-info">
+                <h4><%= pageData.data.user.display_name || pageData.data.user.name %></h4>
+                <p class="text-muted">u/<%= pageData.data.user.name %></p>
+                <% if (pageData.data.user.public_description) { %>
+                  <p class="profile-description"><%= pageData.data.user.public_description %></p>
+                <% } %>
+              </div>
+              
+              <div class="reddit-stats">
+                <div class="stat-card">
+                  <div class="stat-number"><%= pageData.data.user.total_karma || 0 %></div>
+                  <div class="stat-label">Total Karma</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number"><%= pageData.data.user.link_karma || 0 %></div>
+                  <div class="stat-label">Link Karma</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number"><%= pageData.data.user.comment_karma || 0 %></div>
+                  <div class="stat-label">Comment Karma</div>
+                </div>
+              </div>
+              
+              <div class="reddit-info mt-3">
+                <p class="text-info">
+                  <i class="bi bi-info-circle"></i> <%= pageData.data.note || pageData.message %>
+                </p>
+                <p class="text-muted">
+                  Access Level: <%= pageData.data.access_level || 'read-only' %>
+                </p>
+              </div>
             </div>
-            
-            <button type="submit" class="btn btn-danger">
-              <i class="bi bi-reddit"></i> Get Reddit Posts
-            </button>
-          </form>
-        </div>
-      </div>
-      
-      <div id="redditForm-result" class="mt-4" style="display: none;">
-        <div class="card border border-success">
-          <div class="card-header">
-            <h5 class="mb-0">Reddit Posts</h5>
-          </div>
-          <div class="card-body">
-            <div class="result-output bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.875rem;"></div>
-            <button class="btn btn-outline-success btn-sm mt-2" onclick="copyToClipboard('.result-output')">
-              <i class="bi bi-clipboard"></i> Copy JSON
-            </button>
-          </div>
+          <% } else { %>
+            <div class="loading-state">
+              <p>Loading Reddit profile data...</p>
+              <p class="text-muted">Fetching data with OAuth authentication</p>
+            </div>
+          <% } %>
         </div>
       </div>
     </div>
@@ -72,49 +88,54 @@
   </div>
 </div>
 
-<script>
-function copyToClipboard(selector) {
-  const element = document.querySelector(selector);
-  if (element) {
-    navigator.clipboard.writeText(element.textContent);
-  }
+<style>
+.reddit-profile {
+  padding: 1rem;
 }
 
-// Auto-load my Reddit data on page load
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('redditForm').dispatchEvent(new Event('submit'));
-});
+.profile-info h4 {
+  color: var(--purple);
+  margin-bottom: 0.5rem;
+}
 
-document.getElementById('redditForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  
-  const formData = new FormData(e.target);
-  const username = formData.get('username');
-  const resultDiv = document.getElementById('redditForm-result');
-  const resultOutput = resultDiv.querySelector('.result-output');
-  
-  if (!username) {
-    alert('Please enter a username');
-    return;
-  }
-  
-  try {
-    const endpoint = username === 'casjay' ? '/api/v1/me/info/reddit' : `/api/v1/social/reddit/u/${username}`;
-    
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    
-    if (response.ok) {
-      resultOutput.textContent = JSON.stringify(data, null, 2);
-      resultDiv.style.display = 'block';
-      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-      resultOutput.textContent = `Error: ${data.message || 'Failed to fetch data'}`;
-      resultDiv.style.display = 'block';
-    }
-  } catch (error) {
-    resultOutput.textContent = `Error: ${error.message}`;
-    resultDiv.style.display = 'block';
-  }
-});
-</script>
+.reddit-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reddit-info {
+  background: rgba(139, 69, 233, 0.1);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--purple);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+</style>
