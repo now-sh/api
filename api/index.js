@@ -38,8 +38,8 @@ app.get('/version', (req, res) => {
     Today: new Date().toLocaleDateString(),
     Greetings: "🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞",
     Auth: currentUser ? `Logged in as ${currentUser}` : "no",
-    GitHubToken: "Token is set",
-    RedditAuth: "Set and Valid",
+    GitHubToken: "Configured",
+    RedditAuth: "Configured",
     Health: {
       Status: "healthy",
       Issues: []

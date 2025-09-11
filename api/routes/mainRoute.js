@@ -236,6 +236,7 @@ async function handleDataRequest(req, res) {
         switch(source) {
           case 'reddit':
             apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/reddit`;
+            console.log('Reddit page loading with API:', apiUrl);
             break;
           case 'git':
             apiUrl = `${req.protocol}://${req.get('host')}/api/v1/me/info/github`;

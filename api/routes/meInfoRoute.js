@@ -367,13 +367,13 @@ meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
 /**
  * Get Reddit data - JSON response (casjay)
  */
-// Import Reddit helper for OAuth functionality
+// Import Reddit helper
 const { fetchRedditData } = require('../utils/redditHelper');
 
 meInfoRoute.get('/reddit', cors(), async (req, res) => {
   try {
-    // Get real Reddit data using OAuth (READ-ONLY)
-    console.log('Fetching Reddit user data with OAuth (read-only)...');
+    // Get Reddit data (READ-ONLY)
+    console.log('Fetching Reddit user data (read-only)...');
     const userData = await fetchRedditData('casjay', null, 10);
     
     if (userData && userData.data) {
@@ -381,7 +381,7 @@ meInfoRoute.get('/reddit', cors(), async (req, res) => {
       
       const readOnlyResponse = {
         success: true,
-        message: 'Reddit data fetched successfully (read-only mode)',
+        message: 'Reddit data fetched successfully (read-only)',
         data: {
           user: {
             name: user.name,
@@ -397,7 +397,7 @@ meInfoRoute.get('/reddit', cors(), async (req, res) => {
             profile_img: user.icon_img || user.subreddit?.icon_img,
             followers: user.subreddit?.subscribers || 0
           },
-          note: 'Reddit API is READ-ONLY - no write operations allowed',
+          note: 'Reddit data is read-only',
           access_level: 'read-only',
           last_updated: new Date().toISOString()
         }
@@ -405,7 +405,7 @@ meInfoRoute.get('/reddit', cors(), async (req, res) => {
       
       res.json(readOnlyResponse);
     } else {
-      // Fallback to basic info if OAuth fails
+      // Fallback to basic info if data fetch fails
       res.json({
         success: true,
         message: 'Reddit API is read-only (fallback mode)',
@@ -413,7 +413,7 @@ meInfoRoute.get('/reddit', cors(), async (req, res) => {
           user: {
             name: 'casjay',
             display_name: 'Jason M. Hempstead',
-            note: 'Reddit OAuth not available - using fallback data'
+            note: 'Reddit data not available - using fallback data'
           },
           access_level: 'read-only-fallback',
           last_updated: new Date().toISOString()
