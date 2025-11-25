@@ -210,7 +210,6 @@ app.get('/world/covid-global', (req, res) => res.render('pages/world/covid-globa
 app.get('/world/covid-usa', (req, res) => res.render('pages/world/covid-usa'));
 app.get('/world/covid-nys', (req, res) => res.render('pages/world/covid-nys'));
 app.get('/data/anime', (req, res) => res.render('pages/fun/anime'));
-app.get('/data/domains', (req, res) => res.render('pages/data/domains'));
 app.get('/world/timezones', (req, res) => res.render('pages/world/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/world/closings'));
 app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));

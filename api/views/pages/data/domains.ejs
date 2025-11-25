@@ -25,7 +25,7 @@
     </div>
     
     <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
-        <div class="success">✅ Loaded <%= domainsData.domains.length %> domains</div>
+        <div class="success">✅ Loaded <%= domainsData.domains.length %> domains and <%= (domainsData.subDomains || domainsData.subdomains || []).length %> subdomains</div>
     <% } else { %>
         <div id="loadingStatus" class="loading">Loading domains...</div>
     <% } %>
@@ -33,20 +33,17 @@
 
 <div class="card mt-6">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>All Domains</h3>
+        <h3>Domains</h3>
         <span id="domainCount" class="badge bg-purple">
             <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
                 <%= domainsData.domains.length %> domains
-                <% if (domainsData.filtered) { %>
-                    (filtered from <%= domainsData.originalCount %>)
-                <% } %>
             <% } %>
         </span>
     </div>
     <div id="domainsList" class="domains-grid">
         <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
             <% domainsData.domains.forEach(domain => { %>
-                <div class="domain-item" onclick="copyDomain('<%= domain %>')">
+                <div class="domain-item" onclick="copyDomain(this, '<%= domain %>')">
                     <div class="domain-name"><%= domain %></div>
                     <div class="domain-status status-taken">Domain</div>
                     <div class="domain-details">Click to copy</div>
@@ -54,6 +51,34 @@
             <% }) %>
         <% } else { %>
             <div class="empty-state">No domains available</div>
+        <% } %>
+    </div>
+</div>
+
+<div class="card mt-6">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Subdomains</h3>
+        <span id="subdomainCount" class="badge bg-purple">
+            <%
+            const subdomains = domainsData?.subDomains || domainsData?.subdomains || [];
+            const filteredSubdomains = subdomains.filter(s => s && s.trim());
+            %>
+            <% if (typeof domainsData !== 'undefined' && domainsData && filteredSubdomains.length > 0) { %>
+                <%= filteredSubdomains.length %> subdomains
+            <% } %>
+        </span>
+    </div>
+    <div id="subdomainsList" class="domains-grid">
+        <% if (typeof domainsData !== 'undefined' && domainsData && filteredSubdomains.length > 0) { %>
+            <% filteredSubdomains.forEach(subdomain => { %>
+                <div class="domain-item" onclick="copyDomain(this, '<%= subdomain %>')">
+                    <div class="domain-name"><%= subdomain %></div>
+                    <div class="domain-status status-available">Subdomain</div>
+                    <div class="domain-details">Click to copy</div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state">No subdomains available</div>
         <% } %>
     </div>
 </div>
@@ -272,15 +297,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Copy function without popup alerts
-function copyDomain(domain) {
+// Copy function with visual feedback
+function copyDomain(element, domain) {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(domain).then(() => {
-            // Visual feedback without alert
-            event.target.closest('.domain-item').style.backgroundColor = 'var(--green)';
+            // Change background color to green
+            element.style.backgroundColor = 'rgba(80, 250, 123, 0.3)';
+            element.style.borderColor = 'var(--green)';
+
+            // Update the details text
+            const detailsEl = element.querySelector('.domain-details');
+            const originalText = detailsEl.textContent;
+            detailsEl.textContent = '✓ Copied!';
+            detailsEl.style.color = 'var(--green)';
+
+            // Reset after 1 second
             setTimeout(() => {
-                event.target.closest('.domain-item').style.backgroundColor = '';
-            }, 300);
+                element.style.backgroundColor = '';
+                element.style.borderColor = '';
+                detailsEl.textContent = originalText;
+                detailsEl.style.color = '';
+            }, 1000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            // Show error feedback
+            element.style.backgroundColor = 'rgba(255, 85, 85, 0.3)';
+            element.style.borderColor = 'var(--red)';
+            setTimeout(() => {
+                element.style.backgroundColor = '';
+                element.style.borderColor = '';
+            }, 1000);
         });
     }
 }
