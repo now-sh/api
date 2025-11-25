@@ -87,7 +87,7 @@ async function fetchWithOAuth(username, subreddit, limit) {
   try {
     const url = subreddit
       ? `${REDDIT_OAUTH_BASE}/r/${subreddit}/hot.json?limit=${limit}`
-      : `${REDDIT_OAUTH_BASE}/user/${username}/about.json`;
+      : `${REDDIT_OAUTH_BASE}/user/${username}.json?limit=${limit}`;
 
     const response = await axios.get(url, {
       headers: {
@@ -355,9 +355,9 @@ async function tryDirectJSONEndpoints(username, subreddit, limit) {
   for (const domain of domains) {
     for (const userAgent of USER_AGENTS) {
       try {
-        const url = subreddit 
+        const url = subreddit
           ? `https://${domain}/r/${subreddit}.json?limit=${limit}`
-          : `https://${domain}/user/${username}/about.json`;
+          : `https://${domain}/user/${username}.json?limit=${limit}`;
         
         console.log(`[Reddit] Trying ${domain} with ${userAgent.substring(0, 30)}...`);
         
@@ -419,9 +419,9 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
   const methods = [
     // Method 1: node-fetch with browser headers
     async () => {
-      const url = subreddit 
+      const url = subreddit
         ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
-        : `${REDDIT_BASE}/user/${username}/about.json`;
+        : `${REDDIT_BASE}/user/${username}.json?limit=${limit}`;
       
       const response = await fetch(url, {
         headers: {
@@ -443,9 +443,9 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
     
     // Method 2: axios with minimal headers
     async () => {
-      const url = subreddit 
+      const url = subreddit
         ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
-        : `${REDDIT_BASE}/user/${username}/about.json`;
+        : `${REDDIT_BASE}/user/${username}.json?limit=${limit}`;
         
       const response = await axios.get(url, {
         headers: {
@@ -520,4 +520,74 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
   throw lastError || new Error('All methods failed');
 }
 
-module.exports = { fetchRedditData };
+/**
+ * Fetch Reddit user PROFILE data (about.json - karma, account info, badges)
+ * This is separate from posts/submissions data
+ */
+async function fetchRedditUserProfile(username) {
+  console.log(`Fetching Reddit user PROFILE for: ${username}`);
+
+  const domains = ['reddit.com', 'www.reddit.com', 'old.reddit.com'];
+
+  // Try each domain with each user agent
+  for (const domain of domains) {
+    for (const userAgent of USER_AGENTS) {
+      try {
+        const url = `https://${domain}/user/${username}/about.json`;
+
+        console.log(`[Reddit Profile] Trying ${domain}...`);
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': userAgent
+          },
+          timeout: 3000
+        });
+
+        if (response.ok) {
+          const text = await response.text();
+          if (text.trim().startsWith('{')) {
+            const data = JSON.parse(text);
+            if (data && data.data) {
+              console.log(`✅ Profile fetch SUCCESS with ${domain}`);
+              data.source = 'profile-json';
+              return data;
+            }
+          }
+        }
+      } catch (error) {
+        // Continue trying
+      }
+    }
+  }
+
+  // Try OAuth if available
+  const token = await getOAuthToken();
+  if (token) {
+    try {
+      const url = `${REDDIT_OAUTH_BASE}/user/${username}/about.json`;
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'User-Agent': REDDIT_USER_AGENT
+        },
+        timeout: 10000
+      });
+
+      if (response.data) {
+        console.log('✅ Profile fetch SUCCESS with OAuth');
+        response.data.source = 'oauth-profile';
+        return response.data;
+      }
+    } catch (error) {
+      console.error('OAuth profile fetch failed:', error.message);
+    }
+  }
+
+  throw new Error(`Unable to fetch Reddit profile for ${username}`);
+}
+
+module.exports = {
+  fetchRedditData,
+  fetchRedditUserProfile
+};

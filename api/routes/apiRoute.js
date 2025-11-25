@@ -26,7 +26,7 @@ const isValidToken = githubToken &&
                     githubToken !== 'myverylonggithubapikey';
 const githubHeader = isValidToken ? 'Token is set' : 'Token is NOT set';
 
-apiRoute.get('', cors(), (req, res) => {
+apiRoute.get('/', cors(), (req, res) => {
   try {
     const data = {
       Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',

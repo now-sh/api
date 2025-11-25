@@ -14,7 +14,7 @@
               <!-- Profile Header with Avatar -->
               <div class="profile-header">
                 <% if (pageData.data.user.icon_img) { %>
-                  <img src="<%= pageData.data.user.icon_img %>" alt="<%= pageData.data.user.name %>" class="profile-avatar">
+                  <img src="<%- pageData.data.user.icon_img %>" alt="<%= pageData.data.user.name %>" class="profile-avatar">
                 <% } %>
                 <div class="profile-info">
                   <h4>
@@ -42,6 +42,10 @@
                   <span class="info-label"><i class="bi bi-calendar"></i> Cake Day:</span>
                   <span class="info-value"><%= new Date(pageData.data.user.created_utc * 1000).toLocaleDateString() %></span>
                 </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-badge"></i> Account ID:</span>
+                  <span class="info-value"><%= pageData.data.user.id %></span>
+                </div>
                 <% if (pageData.data.user.subreddit && pageData.data.user.subreddit.subscribers) { %>
                   <div class="info-row">
                     <span class="info-label"><i class="bi bi-people"></i> Followers:</span>
@@ -52,6 +56,24 @@
                   <span class="info-label"><i class="bi bi-envelope-check"></i> Verified Email:</span>
                   <span class="info-value"><%= pageData.data.user.has_verified_email ? 'Yes' : 'No' %></span>
                 </div>
+                <% if (pageData.data.user.is_employee) { %>
+                  <div class="info-row">
+                    <span class="info-label"><i class="bi bi-building"></i> Reddit Employee:</span>
+                    <span class="info-value text-danger">Yes</span>
+                  </div>
+                <% } %>
+                <% if (pageData.data.user.accept_followers !== undefined) { %>
+                  <div class="info-row">
+                    <span class="info-label"><i class="bi bi-person-plus"></i> Accepts Followers:</span>
+                    <span class="info-value"><%= pageData.data.user.accept_followers ? 'Yes' : 'No' %></span>
+                  </div>
+                <% } %>
+                <% if (pageData.data.user.has_subscribed) { %>
+                  <div class="info-row">
+                    <span class="info-label"><i class="bi bi-star"></i> Has Subscriptions:</span>
+                    <span class="info-value">Yes</span>
+                  </div>
+                <% } %>
               </div>
 
               <!-- Karma Breakdown -->
@@ -85,7 +107,7 @@
               <!-- Profile Banner -->
               <% if (pageData.data.user.subreddit && pageData.data.user.subreddit.banner_img) { %>
                 <div class="profile-banner mt-3">
-                  <img src="<%= pageData.data.user.subreddit.banner_img %>" alt="Profile Banner" class="banner-img">
+                  <img src="<%- pageData.data.user.subreddit.banner_img %>" alt="Profile Banner" class="banner-img">
                 </div>
               <% } %>
 
@@ -142,9 +164,9 @@
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li><strong>My Posts:</strong> <code>/api/v1/me/info/reddit</code></li>
-            <li><strong>User Posts:</strong> <code>/api/v1/social/reddit/u/spez</code></li>
-            <li><strong>Subreddit Posts:</strong> <code>/api/v1/social/reddit/r/programming</code></li>
+            <li><strong>My Profile:</strong> <code>/api/v1/me/info/reddit</code></li>
+            <li><strong>User Profile:</strong> <code>/api/v1/social/reddit/u/spez</code></li>
+            <li><strong>Subreddit Data:</strong> <code>/api/v1/social/reddit/r/programming</code></li>
           </ul>
           
           <div class="code-examples mt-3">
@@ -160,7 +182,7 @@
             </div>
           </div>
           <a href="/api/v1/me/info/reddit" class="btn btn-info btn-sm" target="_blank">
-            <i class="bi bi-box-arrow-up-right"></i> View Casjay Posts
+            <i class="bi bi-box-arrow-up-right"></i> View Full Profile Data (JSON)
           </a>
         </div>
       </div>

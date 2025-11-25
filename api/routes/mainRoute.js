@@ -225,10 +225,10 @@ async function handleDataRequest(req, res) {
         });
       }
     } else if (source === 'reddit') {
-      // Reddit page - use direct helper call
+      // Reddit page - use direct helper call for PROFILE data
       try {
-        const { fetchRedditData } = require('../utils/redditHelper');
-        const userData = await fetchRedditData('casjay', null, 10);
+        const { fetchRedditUserProfile } = require('../utils/redditHelper');
+        const userData = await fetchRedditUserProfile('casjay');
 
         let pageData = null;
         if (userData && userData.data) {

@@ -332,7 +332,7 @@ function quickPassword(length, includeSymbols) {
     document.querySelector('[name="numbers"]').checked = true;
     document.querySelector('[name="symbols"]').checked = includeSymbols;
     document.getElementById('count').value = 1;
-    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
+    // Auto-generate will be triggered by the initial dispatch on line 162
 }
 
 async function generatePassphrase() {

@@ -31,7 +31,7 @@ app.get('/version', (req, res) => {
   }
   
   // Gather real version data
-  const packageJson = require('./package.json');
+  const packageJson = require('../package.json');
   const os = require('os');
 
   // Helper to mask sensitive data
@@ -134,7 +134,7 @@ app.get('/version', (req, res) => {
     description: 'Complete API version information and system status',
     activePage: 'version',
     baseUrl: `${req.protocol}://${req.get('host')}`,
-    versionData: testVersionData
+    versionData: versionData
   });
 });
 
@@ -260,16 +260,37 @@ app.get('/utilities/passwd', (req, res) => res.render('pages/utilities/passwd'))
 app.get('/tools/commit', (req, res) => res.render('pages/tools/commit'));
 
 // Data frontend pages
-app.get('/data/git', (req, res) => res.render('pages/data/git'));
+app.get('/data/git', (req, res) => res.render('pages/data/git', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 app.get('/data/reddit', (req, res) => res.render('pages/data/reddit'));
+app.get('/data/covid', (req, res) => res.render('pages/data/covid', { baseUrl: `${req.protocol}://${req.get('host')}` }));
+app.get('/data/timezones', (req, res) => res.render('pages/data/timezones', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 app.get('/world/covid', (req, res) => res.render('pages/world/covid'));
 app.get('/world/covid-global', (req, res) => res.render('pages/world/covid-global'));
 app.get('/world/covid-usa', (req, res) => res.render('pages/world/covid-usa'));
 app.get('/world/covid-nys', (req, res) => res.render('pages/world/covid-nys'));
-app.get('/data/anime', (req, res) => res.render('pages/fun/anime'));
+app.get('/data/anime', (req, res) => res.render('pages/fun/anime', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 app.get('/world/timezones', (req, res) => res.render('pages/world/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/world/closings'));
-app.get('/data/blogs', (req, res) => res.render('pages/data/blogs'));
+app.get('/data/blogs', async (req, res) => {
+  try {
+    const blogController = require('./controllers/blog');
+    const posts = await blogController.getBlogPosts();
+    const blogData = {
+      repository: blogController.getDefaultRepo(),
+      posts,
+      total_posts: posts.length
+    };
+    res.render('pages/data/blogs', {
+      blogData,
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    });
+  } catch (error) {
+    res.render('pages/data/blogs', {
+      error: error.message,
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    });
+  }
+});
 
 // World pages
 app.get('/world/nys', (req, res) => res.render('pages/world/nys'));
@@ -279,10 +300,10 @@ app.get('/world/arcgis', (req, res) => res.render('pages/world/arcgis'));
 app.get('/world/closings', (req, res) => res.render('pages/world/closings'));
 
 // Fun pages
-app.get('/fun/anime', (req, res) => res.render('pages/fun/anime'));
-app.get('/fun/jokes', (req, res) => res.render('pages/fun/jokes'));
-app.get('/fun/facts', (req, res) => res.render('pages/fun/facts'));
-app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia'));
+app.get('/fun/anime', (req, res) => res.render('pages/fun/anime', { baseUrl: `${req.protocol}://${req.get('host')}` }));
+app.get('/fun/jokes', (req, res) => res.render('pages/fun/jokes', { baseUrl: `${req.protocol}://${req.get('host')}` }));
+app.get('/fun/facts', (req, res) => res.render('pages/fun/facts', { baseUrl: `${req.protocol}://${req.get('host')}` }));
+app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 
 // Social pages  
 app.get('/social/reddit', (req, res) => res.render('pages/social/reddit'));

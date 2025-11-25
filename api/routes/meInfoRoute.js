@@ -368,13 +368,13 @@ meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
  * Get Reddit data - JSON response (casjay)
  */
 // Import Reddit helper
-const { fetchRedditData } = require('../utils/redditHelper');
+const { fetchRedditData, fetchRedditUserProfile } = require('../utils/redditHelper');
 
 meInfoRoute.get('/reddit', cors(), async (req, res) => {
   try {
-    // Get Reddit data (READ-ONLY)
-    console.log('Fetching Reddit user data (read-only)...');
-    const userData = await fetchRedditData('casjay', null, 10);
+    // Get Reddit PROFILE data (READ-ONLY)
+    console.log('Fetching Reddit user PROFILE data (read-only)...');
+    const userData = await fetchRedditUserProfile('casjay');
 
     if (userData && userData.data) {
       const user = userData.data;
