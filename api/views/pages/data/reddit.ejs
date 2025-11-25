@@ -11,36 +11,98 @@
         <div class="card-body">
           <% if (typeof pageData !== 'undefined' && pageData && pageData.data && pageData.data.user) { %>
             <div class="reddit-profile">
-              <div class="profile-info">
-                <h4><%= pageData.data.user.display_name || pageData.data.user.name %></h4>
-                <p class="text-muted">u/<%= pageData.data.user.name %></p>
-                <% if (pageData.data.user.public_description) { %>
-                  <p class="profile-description"><%= pageData.data.user.public_description %></p>
+              <!-- Profile Header with Avatar -->
+              <div class="profile-header">
+                <% if (pageData.data.user.icon_img) { %>
+                  <img src="<%= pageData.data.user.icon_img %>" alt="<%= pageData.data.user.name %>" class="profile-avatar">
                 <% } %>
+                <div class="profile-info">
+                  <h4>
+                    <%= pageData.data.user.display_name || pageData.data.user.name %>
+                    <% if (pageData.data.user.verified) { %>
+                      <i class="bi bi-patch-check-fill text-primary" title="Verified"></i>
+                    <% } %>
+                    <% if (pageData.data.user.is_gold) { %>
+                      <i class="bi bi-star-fill text-warning" title="Reddit Premium"></i>
+                    <% } %>
+                    <% if (pageData.data.user.is_mod) { %>
+                      <i class="bi bi-shield-fill text-success" title="Moderator"></i>
+                    <% } %>
+                  </h4>
+                  <p class="text-muted">u/<%= pageData.data.user.name %></p>
+                  <% if (pageData.data.user.public_description) { %>
+                    <p class="profile-description"><%= pageData.data.user.public_description %></p>
+                  <% } %>
+                </div>
               </div>
-              
+
+              <!-- Account Info -->
+              <div class="account-info mt-3">
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-calendar"></i> Cake Day:</span>
+                  <span class="info-value"><%= new Date(pageData.data.user.created_utc * 1000).toLocaleDateString() %></span>
+                </div>
+                <% if (pageData.data.user.subreddit && pageData.data.user.subreddit.subscribers) { %>
+                  <div class="info-row">
+                    <span class="info-label"><i class="bi bi-people"></i> Followers:</span>
+                    <span class="info-value"><%= pageData.data.user.subreddit.subscribers.toLocaleString() %></span>
+                  </div>
+                <% } %>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-envelope-check"></i> Verified Email:</span>
+                  <span class="info-value"><%= pageData.data.user.has_verified_email ? 'Yes' : 'No' %></span>
+                </div>
+              </div>
+
+              <!-- Karma Breakdown -->
               <div class="reddit-stats">
-                <div class="stat-card">
-                  <div class="stat-number"><%= pageData.data.user.total_karma || 0 %></div>
+                <div class="stat-card total">
+                  <div class="stat-number"><%= pageData.data.user.total_karma.toLocaleString() %></div>
                   <div class="stat-label">Total Karma</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-number"><%= pageData.data.user.link_karma || 0 %></div>
-                  <div class="stat-label">Link Karma</div>
+                  <div class="stat-number"><%= pageData.data.user.link_karma.toLocaleString() %></div>
+                  <div class="stat-label">Post Karma</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-number"><%= pageData.data.user.comment_karma || 0 %></div>
+                  <div class="stat-number"><%= pageData.data.user.comment_karma.toLocaleString() %></div>
                   <div class="stat-label">Comment Karma</div>
                 </div>
+                <% if (pageData.data.user.awardee_karma > 0) { %>
+                  <div class="stat-card">
+                    <div class="stat-number"><%= pageData.data.user.awardee_karma.toLocaleString() %></div>
+                    <div class="stat-label">Awardee Karma</div>
+                  </div>
+                <% } %>
+                <% if (pageData.data.user.awarder_karma > 0) { %>
+                  <div class="stat-card">
+                    <div class="stat-number"><%= pageData.data.user.awarder_karma.toLocaleString() %></div>
+                    <div class="stat-label">Awarder Karma</div>
+                  </div>
+                <% } %>
               </div>
-              
+
+              <!-- Profile Banner -->
+              <% if (pageData.data.user.subreddit && pageData.data.user.subreddit.banner_img) { %>
+                <div class="profile-banner mt-3">
+                  <img src="<%= pageData.data.user.subreddit.banner_img %>" alt="Profile Banner" class="banner-img">
+                </div>
+              <% } %>
+
+              <!-- API Info -->
               <div class="reddit-info mt-3">
                 <p class="text-info">
                   <i class="bi bi-info-circle"></i> <%= pageData.data.note || pageData.message %>
                 </p>
-                <p class="text-muted">
-                  Access Level: <%= pageData.data.access_level || 'read-only' %>
-                </p>
+                <div class="info-badges">
+                  <span class="badge bg-secondary">Access: <%= pageData.data.access_level || 'read-only' %></span>
+                  <% if (pageData.data.source) { %>
+                    <span class="badge bg-info">Source: <%= pageData.data.source %></span>
+                  <% } %>
+                  <% if (pageData.data.last_updated) { %>
+                    <span class="badge bg-dark">Updated: <%= new Date(pageData.data.last_updated).toLocaleTimeString() %></span>
+                  <% } %>
+                </div>
               </div>
             </div>
           <% } else if (typeof pageData !== 'undefined' && pageData && pageData.success === false) { %>

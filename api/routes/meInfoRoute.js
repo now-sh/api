@@ -375,34 +375,76 @@ meInfoRoute.get('/reddit', cors(), async (req, res) => {
     // Get Reddit data (READ-ONLY)
     console.log('Fetching Reddit user data (read-only)...');
     const userData = await fetchRedditData('casjay', null, 10);
-    
+
     if (userData && userData.data) {
       const user = userData.data;
-      
+
+      // Return full Reddit user data
       const readOnlyResponse = {
         success: true,
         message: 'Reddit data fetched successfully (read-only)',
         data: {
+          // Full user object from Reddit API
           user: {
+            // Basic info
             name: user.name,
+            id: user.id,
             display_name: user.subreddit?.display_name || user.name,
-            public_description: user.subreddit?.public_description || user.name,
+            display_name_prefixed: user.subreddit?.display_name_prefixed,
+
+            // Description/Bio
+            public_description: user.subreddit?.public_description || '',
+            description: user.subreddit?.description || '',
+
+            // Karma
             total_karma: user.total_karma || 0,
             link_karma: user.link_karma || 0,
             comment_karma: user.comment_karma || 0,
+            awardee_karma: user.awardee_karma || 0,
+            awarder_karma: user.awarder_karma || 0,
+
+            // Account status
+            created: user.created,
             created_utc: user.created_utc,
             verified: user.verified || false,
+            has_verified_email: user.has_verified_email || false,
             is_gold: user.is_gold || false,
             is_mod: user.is_mod || false,
-            profile_img: user.icon_img || user.subreddit?.icon_img,
-            followers: user.subreddit?.subscribers || 0
+            is_employee: user.is_employee || false,
+            accept_followers: user.accept_followers || false,
+            has_subscribed: user.has_subscribed || false,
+
+            // Profile images
+            icon_img: user.icon_img || user.subreddit?.icon_img,
+            snoovatar_img: user.snoovatar_img,
+            snoovatar_size: user.snoovatar_size,
+
+            // Subreddit/Profile info
+            subreddit: user.subreddit ? {
+              name: user.subreddit.name,
+              title: user.subreddit.title,
+              url: user.subreddit.url,
+              subscribers: user.subreddit.subscribers || 0,
+              over_18: user.subreddit.over_18 || false,
+              banner_img: user.subreddit.banner_img,
+              banner_size: user.subreddit.banner_size,
+              icon_img: user.subreddit.icon_img,
+              icon_size: user.subreddit.icon_size,
+              primary_color: user.subreddit.primary_color,
+              key_color: user.subreddit.key_color
+            } : null,
+
+            // Privacy settings
+            hide_from_robots: user.hide_from_robots || false,
+            pref_show_snoovatar: user.pref_show_snoovatar || false
           },
           note: 'Reddit data is read-only',
           access_level: 'read-only',
+          source: userData.source || 'unknown',
           last_updated: new Date().toISOString()
         }
       };
-      
+
       res.json(readOnlyResponse);
     } else {
       // Fallback to basic info if data fetch fails
