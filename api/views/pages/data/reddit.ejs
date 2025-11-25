@@ -160,11 +160,89 @@
   padding: 1rem;
 }
 
+/* Profile Header with Avatar */
+.profile-header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--purple);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
 .profile-info h4 {
   color: var(--purple);
   margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
+.profile-info h4 i {
+  font-size: 1.25rem;
+}
+
+.profile-description {
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-top: 0.75rem;
+}
+
+/* Account Info Section */
+.account-info {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-row:first-child {
+  padding-top: 0;
+}
+
+.info-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Karma Stats Grid */
 .reddit-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -178,6 +256,28 @@
   border-radius: var(--radius-md);
   text-align: center;
   border: 1px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.total {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--cyan) 100%);
+  border: none;
+  grid-column: span 2;
+}
+
+.stat-card.total .stat-number {
+  color: white;
+  font-size: 2rem;
+}
+
+.stat-card.total .stat-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 700;
 }
 
 .stat-number {
@@ -191,8 +291,26 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-top: 0.25rem;
 }
 
+/* Profile Banner */
+.profile-banner {
+  margin: 1.5rem 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+}
+
+.banner-img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+/* API Info Section */
 .reddit-info {
   background: rgba(139, 69, 233, 0.1);
   padding: 1rem;
@@ -200,9 +318,67 @@
   border-left: 4px solid var(--purple);
 }
 
-.loading-state {
+.reddit-info p {
+  margin-bottom: 0.75rem;
+}
+
+.info-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.info-badges .badge {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Loading and Error States */
+.loading-state,
+.error-state {
   text-align: center;
   padding: 2rem;
+}
+
+.loading-state {
   color: var(--text-secondary);
+}
+
+.error-state {
+  color: var(--red);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-info h4 {
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .stat-card.total {
+    grid-column: span 1;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+
+  .reddit-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
 }
 </style>
