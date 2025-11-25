@@ -194,27 +194,45 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const formData = new FormData(e.target);
             const url = formData.get('url');
-            
+            const customCode = formData.get('customCode');
+            const expiresIn = formData.get('expiresIn');
+
             if (!url) {
                 alert('Please enter a URL');
                 return;
             }
-            
+
+            // Build request body
+            const body = { url };
+            if (customCode && customCode.trim()) {
+                body.customAlias = customCode.trim();
+            }
+            if (expiresIn) {
+                // Convert time string to milliseconds
+                const timeMap = {
+                    '1h': 3600000,
+                    '24h': 86400000,
+                    '7d': 604800000,
+                    '30d': 2592000000
+                };
+                body.expiresIn = timeMap[expiresIn];
+            }
+
             try {
                 const response = await fetch('/api/v1/data/urls/shorten', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify(body)
                 });
-                
+
                 const result = await response.json();
-                
-                if (response.ok) {
+
+                if (response.ok && result.success) {
                     alert(`Shortened URL: ${result.data.shortUrl}`);
                     form.reset();
                     loadRecentUrls();
                 } else {
-                    alert('Error: ' + (result.message || 'Failed to shorten URL'));
+                    alert('Error: ' + (result.error || result.message || 'Failed to shorten URL'));
                 }
             } catch (error) {
                 alert('Network error: ' + error.message);
@@ -225,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadRecentUrls() {
     try {
-        const response = await fetch('/api/v1/data/urls');
+        const response = await fetch('/api/v1/data/urls/list');
         const result = await response.json();
         
         const recentUrlsDiv = document.getElementById('recentUrls');

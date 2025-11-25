@@ -52,7 +52,7 @@ urlRoute.post('/shorten',
       };
       
       const result = await urlController.createShortUrl(req.body.url, options);
-      
+
       sendJSON(res, formatSuccess({
         originalUrl: req.body.url,
         shortUrl: result.shortUrl,
@@ -60,17 +60,11 @@ urlRoute.post('/shorten',
         customAlias: result.customAlias,
         expiresAt: result.expiresAt,
         userId: result.userId
-      }));
-      res.status(201).json(data);
+      }), { status: 201 });
     } catch (error) {
-      const statusCode = error instanceof Error && error.message.includes('already taken') ? 409 : 
+      const statusCode = error instanceof Error && error.message.includes('already taken') ? 409 :
                         error instanceof Error && error.message.includes('Invalid') ? 400 : 500;
-      const data = { 
-        success: false,
-        error: error instanceof Error ? error.message : 'An error occurred'
-      };
-      setStandardHeaders(res, data);
-      res.status(statusCode).json(data);
+      sendJSON(res, formatError(error.message), { status: statusCode });
     }
   }
 );
