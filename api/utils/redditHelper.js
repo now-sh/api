@@ -12,13 +12,17 @@ const REDDIT_CLIENT_ID = process.env.REDDIT_CLIENT_ID;
 const REDDIT_CLIENT_SECRET = process.env.REDDIT_CLIENT_SECRET;
 const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'API:v1.9.4 (by /u/casjay)';
 
-// Working Firefox user agent for RSS fallback
+// Default user agent - Windows 11 Edge (best compatibility)
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0';
+
+// Firefox user agent as fallback
 const FIREFOX_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0';
 
-// Various user agents to try
+// Various user agents to try (Windows 11 Edge first)
 const USER_AGENTS = [
-  FIREFOX_USER_AGENT,
+  DEFAULT_USER_AGENT,
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  FIREFOX_USER_AGENT,
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
   'curl/7.68.0',
@@ -421,7 +425,7 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
       
       const response = await fetch(url, {
         headers: {
-          'User-Agent': FIREFOX_USER_AGENT,
+          'User-Agent': DEFAULT_USER_AGENT,
           'Accept': 'application/json, text/html, */*',
           'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
@@ -445,7 +449,7 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
         
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': FIREFOX_USER_AGENT
+          'User-Agent': DEFAULT_USER_AGENT
         },
         timeout: 10000
       });
@@ -466,7 +470,7 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
           path: url,
           method: 'GET',
           headers: {
-            'User-Agent': FIREFOX_USER_AGENT,
+            'User-Agent': DEFAULT_USER_AGENT,
             'Accept': 'application/json',
             'Host': 'www.reddit.com',
             'Connection': 'keep-alive'

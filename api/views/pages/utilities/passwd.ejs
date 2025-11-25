@@ -158,6 +158,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lengthRange.value = this.value;
     });
     
+    // Auto-generate password on page load
+    form.dispatchEvent(new Event('submit'));
+
     // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();

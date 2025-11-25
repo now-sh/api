@@ -12,12 +12,13 @@
             <form id="colorForm" class="api-form">
                 <div class="form-group">
                     <label for="color" class="form-label">Color Value</label>
-                    <input 
-                        type="text" 
-                        id="color" 
-                        name="color" 
-                        class="form-control" 
+                    <input
+                        type="text"
+                        id="color"
+                        name="color"
+                        class="form-control"
                         placeholder="Enter color value"
+                        value="#8B45E9"
                         required
                     >
                     <small class="text-secondary">Supports HEX, RGB, RGBA, HSL, HSLA formats</small>
@@ -162,6 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Auto-convert color on page load
+    colorForm.dispatchEvent(new Event('submit'));
+
     // Color conversion form
     colorForm.addEventListener('submit', async (e) => {
         e.preventDefault();

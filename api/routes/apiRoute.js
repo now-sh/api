@@ -175,7 +175,15 @@ const versionHandler = async (req, res) => {
     healthIssues.push('Service recently restarted');
   }
   
+  // Helper to mask sensitive data
+  const maskSensitive = (value) => {
+    if (!value) return 'Not Configured';
+    if (typeof value === 'string' && value.length > 0) return 'Configured ✓';
+    return 'Configured ✓';
+  };
+
   try {
+    const os = require('os');
     const data = {
       Health: {
         Status: healthStatus,
@@ -188,8 +196,29 @@ const versionHandler = async (req, res) => {
       Yesterday: yesterday,
       Today: today,
       Time: curtime,
+
+      // External Data Sources (safe to show)
+      DataSources: {
+        GitMessages: process.env.GIT_MESSAGE_URL || 'Not Configured',
+        Timezones: process.env.TIMEZONE_URL || 'Not Configured',
+        Countries: process.env.COUNTRIES_URL || 'Not Configured',
+        Domains: process.env.DOMAINS_URL || 'Not Configured',
+        MyGitHub: process.env.MY_GITHUB_USER || 'Not Configured',
+        MyReddit: process.env.MY_REDDIT_USER || 'Not Configured',
+        BlogRepo: process.env.BLOG_POSTS_REPO || 'Not Configured',
+      },
+
+      // API Keys Status (masked)
+      APIKeys: {
+        GitHub: maskSensitive(process.env.GITHUB_TOKEN),
+        Reddit: maskSensitive(process.env.REDDIT_CLIENT_ID),
+        GoogleMaps: maskSensitive(process.env.GOOGLE_MAPS_API_KEY),
+        OpenAI: maskSensitive(process.env.OPENAI_API_KEY),
+      },
+
       GitHubToken: githubHeader,
       RedditAuth: redditAuthStatus,
+
       Database: {
         Status: dbStatus,
         URI: sanitizedUri,
@@ -199,23 +228,39 @@ const versionHandler = async (req, res) => {
           ConnectionAttempts: dbStatusDetails.attempts
         }
       },
+
       System: {
         NodeVersion: nodeVersion,
         Platform: platform,
         Architecture: arch,
+        Hostname: os.hostname(),
         Uptime: `${Math.floor(uptime / 60)} minutes`,
         Memory: {
           HeapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`,
           HeapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`,
           RSS: `${Math.round(memUsage.rss / 1024 / 1024)} MB`,
-          HeapPercentage: `${Math.round(heapPercentage)}%`
-        }
+          HeapPercentage: `${Math.round(heapPercentage)}%`,
+          SystemTotal: `${Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10} GB`,
+          SystemFree: `${Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10} GB`
+        },
+        CPUs: `${os.cpus().length} cores`
       },
+
       Environment: {
         NodeEnv: process.env.NODE_ENV || 'development',
-        Port: process.env.PORT || '1919'
+        Port: process.env.PORT || '1919',
+        IsVercel: process.env.VERCEL ? 'Yes' : 'No',
+        Region: process.env.VERCEL_REGION || process.env.NOW_REGION || 'N/A'
       },
+
       Proxies: proxyInfo,
+
+      // User Agent Configuration
+      UserAgent: {
+        Default: 'Windows 11 Edge (Chromium)',
+        Reddit: process.env.REDDIT_USER_AGENT || 'API:v1.9.4 (by /u/casjay)'
+      },
+
       Auth: auth,
     };
     

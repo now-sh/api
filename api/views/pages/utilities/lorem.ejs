@@ -20,10 +20,11 @@
                                 name="count"
                                 class="form-control"
                                 min="1"
-                                max="100"
-                                value="50"
+                                max="20"
+                                value="20"
                                 required
                             >
+                            <small id="countHelp" class="form-text text-muted">Maximum: 20 for paragraphs</small>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -116,10 +117,67 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('loremForm');
     const resultDiv = document.getElementById('loremResult');
     const resultOutput = resultDiv.querySelector('.result-output');
+    const countInput = document.getElementById('count');
+    const typeSelect = document.getElementById('type');
+    const countHelp = document.getElementById('countHelp');
     let generatedText = '';
 
+    // API limits based on backend validation
+    const limits = {
+        paragraphs: 20,
+        sentences: 999,
+        words: 1000
+    };
+
+    // Update max attribute and help text when type changes
+    function updateLimits() {
+        const type = typeSelect.value;
+        const maxValue = limits[type];
+        countInput.max = maxValue;
+        countHelp.textContent = `Maximum: ${maxValue} for ${type}`;
+
+        // If current value exceeds new max, cap it
+        if (parseInt(countInput.value) > maxValue) {
+            countInput.value = maxValue;
+            showLimitWarning(maxValue, type);
+        }
+    }
+
+    // Show warning when value is capped
+    function showLimitWarning(maxValue, type) {
+        countHelp.style.color = 'var(--yellow)';
+        countHelp.textContent = `⚠ Value adjusted to maximum of ${maxValue} for ${type}`;
+        setTimeout(() => {
+            countHelp.style.color = '';
+            countHelp.textContent = `Maximum: ${maxValue} for ${type}`;
+        }, 3000);
+    }
+
+    // Validate and cap input on change
+    function validateCount() {
+        const type = typeSelect.value;
+        const maxValue = limits[type];
+        const currentValue = parseInt(countInput.value);
+
+        if (currentValue > maxValue) {
+            countInput.value = maxValue;
+            showLimitWarning(maxValue, type);
+        } else if (currentValue < 1) {
+            countInput.value = 1;
+        }
+    }
+
+    // Add event listeners
+    typeSelect.addEventListener('change', updateLimits);
+    countInput.addEventListener('change', validateCount);
+    countInput.addEventListener('input', validateCount);
+
+    // Set initial default based on current type
+    countInput.value = 20; // Start with max for paragraphs
+    updateLimits();
+
     // Auto-generate on page load with default values
-    generateLorem(50, 'paragraphs', 'text', false);
+    generateLorem(20, 'paragraphs', 'text', false);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -211,8 +269,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Quick generate function
 function quickGenerate(count, type) {
-    document.getElementById('count').value = count;
-    document.getElementById('type').value = type;
+    const countInput = document.getElementById('count');
+    const typeSelect = document.getElementById('type');
+
+    // Update type first
+    typeSelect.value = type;
+    typeSelect.dispatchEvent(new Event('change'));
+
+    // Then set count (will be validated automatically)
+    countInput.value = count;
+    countInput.dispatchEvent(new Event('change'));
+
+    // Submit form
     document.getElementById('loremForm').dispatchEvent(new Event('submit'));
 }
 

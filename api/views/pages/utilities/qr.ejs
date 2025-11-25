@@ -12,14 +12,14 @@
             <form id="qrForm" class="api-form">
                 <div class="form-group">
                     <label for="text" class="form-label">Data to Encode</label>
-                    <textarea 
-                        id="text" 
-                        name="text" 
-                        class="form-control" 
+                    <textarea
+                        id="text"
+                        name="text"
+                        class="form-control"
                         placeholder="Enter text, URL, or any data..."
                         rows="3"
                         required
-                    ></textarea>
+                    >https://api.casjay.coffee</textarea>
                 </div>
                 
                 <div class="row">
@@ -125,7 +125,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let currentQRData = null;
     let currentFormat = null;
-    
+
+    // Auto-generate QR code on page load
+    form.dispatchEvent(new Event('submit'));
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         

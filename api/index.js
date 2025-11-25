@@ -30,45 +30,102 @@ app.get('/version', (req, res) => {
     }
   }
   
-  // For now, render with static data to test template
-  const testVersionData = {
-    Version: "1.9.4",
-    TimeZone: "America/New_York", 
+  // Gather real version data
+  const packageJson = require('./package.json');
+  const os = require('os');
+
+  // Helper to mask sensitive data
+  const maskSensitive = (value) => {
+    if (!value) return 'Not Configured';
+    if (typeof value === 'string' && value.length > 0) return 'Configured ✓';
+    return 'Configured ✓';
+  };
+
+  // Helper to safely show database URI without credentials
+  const safeDatabaseUri = (uri) => {
+    if (!uri) return 'Not Configured';
+    try {
+      const url = new URL(uri);
+      // Remove credentials
+      return `${url.protocol}//${url.hostname}${url.port ? ':' + url.port : ''}${url.pathname}`;
+    } catch {
+      return 'Configured';
+    }
+  };
+
+  const versionData = {
+    Version: packageJson.version || "1.9.4",
+    TimeZone: process.env.TZ || Intl.DateTimeFormat().resolvedOptions().timeZone,
     Time: new Date().toLocaleTimeString(),
     Today: new Date().toLocaleDateString(),
     Greetings: "🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞",
     Auth: currentUser ? `Logged in as ${currentUser}` : "no",
-    GitHubToken: "Configured",
-    RedditAuth: "Configured",
+
+    // External Data Sources (safe to show)
+    DataSources: {
+      GitMessages: process.env.GIT_MESSAGE_URL || 'Not Configured',
+      Timezones: process.env.TIMEZONE_URL || 'Not Configured',
+      Countries: process.env.COUNTRIES_URL || 'Not Configured',
+      Domains: process.env.DOMAINS_URL || 'Not Configured',
+      MyGitHub: process.env.MY_GITHUB_USER || 'Not Configured',
+      MyReddit: process.env.MY_REDDIT_USER || 'Not Configured',
+      BlogRepo: process.env.BLOG_POSTS_REPO || 'Not Configured',
+    },
+
+    // API Keys Status (masked)
+    APIKeys: {
+      GitHub: maskSensitive(process.env.GITHUB_TOKEN),
+      Reddit: maskSensitive(process.env.REDDIT_CLIENT_ID),
+      GoogleMaps: maskSensitive(process.env.GOOGLE_MAPS_API_KEY),
+      OpenAI: maskSensitive(process.env.OPENAI_API_KEY),
+    },
+
     Health: {
       Status: "healthy",
       Issues: []
     },
+
     Database: {
       Status: "Connected",
+      URI: safeDatabaseUri(process.env.MONGO_URI || process.env.MONGODB_URI),
       Details: {
         State: "connected"
       }
     },
+
     Environment: {
-      NodeEnv: "development",
-      Port: "1919"
+      NodeEnv: process.env.NODE_ENV || "development",
+      Port: process.env.PORT || "1919",
+      IsVercel: process.env.VERCEL ? 'Yes' : 'No',
+      Region: process.env.VERCEL_REGION || process.env.NOW_REGION || 'N/A'
     },
+
     System: {
-      NodeVersion: "v20.19.4",
-      Platform: "linux",
-      Architecture: "x64",
-      Uptime: "Active",
+      NodeVersion: process.version,
+      Platform: os.platform(),
+      Architecture: os.arch(),
+      Hostname: os.hostname(),
+      Uptime: Math.floor(process.uptime()) + ' seconds',
       Memory: {
-        HeapUsed: "60 MB",
-        HeapTotal: "62 MB"
-      }
+        HeapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+        HeapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB',
+        SystemTotal: Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB',
+        SystemFree: Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB'
+      },
+      CPUs: os.cpus().length + ' cores'
     },
+
     Proxies: {
       disease: {
         target: "https://disease.sh",
         status: "Active"
       }
+    },
+
+    // User Agent Configuration
+    UserAgent: {
+      Default: 'Windows 11 Edge (Chromium)',
+      Reddit: process.env.REDDIT_USER_AGENT || 'API:v1.9.4 (by /u/casjay)'
     }
   };
   

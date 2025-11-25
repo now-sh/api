@@ -41,23 +41,85 @@
             </div>
         </div>
 
+        <!-- External Data Sources -->
+        <div class="card mb-4">
+            <h2 class="card-title">🔗 External Data Sources</h2>
+            <div class="data-sources">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.DataSources) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Git Messages</span>
+                            <span class="info-value"><%= versionData.DataSources.GitMessages %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Timezones</span>
+                            <span class="info-value"><%= versionData.DataSources.Timezones %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Countries</span>
+                            <span class="info-value"><%= versionData.DataSources.Countries %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Domains</span>
+                            <span class="info-value"><%= versionData.DataSources.Domains %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">My GitHub</span>
+                            <span class="info-value"><%= versionData.DataSources.MyGitHub %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">My Reddit</span>
+                            <span class="info-value"><%= versionData.DataSources.MyReddit %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Blog Repository</span>
+                            <span class="info-value"><%= versionData.DataSources.BlogRepo %></span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">Data sources information not available</div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- API Keys Status -->
+        <div class="card mb-4">
+            <h2 class="card-title">🔐 API Keys Status</h2>
+            <div class="api-keys-status">
+                <% if (typeof versionData !== 'undefined' && versionData && versionData.APIKeys) { %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">GitHub</span>
+                            <span class="info-value <%= versionData.APIKeys.GitHub === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.GitHub %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Reddit</span>
+                            <span class="info-value <%= versionData.APIKeys.Reddit === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.Reddit %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Google Maps</span>
+                            <span class="info-value <%= versionData.APIKeys.GoogleMaps === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.GoogleMaps %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">OpenAI</span>
+                            <span class="info-value <%= versionData.APIKeys.OpenAI === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.OpenAI %></span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="error-message">API keys information not available</div>
+                <% } %>
+            </div>
+        </div>
+
         <!-- Authentication Status -->
         <div class="card mb-4">
-            <h2 class="card-title">🔐 Authentication Status</h2>
+            <h2 class="card-title">👤 User Authentication</h2>
             <div class="auth-status">
                 <% if (typeof versionData !== 'undefined' && versionData) { %>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Authentication</span>
-                            <span class="info-value <%= versionData.Auth === 'yes' ? 'success' : 'warning' %>"><%= versionData.Auth || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">GitHub Token</span>
-                            <span class="info-value <%= versionData.GitHubToken ? 'success' : 'error' %>"><%= versionData.GitHubToken || 'Not Set' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Reddit Auth</span>
-                            <span class="info-value <%= versionData.RedditAuth === 'Set and Valid' ? 'success' : 'error' %>"><%= versionData.RedditAuth || 'Not Set' %></span>
+                            <span class="info-label">Current Session</span>
+                            <span class="info-value <%= versionData.Auth !== 'no' ? 'success' : 'warning' %>"><%= versionData.Auth || 'Unknown' %></span>
                         </div>
                     </div>
                 <% } else { %>
