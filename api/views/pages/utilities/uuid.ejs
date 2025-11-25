@@ -165,7 +165,7 @@
 function copyToClipboard(text) {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(text).then(() => {
-            alert('Copied: ' + text);
+            showModal('UUID copied to clipboard!', 'Copied', 'success');
         });
     } else {
         const textarea = document.createElement('textarea');
@@ -174,7 +174,7 @@ function copyToClipboard(text) {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        alert('Copied: ' + text);
+        showModal('UUID copied to clipboard!', 'Copied', 'success');
     }
 }
 </script>

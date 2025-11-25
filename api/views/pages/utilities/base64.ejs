@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function copyText(text) {
     if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+        navigator.clipboard.writeText(text).then(() => showModal('Text copied to clipboard!', 'Copied', 'success'));
     }
 }
 </script>

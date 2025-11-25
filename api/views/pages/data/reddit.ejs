@@ -108,12 +108,25 @@
           <% } else if (typeof pageData !== 'undefined' && pageData && pageData.success === false) { %>
             <div class="error-state">
               <p class="text-danger">Error loading Reddit data</p>
-              <p class="text-muted"><%= pageData.message || 'Unknown error' %></p>
+              <p class="text-muted"><%= pageData.message || pageData.error || 'Unknown error' %></p>
+            </div>
+          <% } else if (typeof apiError !== 'undefined' && apiError) { %>
+            <div class="error-state">
+              <p class="text-danger">Failed to fetch Reddit data</p>
+              <p class="text-muted"><%= apiError %></p>
+              <p class="text-info mt-3">
+                <i class="bi bi-info-circle"></i> Try visiting the API directly:
+                <a href="/api/v1/me/info/reddit" target="_blank" class="text-cyan">/api/v1/me/info/reddit</a>
+              </p>
             </div>
           <% } else { %>
             <div class="loading-state">
-              <p>Loading Reddit profile data...</p>
-              <p class="text-muted">Fetching latest Reddit information</p>
+              <p class="text-danger">No Reddit data available</p>
+              <p class="text-muted">Unable to load Reddit profile information</p>
+              <p class="text-info mt-3">
+                <i class="bi bi-info-circle"></i> This might be a configuration issue. Check the API endpoint:
+                <a href="/api/v1/me/info/reddit" target="_blank" class="text-cyan">/api/v1/me/info/reddit</a>
+              </p>
             </div>
           <% } %>
         </div>

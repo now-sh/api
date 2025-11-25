@@ -288,8 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
         displayQuestion();
     }
     
-    function endQuiz() {
-        if (confirm('Are you sure you want to end the quiz?')) {
+    async function endQuiz() {
+        const confirmed = await confirm('Are you sure you want to end the quiz?');
+        if (confirmed) {
             completeQuiz();
         }
     }

@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const expiresIn = formData.get('expiresIn');
 
             if (!url) {
-                alert('Please enter a URL');
+                showModal('Please enter a URL to shorten', 'Invalid Input', 'warning');
                 return;
             }
 
@@ -218,6 +218,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 body.expiresIn = timeMap[expiresIn];
             }
 
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating...';
+
             try {
                 const response = await fetch('/api/v1/data/urls/shorten', {
                     method: 'POST',
@@ -228,16 +234,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    alert(`Shortened URL: ${result.data.shortUrl}`);
+                    const shortUrl = result.data.shortUrl;
+                    showSuccessModal(shortUrl);
                     form.reset();
                     loadRecentUrls();
                 } else {
-                    alert('Error: ' + (result.error || result.message || 'Failed to shorten URL'));
+                    // Handle specific error types
+                    let errorMessage = result.error || result.message || 'Failed to shorten URL';
+                    let errorTitle = 'Error';
+
+                    if (response.status === 409 || errorMessage.includes('already taken')) {
+                        errorTitle = 'Alias Already Taken';
+                        errorMessage = `The custom alias "${body.customAlias || ''}" is already in use. Please try a different one or leave it blank for a random code.`;
+                    } else if (response.status === 400) {
+                        errorTitle = 'Invalid Request';
+                    }
+
+                    showModal(errorMessage, errorTitle, 'error');
                 }
             } catch (error) {
-                alert('Network error: ' + error.message);
+                showModal('Unable to connect to the server. Please try again.', 'Network Error', 'error');
+            } finally {
+                // Restore button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
+
+        // Show success modal with shortened URL
+        function showSuccessModal(shortUrl) {
+            const modal = document.getElementById('globalModal');
+            const modalContent = modal.querySelector('.modal-content');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalContent.classList.remove('modal-error', 'modal-warning', 'modal-info');
+            modalContent.classList.add('modal-success');
+
+            modalTitle.textContent = 'URL Shortened Successfully!';
+            modalBody.innerHTML = `
+                <p class="mb-3">Your short URL is ready:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="${shortUrl}" readonly id="shortUrlInput">
+                    <button class="btn btn-primary" onclick="copyShortUrl()">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <p class="mt-3 mb-0 text-muted">
+                    <i class="bi bi-info-circle"></i> Click to visit:
+                    <a href="${shortUrl}" target="_blank" class="text-cyan">${shortUrl}</a>
+                </p>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function copyShortUrl() {
+            const input = document.getElementById('shortUrlInput');
+            input.select();
+            document.execCommand('copy');
+            showModal('Short URL copied to clipboard!', 'Copied', 'success');
+        }
     }
 });
 

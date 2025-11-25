@@ -422,12 +422,13 @@ function escapeHtml(text) {
 }
 
 function showToast(message, type = 'success') {
-    alert(message); // Simple feedback
+    showModal(message, type === 'success' ? 'Success' : 'Notification', type);
 }
 
 // Delete todo function
 async function deleteTodo(id) {
-    if (!confirm('Delete this todo?')) return;
+    const confirmed = await confirm('Are you sure you want to delete this todo?');
+    if (!confirmed) return;
     
     const token = localStorage.getItem('authToken');
     try {

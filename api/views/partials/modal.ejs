@@ -1,0 +1,275 @@
+<!-- Reusable Modal Component -->
+<div id="globalModal" class="modal-overlay" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Notification</h5>
+        <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <p id="modalMessage"></p>
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button type="button" class="btn btn-primary" onclick="closeModal()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-dialog {
+  max-width: 500px;
+  width: 90%;
+  animation: slideIn 0.3s ease;
+}
+
+.modal-content {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.modal-title {
+  margin: 0;
+  color: var(--purple);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 2px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.modal-body p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Modal variants */
+.modal-content.modal-success .modal-header {
+  border-color: var(--green);
+}
+
+.modal-content.modal-success .modal-title {
+  color: var(--green);
+}
+
+.modal-content.modal-error .modal-header {
+  border-color: var(--red);
+}
+
+.modal-content.modal-error .modal-title {
+  color: var(--red);
+}
+
+.modal-content.modal-warning .modal-header {
+  border-color: var(--yellow);
+}
+
+.modal-content.modal-warning .modal-title {
+  color: var(--yellow);
+}
+
+.modal-content.modal-info .modal-header {
+  border-color: var(--cyan);
+}
+
+.modal-content.modal-info .modal-title {
+  color: var(--cyan);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+</style>
+
+<script>
+// Global modal functions
+function showModal(message, title = 'Notification', type = 'info') {
+  const modal = document.getElementById('globalModal');
+  const modalContent = modal.querySelector('.modal-content');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+
+  // Remove all type classes
+  modalContent.classList.remove('modal-success', 'modal-error', 'modal-warning', 'modal-info');
+
+  // Add appropriate type class
+  if (type) {
+    modalContent.classList.add(`modal-${type}`);
+  }
+
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modal.style.display = 'flex';
+
+  // Close on overlay click
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  };
+
+  // Close on Escape key
+  document.addEventListener('keydown', modalEscapeHandler);
+}
+
+function closeModal() {
+  const modal = document.getElementById('globalModal');
+  modal.style.display = 'none';
+  document.removeEventListener('keydown', modalEscapeHandler);
+}
+
+function modalEscapeHandler(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+}
+
+// Confirmation modal with Yes/No buttons
+function showConfirm(message, title = 'Confirm', onConfirm, onCancel) {
+  const modal = document.getElementById('globalModal');
+  const modalContent = modal.querySelector('.modal-content');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const modalFooter = document.getElementById('modalFooter');
+
+  // Remove all type classes
+  modalContent.classList.remove('modal-success', 'modal-error', 'modal-info');
+  modalContent.classList.add('modal-warning');
+
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  // Create Yes/No buttons
+  modalFooter.innerHTML = `
+    <button type="button" class="btn btn-secondary" onclick="handleConfirmCancel()">No</button>
+    <button type="button" class="btn btn-danger" onclick="handleConfirmYes()">Yes</button>
+  `;
+
+  modal.style.display = 'flex';
+
+  // Store callbacks globally
+  window._confirmCallback = onConfirm;
+  window._cancelCallback = onCancel;
+
+  // Close on overlay click cancels
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      handleConfirmCancel();
+    }
+  };
+
+  // Escape key cancels
+  document.addEventListener('keydown', confirmEscapeHandler);
+}
+
+function handleConfirmYes() {
+  closeModal();
+  if (window._confirmCallback) {
+    window._confirmCallback();
+    delete window._confirmCallback;
+    delete window._cancelCallback;
+  }
+}
+
+function handleConfirmCancel() {
+  closeModal();
+  if (window._cancelCallback) {
+    window._cancelCallback();
+  }
+  delete window._confirmCallback;
+  delete window._cancelCallback;
+}
+
+function confirmEscapeHandler(e) {
+  if (e.key === 'Escape') {
+    handleConfirmCancel();
+  }
+}
+
+// Replace window.alert with modal
+window.alert = function(message) {
+  showModal(message, 'Alert', 'info');
+};
+
+// Replace window.confirm with modal
+window.confirm = function(message) {
+  return new Promise((resolve) => {
+    showConfirm(message, 'Confirm',
+      () => resolve(true),
+      () => resolve(false)
+    );
+  });
+};
+</script>
