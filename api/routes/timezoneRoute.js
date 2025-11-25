@@ -6,8 +6,8 @@ const { getJson } = require('../utils/httpClient');
 const { setStandardHeaders } = require('../utils/standardHeaders');
 
 // GitHub URLs for data
-const TIMEZONE_URL = process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/refs/heads/main/timezones.json';
-const COUNTRIES_URL = process.env.COUNTRIES_URL || 'https://raw.githubusercontent.com/apimgr/countries/refs/heads/main/countries.json';
+const TIMEZONE_URL = process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/main/src/data/timezones.json';
+const COUNTRIES_URL = process.env.COUNTRIES_URL || 'https://raw.githubusercontent.com/apimgr/countries/main/countries.json';
 
 // Cache data with TTL
 let cache = {

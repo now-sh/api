@@ -3,47 +3,13 @@
   "builds": [
     {
       "src": "api/*.js",
-      "use": "@now/node"
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "methods": [
-        "POST",
-        "OPTIONS",
-        "GET",
-        "PUT"
-      ],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": "true"
-      },
-      "src": "^/(.*)$",
+      "src": "/(.*)",
       "dest": "/api/index.js"
-    },
-    {
-      "src": "^/images",
-      "dest": "/api/public"
     }
-  ],
-  "env": {
-    "PORT": "@PORT",
-    "VERSION": "@VERSION",
-    "NODE_ENV": "@NODE_ENV",
-    "HEADER_AGENT": "@HEADER_AGENT",
-    "GITHUB_API_KEY": "@GITHUB_API_KEY",
-    "JWT_SECRET": "@JWT_SECRET",
-    "MONGODB_URI": "@MONGODB_URI",
-    "BLOG_URL": "@BLOG_URL",
-    "DOMAIN_LIST": "@DOMAIN_LIST",
-    "GIT_MESSAGE_URL": "@GIT_MESSAGE_URL",
-    "ARGIS_URL": "@ARGIS_URL",
-    "TIMEZONE_URL": "@TIMEZONE_URL",
-    "COUNTRIES_URL": "@COUNTRIES_URL",
-    "ALBANY_CLOSINGS_URL": "@ALBANY_CLOSINGS_URL",
-    "UTICA_CLOSINGS_URL": "@UTICA_CLOSINGS_URL",
-    "PROFILE_URL": "@PROFILE_URL",
-    "TRAFFIC_URL": "@TRAFFIC_URL"
-  }
+  ]
 }

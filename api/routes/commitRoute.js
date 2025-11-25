@@ -9,7 +9,7 @@ const { getJson } = require('../utils/httpClient');
 const commitRoute = express.Router();
 
 // GitHub URL for commit messages
-const COMMIT_MESSAGES_URL = process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/Commitmessages/refs/heads/main/gitmessages.json';
+const COMMIT_MESSAGES_URL = process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/gitmessages/main/src/data/messages.json';
 
 // Cache for messages
 let messagesCache = {
