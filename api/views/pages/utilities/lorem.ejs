@@ -14,14 +14,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="count" class="form-label">Number of Items</label>
-                            <input 
-                                type="number" 
-                                id="count" 
-                                name="count" 
-                                class="form-control" 
+                            <input
+                                type="number"
+                                id="count"
+                                name="count"
+                                class="form-control"
                                 min="1"
                                 max="100"
-                                value=""
+                                value="50"
                                 required
                             >
                         </div>
@@ -117,7 +117,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultDiv = document.getElementById('loremResult');
     const resultOutput = resultDiv.querySelector('.result-output');
     let generatedText = '';
-    
+
+    // Auto-generate on page load with default values
+    generateLorem(50, 'paragraphs', 'text', false);
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -166,29 +169,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function displayText(text, format) {
+        // Ensure text is a string
+        const textStr = typeof text === 'string' ? text : String(text || '');
+
         if (format === 'html') {
             // Display HTML with syntax highlighting
             resultOutput.innerHTML = `
                 <div class="html-preview mb-3">
-                    ${text}
+                    ${textStr}
                 </div>
                 <div class="html-code">
                     <h4>HTML Code:</h4>
-                    <pre><code>${escapeHtml(text)}</code></pre>
+                    <pre><code>${escapeHtml(textStr)}</code></pre>
                 </div>
             `;
         } else {
             // Display plain text
-            resultOutput.innerHTML = `<pre class="lorem-text">${text}</pre>`;
+            resultOutput.innerHTML = `<pre class="lorem-text">${escapeHtml(textStr)}</pre>`;
         }
     }
     
     function updateStats(text) {
+        // Ensure text is a string
+        const textStr = typeof text === 'string' ? text : String(text || '');
+
         // Remove HTML tags for counting
-        const plainText = text.replace(/<[^>]*>/g, '');
+        const plainText = textStr.replace(/<[^>]*>/g, '');
         const words = plainText.trim().split(/\s+/).filter(word => word.length > 0);
         const chars = plainText.length;
-        
+
         document.getElementById('wordCount').textContent = words.length;
         document.getElementById('charCount').textContent = chars;
     }

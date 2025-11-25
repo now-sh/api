@@ -55,6 +55,11 @@
                         </div>
                     <% } %>
                 </div>
+            <% } else if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-danger">
+                    <h4>Failed to load posts</h4>
+                    <p><%= error %></p>
+                </div>
             <% } else { %>
                 <div class="loading-state">
                     <p>Loading blog posts from GitHub repository...</p>

@@ -93,7 +93,7 @@ commitRoute.get('/text', cors(), async (req, res) => {
  */
 commitRoute.get('/batch/:count',
   cors(),
-  param('count').isInt({ min: 1, max: 20 }).withMessage('Count must be between 1 and 20'),
+  param('count').isInt({ min: 1, max: 200 }).withMessage('Count must be between 1 and 200'),
   validateRequest,
   async (req, res) => {
     try {
@@ -122,7 +122,7 @@ commitRoute.get('/batch/:count',
  */
 commitRoute.get('/batch/:count/text',
   cors(),
-  param('count').isInt({ min: 1, max: 20 }).withMessage('Count must be between 1 and 20'),
+  param('count').isInt({ min: 1, max: 200 }).withMessage('Count must be between 1 and 200'),
   validateRequest,
   async (req, res) => {
     try {

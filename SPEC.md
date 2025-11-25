@@ -252,7 +252,7 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 - `/data/reddit` - Reddit activity viewer
 - `/data/covid` - COVID-19 statistics
 - `/data/anime` - Anime quotes
-- `/data/domains` - Domain list
+- `/data/domains` - Domain list (displays domains and subdomains in separate sections with copy functionality)
 - `/data/timezones` - World timezones
 - `/data/closings` - School closings
 - `/data/blogs` - Blog posts
@@ -266,14 +266,23 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 - Dark theme (Bootswatch Darkly)
 - Form-based interactions for all tools
 - Real-time results display
-- Copy-to-clipboard functionality
+- Copy-to-clipboard functionality with fallback
 - Mobile-responsive design
-- JavaScript files for dynamic functionality:
-  - `utility-forms.js` - Handles utility form submissions
+- **Global JavaScript Utilities (`utils.js`)** - Type-safe helper functions loaded on all pages:
+  - `ensureString()`, `ensureArray()` - Type safety
+  - `escapeHtml()` - XSS protection
+  - `safeGet()` - Safe nested property access
+  - `copyToClipboard()` - Clipboard with automatic fallback and feedback
+  - `debounce()` - Function call debouncing
+  - `formatDate()` - Consistent date formatting
+  - `showLoading()`, `showError()`, `showSuccess()` - State management
+- Page-specific JavaScript files:
+  - `utility-forms-v2.js` - Handles utility form submissions
   - `data-forms.js` - Handles data viewing forms
   - `base64.js` - Base64 specific functionality
   - `todos.js` - Todo management
   - `copy.js` - Copy to clipboard utility
+  - `auth-cookies.js` - Authentication helpers
 
 ## Middleware and Utilities
 
@@ -296,13 +305,17 @@ All responses include standard headers for CORS, caching, and security.
 
 ## External Data Sources
 
-All personal data is fetched from GitHub repositories:
+All personal data is fetched from GitHub repositories. **Important**: Frontend pages fetch from backend API endpoints, NOT directly from GitHub.
 
 - Profile: `https://raw.githubusercontent.com/casjay/public/main/profile.json`
 - Domains: `https://raw.githubusercontent.com/casjay/public/main/domains.json`
+  - Structure: `{ "domains": [...], "subDomains": [...] }` (note: capital D in subDomains)
 - Resume PDF: `https://raw.githubusercontent.com/casjay/public/main/Resume-Tech.pdf`
 - Resume JSON: `https://raw.githubusercontent.com/casjay/public/main/resume.json`
-- Blogs: `https://malaks-us.github.io/jason/api/posts.json`
+- Blogs: `https://api.github.com/repos/malaks-us/jason/contents/_posts` (196 markdown files)
+- Git Messages: `https://raw.githubusercontent.com/apimgr/gitmessages/main/src/data/messages.json`
+- Timezones: `https://raw.githubusercontent.com/apimgr/timezones/main/src/data/timezones.json`
+- Countries: `https://raw.githubusercontent.com/apimgr/countries/main/countries.json`
 
 ## Authentication
 
@@ -345,10 +358,24 @@ npm run dev
 ```
 
 ### Environment Variables
+See `.env.sample` for complete list. Key variables:
+
 - `PORT` - Server port (default: 1919)
-- `MONGODB_URI` - MongoDB connection string
-- `JWT_SECRET` - JWT signing secret
+- `HOSTNAME` - Server hostname (default: localhost)
+- `VERSION` - API version (default: 1.9.4)
+- `TIMEZONE` - Server timezone (default: America/New_York)
+- `MONGODB_URI` - MongoDB connection string (optional)
+- `JWT_SECRET` - JWT signing secret (required for auth features)
 - `NODE_ENV` - Environment (development/production)
+- `GITHUB_API_KEY` - GitHub token for API access (optional but recommended)
+- `REDDIT_CLIENT_ID` - Reddit client ID (optional)
+- `REDDIT_CLIENT_SECRET` - Reddit client secret (optional)
+- `PROFILE_URL` - Profile JSON URL (default: GitHub raw)
+- `BLOG_URL` - Blog posts URL (default: malaks-us/jason/_posts)
+- `DOMAIN_LIST` - Domains JSON URL (default: GitHub raw)
+- `GIT_MESSAGE_URL` - Commit messages JSON URL
+- `TIMEZONE_URL` - Timezones JSON URL
+- `COUNTRIES_URL` - Countries JSON URL
 
 ### Project Structure
 ```
@@ -391,10 +418,12 @@ npm run test:endpoints
 ## Vercel Configuration
 
 The project uses Vercel for deployment with the following configuration:
-- Builder: `@vercel/node` 
+- Builder: `@vercel/node` (updated from deprecated `@now/node`)
+- Configuration file: `now.json` (do NOT use both `now.json` and `vercel.json`)
 - Output directory: `api`
 - MongoDB connection handled via environment variables
 - Automatic SSL/HTTPS
+- Recent deployment: `https://api-ozmpeipy0-casjaysdev.vercel.app`
 
 ## Security Considerations
 
@@ -445,22 +474,57 @@ try {
 
 ## Recent Updates
 
-1. **Route Reorganization**: 
+### December 2024 - Data Source Fixes and Frontend Enhancements
+
+1. **Global JavaScript Utilities**:
+   - Created `utils.js` with type-safe helper functions
+   - Loaded globally on all pages via main layout
+   - Fixes common JavaScript errors like "text.replace is not a function"
+   - Provides consistent clipboard, type checking, and HTML escaping utilities
+   - Documented in `/api/public/js/README.md`
+
+2. **Fixed Broken External Data URLs**:
+   - Updated Git Messages URL: `gitmessages/main/src/data/messages.json` (repo renamed from Commitmessages)
+   - Fixed Timezone URL: Removed invalid `refs/heads/main` path segment
+   - Fixed Countries URL: Updated to use correct raw.githubusercontent.com format
+   - **Important**: Always use `raw.githubusercontent.com` format, NOT `github.com/repo/raw`
+
+2. **Vercel Deployment Fixes**:
+   - Fixed "Cannot find module 'dotenv'" error
+   - Updated `now.json` to use `@vercel/node` builder instead of deprecated `@now/node`
+   - Removed conflicting `vercel.json` file (cannot use both now.json and vercel.json)
+   - Successfully deployed to production
+
+3. **Domains Frontend Enhancement**:
+   - Updated domain controller to properly read `domains` and `subDomains` keys from JSON source
+   - Fixed template to handle both `subDomains` (capital D) and `subdomains` naming conventions
+   - Implemented separate card sections for domains and subdomains on frontend
+   - Added visual copy feedback: green highlight, checkmark, and "✓ Copied!" message
+   - Filter out empty subdomain entries from display
+   - Removed conflicting route handler (mainRoute.js already handles /data/domains)
+
+4. **Frontend Architecture Clarification**:
+   - Frontend pages (`/data/*`) fetch data from backend API endpoints
+   - Backend API endpoints fetch from external sources (GitHub, etc.)
+   - Frontend NEVER fetches directly from GitHub or external sources
+   - Example flow: `/data/domains` → `/api/v1/me/info/domains` → GitHub raw URL
+
+5. **Route Reorganization** (Previous):
    - Moved all utility endpoints from `/utilities` to `/tools`
    - Created proper categories (tools, data, fun, social, world)
    - Implemented `/me/info` for personal data
 
-2. **Frontend Implementation**:
+6. **Frontend Implementation** (Previous):
    - Created EJS views for all endpoints
    - Implemented consistent theming with Bootstrap 5
    - Added interactive forms for all tools
    - Updated JavaScript to use new API routes
 
-3. **Backward Compatibility**:
+7. **Backward Compatibility** (Previous):
    - Maintained `/api/v1/git` routes for casjay.coffee
    - Legacy `/utilities` routes proxy to new `/tools` endpoints
 
-4. **Resume Enhancement**:
+8. **Resume Enhancement** (Previous):
    - Added JSON resume endpoint fetching from GitHub
    - Text format endpoint for resume
    - PDF view/download remain unchanged

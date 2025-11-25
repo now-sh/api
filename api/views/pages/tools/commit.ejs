@@ -12,17 +12,24 @@
         <button class="btn btn-sm btn-secondary copy-btn" data-action="copy-message">Copy</button>
     </div>
     
-    <button id="generateBtn" class="btn btn-primary btn-lg">Generate Random Message</button>
+    <button id="generateBtn" class="btn btn-primary btn-lg">Generate New Message</button>
     
     <div class="mt-4">
-        <button id="showAllBtn" class="btn btn-secondary btn-sm">Show All Messages</button>
+        <button id="showAllBtn" class="btn btn-secondary btn-sm">Show Random Messages</button>
     </div>
 </div>
 
 <div class="card mt-6" id="allMessagesCard" style="display: none;">
-    <h3>All Available Messages</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Random Messages</h3>
+        <span id="messageStats" class="badge bg-purple"></span>
+    </div>
     <div id="allMessagesList" class="messages-list">
         <div class="loading">Loading messages...</div>
+    </div>
+    <div class="pagination-controls mt-4" style="display: none;">
+        <button id="loadMoreBtn" class="btn btn-primary">Load More (50)</button>
+        <span class="text-muted ms-3" id="loadedCount"></span>
     </div>
 </div>
 
@@ -139,6 +146,21 @@
     font-size: var(--text-lg);
 }
 
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.badge.bg-purple {
+    background-color: var(--purple);
+    color: var(--background);
+    font-size: var(--text-sm);
+    padding: 0.5rem 1rem;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -157,9 +179,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const commitMessage = document.getElementById('commitMessage');
     const allMessagesCard = document.getElementById('allMessagesCard');
     const allMessagesList = document.getElementById('allMessagesList');
-    
-    // Generate random message
-    generateBtn.addEventListener('click', async () => {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const messageStats = document.getElementById('messageStats');
+    const loadedCount = document.getElementById('loadedCount');
+    const paginationControls = document.querySelector('.pagination-controls');
+
+    let allMessages = [];
+    let currentPage = 0;
+    const messagesPerPage = 50;
+
+    // Function to generate random message
+    async function generateMessage() {
         try {
             const response = await fetch('/api/v1/tools/commit');
             const data = await response.json();
@@ -182,44 +212,85 @@ document.addEventListener('DOMContentLoaded', function() {
             commitMessage.textContent = 'Network error. Please try again.';
             messageDisplay.style.display = 'block';
         }
-    });
-    
-    // Show all messages
+    }
+
+    // Generate message on button click
+    generateBtn.addEventListener('click', generateMessage);
+
+    // Auto-generate message on page load
+    generateMessage();
+
+    // Function to render messages
+    function renderMessages(startIndex, count) {
+        const endIndex = Math.min(startIndex + count, allMessages.length);
+        const messagesToRender = allMessages.slice(startIndex, endIndex);
+
+        const messagesHtml = messagesToRender.map((msg, index) => `
+            <div class="message-item" data-message="${escapeHtml(msg)}">
+                ${escapeHtml(msg)}
+                <span class="copy-icon">📋</span>
+            </div>
+        `).join('');
+
+        if (startIndex === 0) {
+            allMessagesList.innerHTML = messagesHtml;
+        } else {
+            allMessagesList.insertAdjacentHTML('beforeend', messagesHtml);
+        }
+
+        // Add click handlers for copying
+        document.querySelectorAll('.message-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const message = item.getAttribute('data-message');
+                copyToClipboard(message, item);
+            });
+        });
+
+        // Update stats
+        loadedCount.textContent = `Showing ${endIndex} of ${allMessages.length} messages`;
+
+        // Show/hide load more button
+        if (endIndex >= allMessages.length) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'inline-block';
+        }
+    }
+
+    // Show messages
     showAllBtn.addEventListener('click', async () => {
         if (allMessagesCard.style.display === 'block') {
             allMessagesCard.style.display = 'none';
-            showAllBtn.textContent = 'Show All Messages';
+            showAllBtn.textContent = 'Show Random Messages';
+            currentPage = 0;
             return;
         }
-        
+
         try {
-            const response = await fetch('/api/v1/tools/commit/batch/100');
+            allMessagesList.innerHTML = '<div class="loading">Loading messages...</div>';
+            allMessagesCard.style.display = 'block';
+            showAllBtn.textContent = 'Hide Messages';
+
+            const response = await fetch('/api/v1/tools/commit/batch/200');
             const data = await response.json();
-            
+
             if (response.ok && data.success && data.data) {
-                const messagesHtml = data.data.messages.map((msg, index) => `
-                    <div class="message-item" data-message="${msg.replace(/"/g, '&quot;')}">
-                        ${msg}
-                        <span class="copy-icon">📋</span>
-                    </div>
-                `).join('');
-                
-                allMessagesList.innerHTML = messagesHtml;
-                allMessagesCard.style.display = 'block';
-                showAllBtn.textContent = 'Hide All Messages';
-                
-                // Add click handlers for copying
-                document.querySelectorAll('.message-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const message = item.getAttribute('data-message');
-                        copyToClipboard(message, item);
-                    });
-                });
+                allMessages = data.data.messages;
+                messageStats.textContent = `${data.data.total} total available`;
+                currentPage = 0;
+
+                renderMessages(0, messagesPerPage);
+                paginationControls.style.display = 'block';
             }
         } catch (error) {
             allMessagesList.innerHTML = '<div class="error">Failed to load messages</div>';
-            allMessagesCard.style.display = 'block';
         }
+    });
+
+    // Load more messages
+    loadMoreBtn.addEventListener('click', () => {
+        currentPage++;
+        renderMessages(currentPage * messagesPerPage, messagesPerPage);
     });
     
     // Copy button handler
@@ -230,6 +301,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // HTML escape function
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     // Copy to clipboard function
     function copyToClipboard(text, element) {
         navigator.clipboard.writeText(text).then(() => {
