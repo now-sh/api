@@ -41,14 +41,19 @@ async function fetchAlbanyClosings() {
     const hasClosings = !bodyText.includes('no reported closings');
     
     if (hasClosings) {
-      // Parse actual closings when they exist
-      // Look for common patterns like lists, tables, or divs
-      $('li, tr, .closing-item, .alert-item').each((i, elem) => {
-        const text = $(elem).text().trim();
-        if (text && !text.includes('Last Updated') && text.length > 3) {
+      // Parse closings from WNYT - they use div.everyOther elements
+      $('.everyOther').each((i, elem) => {
+        const $elem = $(elem);
+        // Name is in the <strong> tag
+        const name = $elem.find('strong').text().trim();
+        // Status/details is the text after the <br> tag
+        const fullText = $elem.text().trim();
+        const statusMatch = fullText.replace(name, '').trim();
+
+        if (name && name.length > 1) {
           closings.push({
-            name: text,
-            status: 'Closed', // Default status
+            name: name,
+            status: statusMatch || 'Closed',
             region: 'Albany',
             source: 'WNYT'
           });
@@ -95,61 +100,53 @@ async function fetchAlbanyClosings() {
 }
 
 /**
- * Parse Utica closings from JSON
+ * Fetch Utica closings metadata from JSON
+ * Note: WKTV's JSON only provides count/metadata, not individual closings.
+ * Full list is available at their website (loaded via JavaScript).
  */
 async function fetchUticaClosings() {
   const now = Date.now();
-  
+
   // Return cached data if still valid
   if (cache.utica.data && (now - cache.utica.timestamp) < CACHE_TTL) {
     return cache.utica.data;
   }
-  
+
   try {
     const data = await getJson(UTICA_CLOSINGS_URL, { timeout: 5000 });
-    
-    const closings = [];
-    const hasClosings = parseInt(data.numClosings) > 0;
-    
-    // Parse closings array if it exists
-    if (data.closings && Array.isArray(data.closings)) {
-      data.closings.forEach((closing) => {
-        closings.push({
-          name: closing.name || closing.organization || closing.school || 'Unknown',
-          status: closing.status || 'Closed',
-          region: 'Utica',
-          source: 'WKTV',
-          details: closing.details || null
-        });
-      });
-    }
-    
+
+    const count = parseInt(data.numClosings) || 0;
+    const hasClosings = count > 0;
+
     const result = {
       region: 'Utica',
       source: 'WKTV',
-      title: data.title,
-      count: parseInt(data.numClosings) || 0,
+      title: data.title || 'School and Business Closings',
+      count: count,
       hasClosings: hasClosings,
-      closings: closings,
-      message: hasClosings ? null : 'There are currently no reported closings.',
-      url: data.closingsURL
+      closings: [], // WKTV JSON doesn't include individual closings
+      message: hasClosings
+        ? `${count} closings reported. Visit WKTV website for full list.`
+        : 'There are currently no reported closings.',
+      url: data.closingsURL || 'https://www.wktv.com/weather/closings/',
+      note: 'Individual closings list unavailable via API - visit WKTV website for details'
     };
-    
+
     // Update cache
     cache.utica = {
       data: result,
       timestamp: now
     };
-    
+
     return result;
   } catch (error) {
     console.error('Failed to fetch Utica closings:', error instanceof Error ? error.message : 'Unknown error');
-    
+
     // Return cached data if available
     if (cache.utica.data) {
       return cache.utica.data;
     }
-    
+
     // Return error response
     return {
       region: 'Utica',
@@ -158,7 +155,8 @@ async function fetchUticaClosings() {
       closings: [],
       count: 0,
       hasClosings: false,
-      message: null
+      message: null,
+      url: 'https://www.wktv.com/weather/closings/'
     };
   }
 }
