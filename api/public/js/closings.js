@@ -33,44 +33,33 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadClosings() {
         try {
             const response = await fetch('/api/v1/world/closings');
-            
+
             if (response.ok) {
                 const data = await response.json();
-                
-                // Handle the regions structure
-                if (data.regions) {
-                    allClosings = [];
-                    // Extract closings from all regions
-                    Object.values(data.regions).forEach(region => {
-                        if (region.closings && Array.isArray(region.closings)) {
-                            region.closings.forEach(closing => {
-                                // Add region info to each closing
-                                allClosings.push({
-                                    ...closing,
-                                    region: region.region || 'Unknown'
-                                });
+
+                // Handle the new grouped category structure
+                allClosings = [];
+                const categories = ['schools', 'colleges', 'churches', 'government', 'public', 'organizations', 'business'];
+
+                categories.forEach(category => {
+                    if (data[category] && Array.isArray(data[category])) {
+                        data[category].forEach(closing => {
+                            allClosings.push({
+                                ...closing,
+                                category: category.charAt(0).toUpperCase() + category.slice(1)
                             });
-                        }
-                    });
-                } else if (data.closings && Array.isArray(data.closings)) {
-                    allClosings = data.closings;
-                } else if (Array.isArray(data)) {
-                    allClosings = data;
-                } else {
-                    // No data available
-                    allClosings = [];
-                }
-                
+                        });
+                    }
+                });
+
                 // Update last updated time
-                lastUpdated.textContent = data.timestamp ? 
-                    new Date(data.timestamp).toLocaleTimeString() : 
-                    new Date().toLocaleTimeString();
-                
+                lastUpdated.textContent = data.lastUpdated || new Date().toLocaleTimeString();
+
                 // Show weather alert if there are closings
-                if (data.hasClosings && data.totalClosings > 0) {
-                    showWeatherAlert(`${data.totalClosings} closings reported across all regions`);
+                if (data.closures > 0) {
+                    showWeatherAlert(`${data.closures} closings reported across all regions`);
                 }
-                
+
                 // Display closings
                 filterAndDisplayClosings(searchInput.value.toLowerCase(), currentFilter);
             } else {

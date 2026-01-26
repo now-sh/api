@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
 const jwt = require('jsonwebtoken');
+const { getExpirationLabel, formatLastUpdated } = require('../utils/dateUtils');
 
 
 
@@ -166,20 +167,26 @@ const decodeJWT = (token, options = {}) => {
     // Check expiration
     if (decoded.payload.exp) {
       const expirationDate = new Date(decoded.payload.exp * 1000);
-      result.expired = expirationDate < new Date();
+      const expInfo = getExpirationLabel(expirationDate);
+      result.expired = expInfo.isExpired;
       result.expiration_date = expirationDate.toISOString();
+      result.expiration_formatted = formatLastUpdated(expirationDate);
+      result.expiration_label = expInfo.label;
     }
-    
+
     // Check not before
     if (decoded.payload.nbf) {
       const notBeforeDate = new Date(decoded.payload.nbf * 1000);
-      result.not_before = notBeforeDate;
+      result.not_before = notBeforeDate.toISOString();
+      result.not_before_formatted = formatLastUpdated(notBeforeDate);
       result.active = notBeforeDate <= new Date();
     }
-    
+
     // Check issued at
     if (decoded.payload.iat) {
-      result.issued_at = new Date(decoded.payload.iat * 1000).toISOString();
+      const issuedAtDate = new Date(decoded.payload.iat * 1000);
+      result.issued_at = issuedAtDate.toISOString();
+      result.issued_at_formatted = formatLastUpdated(issuedAtDate);
     }
     
     // If secret is provided, verify signature

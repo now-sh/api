@@ -1,6 +1,7 @@
 const { getText } = require('../utils/httpClient');
 const { getHeaders } = require('../middleware/headers');
 const { fetchAllGitHubPages } = require('../utils/pagination');
+const { getPostDateLabel } = require('../utils/dateUtils');
 
 const githubToken = process.env.GITHUB_API_KEY;
 const DEFAULT_REPO_URL = process.env.BLOG_URL || 'https://api.github.com/repos/malaks-us/jason/contents/_posts';
@@ -100,6 +101,9 @@ async function fetchBlogPosts(repoUrl) {
         const { frontmatter, content: postContent } = parseFrontmatter(content);
         const { date, slug } = parseFilename(file.name);
         
+        const postDate = frontmatter.date || date;
+        const dateInfo = getPostDateLabel(postDate);
+
         return {
           // File metadata
           filename: file.name,
@@ -109,16 +113,19 @@ async function fetchBlogPosts(repoUrl) {
           url: file.url,
           html_url: file.html_url,
           download_url: file.download_url,
-          
+
           // Parsed content
           title: frontmatter.title || slug.replace(/-/g, ' '),
-          date: frontmatter.date || date,
+          date: postDate,
+          dateFormatted: dateInfo.formatted,
+          dateRelative: dateInfo.relative,
+          dateLabel: dateInfo.label,
           slug: slug,
           author: frontmatter.author || null,
           categories: frontmatter.categories || frontmatter.category || null,
           tags: frontmatter.tags || null,
           excerpt: frontmatter.excerpt || postContent.substring(0, 200) + '...',
-          
+
           // Full content
           frontmatter: frontmatter,
           content: postContent
