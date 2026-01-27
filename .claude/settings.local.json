@@ -10,7 +10,8 @@
       "Bash(npm uninstall:*)",
       "Bash(npm run lint:*)",
       "Bash(npx eslint:*)",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Bash(vercel logs:*)"
     ]
   }
 }
