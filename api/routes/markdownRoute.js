@@ -2,9 +2,27 @@ const express = require('express');
 const cors = require('cors');
 const { marked } = require('marked');
 const { markedHighlight } = require('marked-highlight');
-const DOMPurify = require('isomorphic-dompurify');
 const hljs = require('highlight.js');
 const { setStandardHeaders } = require('../utils/standardHeaders');
+
+// DOMPurify with fallback for serverless environments
+let DOMPurify;
+try {
+  DOMPurify = require('isomorphic-dompurify');
+} catch {
+  // Fallback: basic HTML escaping if DOMPurify fails to load
+  DOMPurify = {
+    sanitize: (html, options) => {
+      // Allow specified tags, escape others
+      const allowedTags = options?.ALLOWED_TAGS || ['p', 'br', 'strong', 'em', 'code', 'pre'];
+      const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/gi;
+      return html.replace(tagRegex, (match, tag) => {
+        return allowedTags.includes(tag.toLowerCase()) ? match : '';
+      });
+    }
+  };
+  console.warn('DOMPurify fallback active - isomorphic-dompurify not available');
+}
 
 const markdownRoute = express.Router();
 
