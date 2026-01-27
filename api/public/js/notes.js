@@ -143,7 +143,7 @@ async function saveNote(autoSave = false) {
             const error = await response.json();
             showToast(error.message || 'Failed to save note', 'error');
         }
-    } catch (error) {
+    } catch (_error) {
         showToast('Network error. Please try again.', 'error');
     }
 }
@@ -179,7 +179,7 @@ async function loadNotes() {
             notes = data.notes || data || [];
         }
         renderNotes();
-    } catch (error) {
+    } catch (_error) {
         document.getElementById('notesList').innerHTML = 
             '<div class="empty-state">Error loading notes. Please try again.</div>';
     }
@@ -242,15 +242,16 @@ window.loadNote = async function(noteId) {
 
 async function deleteCurrentNote() {
     if (!currentNoteId) return;
-    
+
     const token = localStorage.getItem('authToken');
     if (!token) {
         showToast('Please sign in to delete notes', 'error');
         return;
     }
-    
-    if (!confirm('Are you sure you want to delete this note?')) return;
-    
+
+    const confirmed = await confirm('Are you sure you want to delete this note?');
+    if (!confirmed) return;
+
     try {
         const response = await fetch(`/api/v1/data/notes/${currentNoteId}`, {
             method: 'DELETE',
@@ -271,7 +272,7 @@ async function deleteCurrentNote() {
         } else {
             showToast('Error deleting note', 'error');
         }
-    } catch (error) {
+    } catch (_error) {
         showToast('Network error. Please try again.', 'error');
     }
 }

@@ -25,7 +25,7 @@ app.get('/version', (req, res) => {
       const jwt = require('jsonwebtoken');
       const decoded = jwt.decode(authToken);
       currentUser = decoded?.username || decoded?.name || decoded?.sub || 'Authenticated User';
-    } catch (error) {
+    } catch (_error) {
       // Invalid token, leave currentUser as null
     }
   }
@@ -337,7 +337,7 @@ const hostname = process.env.HOSTNAME;
 app.listen(port, async () => {
   try {
     await connectToDatabase();
-  } catch (error) {
+  } catch (_error) {
     console.warn('⚠️  Starting without database connection');
   }
   console.log(`🚀 Server started: http://${hostname}:${port}`);

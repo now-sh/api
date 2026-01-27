@@ -1,7 +1,7 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
-const { body, query, param, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 
 // Middleware
 const checkAuth = require('../middleware/checkAuth');
@@ -10,8 +10,7 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 // Controllers
 const todoController = require('../controllers/todo');
-const authController = require('../controllers/auth');
-const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatSuccess, formatError, sendJSON } = require('../controllers/responseFormatter');
 const { formatValidationErrors } = require('../utils/validationHelper');
 
 const todoRoute = express.Router();

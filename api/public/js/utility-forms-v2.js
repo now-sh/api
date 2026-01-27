@@ -125,21 +125,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Special handling for different form types
         switch (formId) {
-            case 'hashForm':
+            case 'hashForm': {
                 const algorithm = data.algorithm || 'sha256';
                 url = `/api/v1/tools/hash/${algorithm}`;
                 delete data.algorithm;
                 break;
+            }
 
-            case 'uuidForm':
+            case 'uuidForm': {
                 const count = data.count || 1;
                 url = `/api/v1/tools/uuid/generate/${count}`;
                 options.method = 'GET';
                 delete options.body;
                 delete options.headers;
                 break;
+            }
 
-            case 'loremForm':
+            case 'loremForm': {
                 const type = data.type || 'paragraphs';
                 const lCount = data.count || 3;
                 url = `/api/v1/tools/lorem/${type}/${lCount}`;
@@ -147,14 +149,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 delete options.body;
                 delete options.headers;
                 break;
+            }
 
-            case 'passwdForm':
+            case 'passwdForm': {
                 const length = data.length || 16;
                 url = `/api/v1/tools/passwd/${length}`;
                 options.method = 'GET';
                 delete options.body;
                 delete options.headers;
                 break;
+            }
 
             case 'commitForm':
                 url = '/api/v1/tools/commit';
@@ -179,21 +183,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 // SKIP - handled inline in reddit.ejs
                 return null;
 
-            case 'covidForm':
+            case 'covidForm': {
                 const country = data.country;
                 url = country ? `/api/v1/world/covid/countries/${country}` : '/api/v1/world/covid';
                 options.method = 'GET';
                 delete options.body;
                 delete options.headers;
                 break;
+            }
 
-            case 'animeForm':
+            case 'animeForm': {
                 const quoteCount = data.count || 1;
                 url = quoteCount > 1 ? `/api/v1/fun/anime/quotes/${quoteCount}` : '/api/v1/fun/anime/quote';
                 options.method = 'GET';
                 delete options.body;
                 delete options.headers;
                 break;
+            }
         }
 
         return { url, options };

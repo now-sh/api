@@ -4,7 +4,13 @@
       "Bash(python3:*)",
       "Bash(npm install:*)",
       "Bash(node -e:*)",
-      "Bash(node /root/Projects/github/now-sh/api/test-dedup.js:*)"
+      "Bash(node /root/Projects/github/now-sh/api/test-dedup.js:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm update:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(node -c:*)"
     ]
   }
 }

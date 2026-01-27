@@ -28,7 +28,7 @@ const decode = (text) => {
         output: decoded.length
       }
     };
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid base64 string');
   }
 };

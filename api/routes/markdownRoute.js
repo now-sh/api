@@ -1,27 +1,31 @@
 const express = require('express');
 const cors = require('cors');
-const marked = require('marked');
+const { marked } = require('marked');
+const { markedHighlight } = require('marked-highlight');
 const DOMPurify = require('isomorphic-dompurify');
 const hljs = require('highlight.js');
 const { setStandardHeaders } = require('../utils/standardHeaders');
 
 const markdownRoute = express.Router();
 
-// Configure marked options
-marked.setOptions({
-  highlight: function(code, lang) {
+// Configure marked with highlight extension
+marked.use(markedHighlight({
+  langPrefix: 'hljs language-',
+  highlight(code, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(code, { language: lang }).value;
-      } catch (err) {}
+      } catch (_err) {
+        // Fall through to auto-highlight
+      }
     }
     return hljs.highlightAuto(code).value;
-  },
+  }
+}));
+
+marked.use({
   breaks: true,
-  gfm: true,
-  headerIds: true,
-  mangle: false,
-  sanitize: false // We'll use DOMPurify instead
+  gfm: true
 });
 
 /**
@@ -57,7 +61,6 @@ function markdownToHtml(markdown, options = {}) {
  * Extract metadata from markdown
  */
 function extractMetadata(markdown) {
-  const lines = markdown.split('\n');
   const metadata = {
     title: null,
     headings: [],
@@ -98,7 +101,7 @@ function extractMetadata(markdown) {
   
   // Word count
   const words = markdown.replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/[#*`\[\]()!]/g, '') // Remove markdown syntax
+    .replace(/[#*`[\]()!]/g, '') // Remove markdown syntax
     .split(/\s+/)
     .filter(word => word.length > 0);
   metadata.wordCount = words.length;
@@ -240,7 +243,7 @@ markdownRoute.post('/to-markdown', cors(), express.json({ limit: '10mb' }), asyn
 // Preview markdown (returns styled HTML page)
 markdownRoute.post('/preview', cors(), express.json({ limit: '10mb' }), async (req, res) => {
   try {
-    const { markdown, theme = 'github' } = req.body;
+    const { markdown } = req.body;
     
     if (!markdown) {
       const data = { error: 'Markdown content is required' };

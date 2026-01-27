@@ -78,7 +78,6 @@ function sendJSON(res, data, options = {}) {
  * Send text response
  */
 function sendText(res, text, options = {}) {
-  const { setStandardHeaders } = require('../utils/standardHeaders');
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   if (options.noCache) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

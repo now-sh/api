@@ -1,4 +1,4 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const path = require('path');
 const express = require('express');
 const handlerRoute = express.Router();

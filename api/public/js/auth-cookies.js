@@ -46,7 +46,7 @@ class AuthCookies {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const now = Date.now() / 1000;
       return payload.exp > now;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -64,7 +64,7 @@ class AuthCookies {
         expiresAt: new Date(payload.exp * 1000),
         issuedAt: new Date(payload.iat * 1000)
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }

@@ -4,7 +4,6 @@
  */
 
 const mongoose = require('mongoose');
-const { getErrorMessage } = require('./errorUtils');
 
 /**
  * Convert string to ObjectId if valid

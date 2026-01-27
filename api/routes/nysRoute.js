@@ -1,4 +1,4 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const nysRoute = express.Router();
 const cors = require('cors');

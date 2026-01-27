@@ -132,7 +132,7 @@ const checkPasswordStrength = (password) => {
 /**
  * Get password improvement suggestions
  */
-const getPasswordSuggestions = (password, score) => {
+const getPasswordSuggestions = (password, _score) => {
   const suggestions = [];
   
   if (password.length < 8) {

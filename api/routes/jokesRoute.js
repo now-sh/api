@@ -27,12 +27,13 @@ jokesRoute.get('/random', cors(), async (req, res) => {
         break;
       
       case 'any':
-      default:
+      default: {
         // Randomly pick a source
         const sources = [getDadJoke, getChuckNorrisJoke, getProgrammingJoke];
         const randomSource = sources[Math.floor(Math.random() * sources.length)];
         joke = await randomSource();
         break;
+      }
     }
     
     const data = { ...joke, source: joke.source || source };

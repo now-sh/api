@@ -183,12 +183,12 @@ const generatePalette = (baseColor, type = 'monochromatic', count = 5) => {
       }
       break;
       
-    case 'complementary':
+    case 'complementary': {
       colors.push(baseHex);
       const compHue = (hsl.h + 180) % 360;
       const compRgb = hslToRgb(`hsl(${compHue}, ${hsl.s}%, ${hsl.l}%)`);
       colors.push(rgbToHex(compRgb.r, compRgb.g, compRgb.b));
-      
+
       // Fill remaining with variations
       for (let i = 2; i < count; i++) {
         const variation = i % 2 === 0 ? hsl.h : compHue;
@@ -197,8 +197,9 @@ const generatePalette = (baseColor, type = 'monochromatic', count = 5) => {
         colors.push(rgbToHex(varRgb.r, varRgb.g, varRgb.b));
       }
       break;
-      
-    case 'analogous':
+    }
+
+    case 'analogous': {
       const step = 30;
       for (let i = 0; i < count; i++) {
         const hue = (hsl.h + (i - Math.floor(count / 2)) * step + 360) % 360;
@@ -206,6 +207,7 @@ const generatePalette = (baseColor, type = 'monochromatic', count = 5) => {
         colors.push(rgbToHex(analogRgb.r, analogRgb.g, analogRgb.b));
       }
       break;
+    }
       
     case 'triadic':
       for (let i = 0; i < Math.min(count, 3); i++) {

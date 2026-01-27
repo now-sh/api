@@ -1,12 +1,9 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
-const { body, param, validationResult } = require('express-validator');
+const { param, validationResult } = require('express-validator');
 const { getHeaders } = require('../middleware/headers');
-const { getJson } = require('../utils/httpClient');
-const httpClient = require('../utils/httpClient');
-const { fetchAllGitHubPages } = require('../utils/pagination');
-const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatSuccess, formatError, sendJSON } = require('../controllers/responseFormatter');
 const { formatValidationErrors } = require('../utils/validationHelper');
 const githubToken = process.env.GITHUB_API_KEY;
 
@@ -113,10 +110,11 @@ async function fetchWithCacheAndHeaders(url, cacheKey) {
 }
 
 // Helper function to fetch with cache (backward compatibility)
-async function fetchWithCache(url, cacheKey) {
+async function _fetchWithCache(url, cacheKey) {
   const result = await fetchWithCacheAndHeaders(url, cacheKey);
   return result.data;
 }
+void _fetchWithCache; // Retained for backward compatibility
 
 
 /**

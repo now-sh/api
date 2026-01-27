@@ -1,4 +1,4 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
 const { body, query, param, validationResult } = require('express-validator');
@@ -10,7 +10,7 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 // Controllers
 const notesController = require('../controllers/notes');
-const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatSuccess, formatError, sendJSON } = require('../controllers/responseFormatter');
 const { formatValidationErrors } = require('../utils/validationHelper');
 
 const notesRoute = express.Router();

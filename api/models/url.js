@@ -27,8 +27,7 @@ const urlSchema = new mongoose.Schema({
   },
   expiresAt: {
     type: Date,
-    default: null,
-    index: true
+    default: null
   },
   isActive: {
     type: Boolean,

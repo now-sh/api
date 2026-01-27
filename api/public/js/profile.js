@@ -262,8 +262,9 @@ async function updateProfile(e) {
     }
 }
 
-function logout() {
-    if (confirm('Are you sure you want to sign out?')) {
+async function logout() {
+    const confirmed = await confirm('Are you sure you want to sign out?');
+    if (confirmed) {
         localStorage.removeItem('authToken');
         window.location.href = '/auth';
     }

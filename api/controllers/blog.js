@@ -77,91 +77,87 @@ async function fetchBlogPosts(repoUrl) {
       blogCache.delete(cacheKey);
     }
   }
-  
-  try {
-    // Only add auth header if token exists and is not placeholder
-    const isValidToken = githubToken && 
-                        githubToken.trim() !== '' && 
-                        githubToken !== 'myverylonggithubapikey';
-    const headers = isValidToken
-      ? getHeaders({ 'Authorization': `token ${githubToken}` })
-      : getHeaders({});
-    
-    // First, get all file metadata
-    const files = await fetchAllGitHubPages(repoUrl, headers);
-    
-    // Filter to only markdown files
-    const mdFiles = files.filter(file => file.name.endsWith('.md'));
-    
-    // Fetch content for each file
-    const postsPromises = mdFiles.map(async (file) => {
-      try {
-        const content = await getText(file.download_url, { headers });
-        
-        const { frontmatter, content: postContent } = parseFrontmatter(content);
-        const { date, slug } = parseFilename(file.name);
-        
-        const postDate = frontmatter.date || date;
-        const dateInfo = getPostDateLabel(postDate);
 
-        return {
-          // File metadata
-          filename: file.name,
-          path: file.path,
-          sha: file.sha,
-          size: file.size,
-          url: file.url,
-          html_url: file.html_url,
-          download_url: file.download_url,
+  // Only add auth header if token exists and is not placeholder
+  const isValidToken = githubToken &&
+                      githubToken.trim() !== '' &&
+                      githubToken !== 'myverylonggithubapikey';
+  const headers = isValidToken
+    ? getHeaders({ 'Authorization': `token ${githubToken}` })
+    : getHeaders({});
 
-          // Parsed content
-          title: frontmatter.title || slug.replace(/-/g, ' '),
-          date: postDate,
-          dateFormatted: dateInfo.formatted,
-          dateRelative: dateInfo.relative,
-          dateLabel: dateInfo.label,
-          slug: slug,
-          author: frontmatter.author || null,
-          categories: frontmatter.categories || frontmatter.category || null,
-          tags: frontmatter.tags || null,
-          excerpt: frontmatter.excerpt || postContent.substring(0, 200) + '...',
+  // First, get all file metadata
+  const files = await fetchAllGitHubPages(repoUrl, headers);
 
-          // Full content
-          frontmatter: frontmatter,
-          content: postContent
-        };
-      } catch (error) {
-        console.error(`Error fetching content for ${file.name}:`, error.message);
-        return {
-          filename: file.name,
-          path: file.path,
-          error: `Failed to fetch content: ${error.message}`
-        };
-      }
-    });
-    
-    const posts = await Promise.all(postsPromises);
-    
-    // Filter out posts with errors
-    const validPosts = posts.filter(post => !post.error);
-    
-    // Sort by date (newest first)
-    validPosts.sort((a, b) => {
-      const dateA = new Date(a.date || '1970-01-01');
-      const dateB = new Date(b.date || '1970-01-01');
-      return dateB - dateA;
-    });
-    
-    // Cache the results
-    blogCache.set(cacheKey, {
-      data: validPosts,
-      timestamp: Date.now()
-    });
-    
-    return validPosts;
-  } catch (error) {
-    throw error;
-  }
+  // Filter to only markdown files
+  const mdFiles = files.filter(file => file.name.endsWith('.md'));
+
+  // Fetch content for each file
+  const postsPromises = mdFiles.map(async (file) => {
+    try {
+      const content = await getText(file.download_url, { headers });
+
+      const { frontmatter, content: postContent } = parseFrontmatter(content);
+      const { date, slug } = parseFilename(file.name);
+
+      const postDate = frontmatter.date || date;
+      const dateInfo = getPostDateLabel(postDate);
+
+      return {
+        // File metadata
+        filename: file.name,
+        path: file.path,
+        sha: file.sha,
+        size: file.size,
+        url: file.url,
+        html_url: file.html_url,
+        download_url: file.download_url,
+
+        // Parsed content
+        title: frontmatter.title || slug.replace(/-/g, ' '),
+        date: postDate,
+        dateFormatted: dateInfo.formatted,
+        dateRelative: dateInfo.relative,
+        dateLabel: dateInfo.label,
+        slug: slug,
+        author: frontmatter.author || null,
+        categories: frontmatter.categories || frontmatter.category || null,
+        tags: frontmatter.tags || null,
+        excerpt: frontmatter.excerpt || postContent.substring(0, 200) + '...',
+
+        // Full content
+        frontmatter: frontmatter,
+        content: postContent
+      };
+    } catch (error) {
+      console.error(`Error fetching content for ${file.name}:`, error.message);
+      return {
+        filename: file.name,
+        path: file.path,
+        error: `Failed to fetch content: ${error.message}`
+      };
+    }
+  });
+
+  const posts = await Promise.all(postsPromises);
+
+  // Filter out posts with errors
+  const validPosts = posts.filter(post => !post.error);
+
+  // Sort by date (newest first)
+  validPosts.sort((a, b) => {
+    const dateA = new Date(a.date || '1970-01-01');
+    const dateB = new Date(b.date || '1970-01-01');
+    return dateB - dateA;
+  });
+
+  // Cache the results
+  blogCache.set(cacheKey, {
+    data: validPosts,
+    timestamp: Date.now()
+  });
+
+  return validPosts;
 }
 
 /**

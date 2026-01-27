@@ -193,7 +193,7 @@ urlRoute.delete('/:code',
   async (req, res) => {
     try {
       const userId = await authController.getUserId(req.user);
-      const result = await urlController.deleteUrl(req.params.code, userId);
+      await urlController.deleteUrl(req.params.code, userId);
       
       sendJSON(res, formatSuccess({
         message: 'URL deleted successfully',

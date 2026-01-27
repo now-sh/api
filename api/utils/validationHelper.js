@@ -1,5 +1,3 @@
-const { ValidationError } = require('express-validator');
-
 function formatValidationErrors(errors) {
   return errors.map(e => {
     return {

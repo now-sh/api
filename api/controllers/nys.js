@@ -1,10 +1,4 @@
-const datetime = require('node-datetime');
 const { getJson } = require('../utils/httpClient');
-
-const dttoday = datetime.create();
-const dtyester = datetime.create();
-dtyester.offsetInHours(-48);
-const yesterday = dtyester.format('Y-m-d');
 
 const nysurl = `https://disease.sh/v3/covid-19/states/New%20York`;
 let cache = null;

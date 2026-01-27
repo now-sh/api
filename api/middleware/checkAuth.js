@@ -46,9 +46,9 @@ const checkAuth = async (req, res, next) => {
     // Set user info on request
     req.user = decoded.email;
     req.token = token;
-    
+
     next();
-  } catch (error) {
+  } catch (_error) {
     return res.status(403).json({
       errors: [
         {

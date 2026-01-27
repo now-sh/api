@@ -2,23 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const domainsList = document.getElementById('domainsList');
     const domainSearch = document.getElementById('domainSearch');
     let allDomains = [];
-    
-    // Auto-load domains on page load
-    loadAllDomains();
-    
-    // Handle domain search
-    if (domainSearch) {
-        domainSearch.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filtered = allDomains.filter(item => 
-                item.name.toLowerCase().includes(searchTerm)
-            );
-            displayDomains(filtered);
-        });
-    }
-    
-    // Make loadAllDomains globally accessible
-    window.loadAllDomains = async function() {
+
+    // Define loadAllDomains function
+    async function loadAllDomains() {
         try {
             const response = await fetch('/api/v1/me/info/domains');
             
@@ -122,18 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Display TLD categories (if API returns categorized data)
-    function displayTLDCategories(categories) {
-        const allDomains = [];
-        
+    // Exposed to window for potential future use
+    window._displayTLDCategories = function(categories) {
+        const flatDomains = [];
+
         // Flatten all categories into a single array
         Object.values(categories).forEach(tldList => {
             if (Array.isArray(tldList)) {
-                allDomains.push(...tldList);
+                flatDomains.push(...tldList);
             }
         });
-        
-        if (allDomains.length > 0) {
-            displayDomains(allDomains);
+
+        if (flatDomains.length > 0) {
+            displayDomains(flatDomains);
         } else {
             // Display as JSON if we can't parse it
             domainsList.innerHTML = `
@@ -143,4 +130,19 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
     }
+
+    // Handle domain search
+    if (domainSearch) {
+        domainSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allDomains.filter(item =>
+                item.name.toLowerCase().includes(searchTerm)
+            );
+            displayDomains(filtered);
+        });
+    }
+
+    // Make loadAllDomains globally accessible and auto-load
+    window.loadAllDomains = loadAllDomains;
+    loadAllDomains();
 });

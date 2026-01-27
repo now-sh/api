@@ -40,7 +40,7 @@ const base64Decode = (text) => {
         output: decoded.length
       }
     };
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid base64 string');
   }
 };
@@ -291,10 +291,11 @@ const convertColor = (color, fromFormat, toFormat) => {
     case 'rgb':
       result = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
       break;
-    case 'hsl':
+    case 'hsl': {
       const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
       result = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
       break;
+    }
     default:
       throw new Error('Unsupported output format. Supported: hex, rgb, hsl');
   }

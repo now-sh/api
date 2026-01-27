@@ -1,12 +1,10 @@
-require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
+// dotenv loaded in index.js
 const express = require('express');
 const datetime = require('node-datetime');
 const cors = require('cors');
 
 const { setStandardHeaders } = require('../utils/standardHeaders');
-const { mongoose, getDatabaseStatus, connectToDatabase } = require('../db/connection');
+const { getDatabaseStatus, connectToDatabase } = require('../db/connection');
 
 const apiRoute = express.Router();
 const dttoday = datetime.create();

@@ -1,9 +1,7 @@
-require('dotenv').config();
-const fs = require('fs');
+// dotenv loaded in index.js
 const path = require('path');
 const express = require('express');
 const defaultRoute = express.Router();
-const datetime = require('node-datetime');
 const cors = require('cors');
 const utilitiesController = require('../controllers/utilities');
 const { setStandardHeaders } = require('../utils/standardHeaders');
@@ -528,8 +526,8 @@ defaultRoute.get('/:endpoint', cors(), (req, res) => {
   }
 });
 
-// Function to generate generic endpoint pages
-function generateGenericEndpointPage(endpoint) {
+// Function to generate generic endpoint pages (retained for future use)
+function _generateGenericEndpointPage(endpoint) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -570,8 +568,8 @@ function generateGenericEndpointPage(endpoint) {
 </html>`;
 }
 
-// Function to generate categorized endpoint pages
-function generateCategorizedEndpointPage(category, tool) {
+// Function to generate categorized endpoint pages (retained for future use)
+function _generateCategorizedEndpointPage(category, tool) {
   const categoryEmoji = {
     'utilities': '🔧',
     'tools': '🛠️', 
@@ -674,5 +672,9 @@ defaultRoute.get('/s/:code', cors(), async (req, res) => {
     `);
   }
 });
+
+// Suppress unused warnings for utility functions retained for future use
+void _generateGenericEndpointPage;
+void _generateCategorizedEndpointPage;
 
 module.exports = defaultRoute;

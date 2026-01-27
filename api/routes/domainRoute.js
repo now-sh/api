@@ -1,4 +1,4 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
 const { query, validationResult } = require('express-validator');
@@ -164,7 +164,7 @@ domainRoute.get('/help', cors(), (req, res) => {
       stats: `curl ${host}/api/v1/me/domains/stats`
     },
     cli_examples: {
-      searchFunction: `domain_search() { curl -s "${host}/api/v1/me/domains/search?q=\$1" | jq -r '.data.results[]'; }`,
+      searchFunction: `domain_search() { curl -s "${host}/api/v1/me/domains/search?q=$1" | jq -r '.data.results[]'; }`,
       countDomains: `curl -s ${host}/api/v1/me/domains/stats | jq '.data.totalDomains'`
     }
   });

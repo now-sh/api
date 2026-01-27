@@ -131,8 +131,8 @@ const formatResponse = (req, res, next) => {
       // If we can't determine a simple format, return key=value pairs
       if (typeof data === 'object') {
         const pairs = Object.entries(data)
-          .filter(([key, value]) => typeof value !== 'object')
-          .map(([key, value]) => `${key}: ${value}`)
+          .filter(([_key, value]) => typeof value !== 'object')
+          .map(([k, value]) => `${k}: ${value}`)
           .join('\n');
         return res.send((pairs || JSON.stringify(data)) + '\n');
       }

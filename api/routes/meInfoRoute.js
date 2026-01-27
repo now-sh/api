@@ -1,8 +1,8 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { sendText } = require('../controllers/responseFormatter');
 
 const meInfoRoute = express.Router();
 
@@ -368,7 +368,7 @@ meInfoRoute.get('/github/orgs', cors(), async (req, res) => {
  * Get Reddit data - JSON response (casjay)
  */
 // Import Reddit helper
-const { fetchRedditData, fetchRedditUserProfile } = require('../utils/redditHelper');
+const { fetchRedditUserProfile } = require('../utils/redditHelper');
 
 meInfoRoute.get('/reddit', cors(), async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const covidRoute = express.Router();
 const cors = require('cors');

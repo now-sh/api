@@ -161,7 +161,7 @@ const verifyToken = async (token) => {
     
     const decoded = JWT.verify(token, process.env.JWT_SECRET);
     return decoded.email;
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid token');
   }
 };
@@ -234,10 +234,10 @@ const rotateToken = async (oldToken, revokeOld = true) => {
     
     const decoded = JWT.verify(oldToken, process.env.JWT_SECRET);
     email = decoded.email;
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid token');
   }
-  
+
   // Check if token is active
     const tokenDoc = await Token.findOne({ token: oldToken, isActive: true });
   if (!tokenDoc) {

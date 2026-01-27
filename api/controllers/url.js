@@ -3,7 +3,6 @@ const Url = require('../models/url');
 const { createRepository } = require('../utils/databaseUtils');
 const { getExpirationLabel, formatLastUpdated, getRelativeTimeLabel } = require('../utils/dateUtils');
 const { formatCompact } = require('../utils/numberUtils');
-const { logError } = require('../utils/errorUtils');
 
 /**
  * Create URL repository
@@ -70,7 +69,7 @@ const createShortUrl = async (originalUrl, options = {}) => {
   // Validate URL
   try {
     new URL(originalUrl);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid URL format');
   }
 
@@ -121,7 +120,7 @@ const createShortUrl = async (originalUrl, options = {}) => {
   try {
     const urlObj = new URL(originalUrl);
     urlDoc.metadata = { domain: urlObj.hostname };
-  } catch (error) {
+  } catch (_error) {
     // Ignore metadata extraction errors
   }
 

@@ -46,9 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global copy function for backward compatibility
-function copyToClipboard(selector) {
+window.copyToClipboard = function(selector) {
     const element = document.querySelector(selector);
     if (element) {
         navigator.clipboard.writeText(element.textContent);
     }
-}
+};

@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { formatSuccess, formatError, sendJSON } = require('../controllers/responseFormatter');
+const { formatSuccess, sendJSON } = require('../controllers/responseFormatter');
 const { getCacheStats } = require('../utils/cache');
 const { clearResponseCache } = require('../middleware/cacheMiddleware');
 

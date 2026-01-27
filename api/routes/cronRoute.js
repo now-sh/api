@@ -3,7 +3,7 @@ const cors = require('cors');
 const cronParser = require('cron-parser');
 const cronstrue = require('cronstrue');
 const { body, query, validationResult } = require('express-validator');
-const { formatSuccess, formatError, formatText, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
 
 const cronRoute = express.Router();
 
@@ -191,10 +191,10 @@ cronRoute.post('/validate',
   body('expression').notEmpty().withMessage('Expression is required'),
   validateRequest,
   (req, res) => {
+    const { expression } = req.body;
     try {
-      const { expression } = req.body;
       cronParser.parseExpression(expression);
-      
+
       sendJSON(res, formatSuccess({
         expression,
         valid: true,

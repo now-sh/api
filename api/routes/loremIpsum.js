@@ -1,4 +1,4 @@
-const express = require('express'); const { Request, Response } = require('express');
+const express = require('express');
 const { param, body, validationResult } = require('express-validator');
 const cors = require('cors');
 const loremController = require('../controllers/lorem');
@@ -60,14 +60,14 @@ loremRoute.get('/sentences/:number',
 );
 
 
-loremRoute.get('/paragraphs/:paragraphs/:sentences?',
+const paragraphsHandler = [
   cors(),
   param('paragraphs').isInt({ min: 1, max: 20 }).withMessage('Paragraphs must be between 1 and 20'),
   param('sentences').optional().isInt({ min: 1, max: 50 }).withMessage('Sentences must be between 1 and 50'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const data = { 
+      const data = {
         success: false,
         errors: formatValidationErrors(errors.array())
       };
@@ -80,7 +80,7 @@ loremRoute.get('/paragraphs/:paragraphs/:sentences?',
     const jsonFormat = req.query.format === 'json';
     const pTags = !!req.query.p;
     const result = loremController.generateParagraphs(numberOfParagraphs, sentencesPerParagraph);
-    
+
     if (jsonFormat) {
       const data = {
         text: result.text
@@ -96,7 +96,9 @@ loremRoute.get('/paragraphs/:paragraphs/:sentences?',
       res.send(text);
     }
   }
-);
+];
+loremRoute.get('/paragraphs/:paragraphs', ...paragraphsHandler);
+loremRoute.get('/paragraphs/:paragraphs/:sentences', ...paragraphsHandler);
 
 
 loremRoute.post('/generate',

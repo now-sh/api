@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         : result.message || 'Login failed';
                     showMessage(errorMessage, 'error');
                 }
-            } catch (error) {
+            } catch (_error) {
                 showMessage('Network error. Please try again.', 'error');
             }
         });
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         : result.message || 'Registration failed';
                     showMessage(errorMessage, 'error');
                 }
-            } catch (error) {
+            } catch (_error) {
                 showMessage('Network error. Please try again.', 'error');
             }
         });
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         : result.error || 'Profile update failed';
                     showMessage(errorMessage, 'error');
                 }
-            } catch (error) {
+            } catch (_error) {
                 showMessage('Network error. Please try again.', 'error');
             }
         });
@@ -200,7 +200,7 @@ function copyToken() {
                 button.textContent = originalText;
                 button.classList.remove('btn-success');
             }, 2000);
-        }).catch(err => {
+        }).catch(() => {
             // Fallback for older browsers
             tokenElement.select();
             document.execCommand('copy');
@@ -232,7 +232,7 @@ async function checkAuthState() {
                 localStorage.removeItem('authToken');
                 showUnauthenticatedState();
             }
-        } catch (error) {
+        } catch (_error) {
             localStorage.removeItem('authToken');
             showUnauthenticatedState();
         }
@@ -286,7 +286,7 @@ function showAuthenticatedState(token, user) {
         `;
         
         document.getElementById('tokenDetails').innerHTML = detailsHtml;
-    } catch (error) {
+    } catch (_error) {
         document.getElementById('tokenDetails').innerHTML = '<p class="text-secondary">Unable to decode token details</p>';
     }
 }

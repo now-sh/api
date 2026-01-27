@@ -206,9 +206,10 @@ async function deleteTodo(id) {
         showToast('Please sign in to delete todos', 'error');
         return;
     }
-    
-    if (!confirm('Are you sure you want to delete this todo?')) return;
-    
+
+    const confirmed = await confirm('Are you sure you want to delete this todo?');
+    if (!confirmed) return;
+
     try {
         const response = await fetch(`/api/v1/data/todos/${id}`, {
             method: 'DELETE',

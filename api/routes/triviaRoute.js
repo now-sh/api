@@ -199,34 +199,36 @@ triviaRoute.get('/categories', cors(), (req, res) => {
 });
 
 // Get question count for category
-triviaRoute.get('/count/:category?', cors(), async (req, res) => {
+const countHandler = async (req, res) => {
   try {
     const { category } = req.params;
-    
+
     let url = 'https://opentdb.com/api_count_global.php';
-    
+
     if (category && CATEGORIES[category]) {
       url = `https://opentdb.com/api_count.php?category=${CATEGORIES[category]}`;
     }
-    
+
     const response = await axios.get(url);
-    
+
     const data = {
       ...response.data,
       category: category || 'all'
     };
-    
+
     setStandardHeaders(res, data);
     res.json(data);
   } catch (error) {
-    const data = { 
+    const data = {
       error: 'Failed to fetch question count',
-      message: error.message 
+      message: error.message
     };
     setStandardHeaders(res, data);
     res.status(500).json(data);
   }
-});
+};
+triviaRoute.get('/count', cors(), countHandler);
+triviaRoute.get('/count/:category', cors(), countHandler);
 
 // Shuffle array helper
 function shuffleArray(array) {

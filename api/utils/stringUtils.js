@@ -185,10 +185,11 @@ function pad(str, length, char = ' ', direction = 'left') {
   switch (direction) {
     case 'right':
       return str + padding;
-    case 'both':
+    case 'both': {
       const leftPad = char.repeat(Math.floor((length - str.length) / 2));
       const rightPad = char.repeat(Math.ceil((length - str.length) / 2));
       return leftPad + str + rightPad;
+    }
     default:
       return padding + str;
   }

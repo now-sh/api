@@ -1,7 +1,7 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
-const { body, param, validationResult } = require('express-validator');
+const { param, validationResult } = require('express-validator');
 const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
 const { formatValidationErrors } = require('../utils/validationHelper');
 const { getJson } = require('../utils/httpClient');

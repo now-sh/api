@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { body, validationResult } = require('express-validator');
-const { formatSuccess, formatError, formatText, sendJSON, sendText } = require('../controllers/responseFormatter');
+const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
 
 const regexRoute = express.Router();
 

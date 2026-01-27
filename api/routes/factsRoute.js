@@ -39,12 +39,13 @@ factsRoute.get('/random', cors(), async (req, res) => {
         break;
       
       case 'any':
-      default:
+      default: {
         // Randomly pick a source
         const sources = [getUselessFact, getCatFact, getDogFact, getNumberFact];
         const randomSource = sources[Math.floor(Math.random() * sources.length)];
         fact = await randomSource();
         break;
+      }
     }
     
     const data = { ...fact, source: fact.source || source };
@@ -109,55 +110,62 @@ factsRoute.get('/dogs', cors(), async (req, res) => {
 });
 
 // Get number facts
-factsRoute.get('/numbers/:number?', cors(), async (req, res) => {
+const numberFactHandler = async (req, res) => {
   try {
     const number = req.params.number || 'random';
     const fact = await getNumberFact(number);
     setStandardHeaders(res, fact, { noCache: true });
     res.json(fact);
   } catch (error) {
-    const data = { 
+    const data = {
       error: 'Failed to fetch number fact',
-      message: error.message 
+      message: error.message
     };
     setStandardHeaders(res, data);
     res.status(500).json(data);
   }
-});
+};
+factsRoute.get('/numbers', cors(), numberFactHandler);
+factsRoute.get('/numbers/:number', cors(), numberFactHandler);
 
 // Get year facts
-factsRoute.get('/years/:year?', cors(), async (req, res) => {
+const yearFactHandler = async (req, res) => {
   try {
     const year = req.params.year || 'random';
     const fact = await getYearFact(year);
     setStandardHeaders(res, fact, { noCache: true });
     res.json(fact);
   } catch (error) {
-    const data = { 
+    const data = {
       error: 'Failed to fetch year fact',
-      message: error.message 
+      message: error.message
     };
     setStandardHeaders(res, data);
     res.status(500).json(data);
   }
-});
+};
+factsRoute.get('/years', cors(), yearFactHandler);
+factsRoute.get('/years/:year', cors(), yearFactHandler);
 
 // Get date facts
-factsRoute.get('/dates/:month?/:day?', cors(), async (req, res) => {
+const dateFactHandler = async (req, res) => {
   try {
     const { month, day } = req.params;
     const fact = await getDateFact(month, day);
     setStandardHeaders(res, fact, { noCache: true });
     res.json(fact);
   } catch (error) {
-    const data = { 
+    const data = {
       error: 'Failed to fetch date fact',
-      message: error.message 
+      message: error.message
     };
     setStandardHeaders(res, data);
     res.status(500).json(data);
   }
-});
+};
+factsRoute.get('/dates', cors(), dateFactHandler);
+factsRoute.get('/dates/:month', cors(), dateFactHandler);
+factsRoute.get('/dates/:month/:day', cors(), dateFactHandler);
 
 // Get today's fact
 factsRoute.get('/today', cors(), async (req, res) => {
@@ -318,12 +326,13 @@ factsRoute.get('/', cors(), async (req, res) => {
         break;
       
       case 'any':
-      default:
+      default: {
         // Randomly pick a source
         const sources = [getUselessFact, getCatFact, getDogFact, getNumberFact];
         const randomSource = sources[Math.floor(Math.random() * sources.length)];
         fact = await randomSource();
         break;
+      }
     }
     
     const data = { ...fact, source: fact.source || source };

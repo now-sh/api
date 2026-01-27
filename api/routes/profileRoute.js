@@ -1,26 +1,11 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const cors = require('cors');
-const { param, validationResult } = require('express-validator');
 const profileData = require('../controllers/profile');
 const { formatSuccess, formatError, sendJSON, sendText } = require('../controllers/responseFormatter');
-const { formatValidationErrors } = require('../utils/validationHelper');
 
 const profileRoute = express.Router();
 
-/**
- * Validation middleware
- */
-function validateRequest(req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    sendJSON(res, formatError('Validation failed', {
-      details: formatValidationErrors(errors.array())
-    }), { status: 400 });
-    return;
-  }
-  next();
-}
 
 /**
  * Get profile - JSON response

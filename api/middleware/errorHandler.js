@@ -1,4 +1,4 @@
-const notFound = (req, res, next) => {
+const notFound = (req, res, _next) => {
   res.status(404).json({
     success: false,
     error: 'Not Found',

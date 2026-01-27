@@ -75,7 +75,7 @@ async function copyToClipboard(text, feedbackElement = null) {
             showCopyFeedback(feedbackElement, true);
             return true;
         }
-    } catch (err) {
+    } catch (_err) {
         console.warn('Clipboard API failed, using fallback');
     }
 
@@ -179,7 +179,7 @@ function formatDate(date, options = {}) {
         };
 
         return dateObj.toLocaleDateString('en-US', { ...defaultOptions, ...options });
-    } catch (err) {
+    } catch (_err) {
         return 'Invalid Date';
     }
 }

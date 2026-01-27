@@ -1,8 +1,7 @@
-require('dotenv').config();
+// dotenv loaded in index.js
 const express = require('express');
 const usaRoute = express.Router();
 const cors = require('cors');
-const usa = require('../controllers/usa');
 const { getHeaders } = require('../middleware/headers');
 const { getJson } = require('../utils/httpClient');
 const { setStandardHeaders } = require('../utils/standardHeaders');
@@ -76,7 +75,7 @@ usaRoute.get(default_route, cors(), async (req, res) => {
         nys_specific: `${host}/api/v1/usa/nys`
       },
       cli_example: `curl ${host}/api/v1/usa/California`,
-      bash_function: `usa_covid() { state="\${1:-California}"; curl -s "${host}/api/v1/usa/\$state" | jq -r '\"\\(.state): Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)\"'; }`,
+      bash_function: `usa_covid() { state="\${1:-California}"; curl -s "${host}/api/v1/usa/$state" | jq -r '"\\(.state): Cases: \\(.cases) Deaths: \\(.deaths) Recovered: \\(.recovered)"'; }`,
       available_states: states
     };
     setStandardHeaders(res, data);

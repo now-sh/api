@@ -2,16 +2,10 @@ const cheerio = require('cheerio');
 const { getText } = require('../utils/httpClient');
 
 const TRAFFIC_URL = process.env.TRAFFIC_URL || 'https://511ny.org/list/events/traffic?start=0&length=100&order%5Bi%5D=1&order%5Bdir%5D=asc';
-let cache = null;
-let lastCacheTime = null;
 
 async function traffic() {
-  // if (cache && lastCacheTime > Date.now() - 1000 * 60 * 10) {
-  //   return cache;
-  // }
   const html = await getText(TRAFFIC_URL);
   const $ = cheerio.load(html);
-  const title = $('traffic').text();
   const table = $('table');
   const header = table.find('thead tr');
   const headers = [];
@@ -33,8 +27,6 @@ async function traffic() {
         });
       rows.push(row);
     });
-  cache = rows;
-  lastCacheTime = Date.now();
   return rows;
 }
 module.exports = traffic;

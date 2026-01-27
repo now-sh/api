@@ -1,5 +1,4 @@
 const { getJson } = require('../utils/httpClient');
-const { getHeaders } = require('../middleware/headers');
 
 
 // External API sources

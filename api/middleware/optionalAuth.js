@@ -45,7 +45,7 @@ const optionalAuth = async (req, res, next) => {
     req.isAuthenticated = true;
     req.token = token;
     next();
-  } catch (error) {
+  } catch (_error) {
     // Invalid token, continue as guest
     req.user = undefined;
     req.isAuthenticated = false;

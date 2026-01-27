@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     showError(result.message || 'Failed to shorten URL');
                 }
-            } catch (error) {
+            } catch (_error) {
                 showError('Network error. Please try again.');
             }
         });
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (e.target.matches('[data-action="show-qr"]')) {
             showQRCode(e.target.dataset.url);
         } else if (e.target.matches('.overlay')) {
-            closeQRPopup();
+            window.closeQRPopup();
         }
     });
     
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 recentUrlsDiv.innerHTML = '<div class="empty-state">Unable to load recent URLs</div>';
             }
-        } catch (error) {
+        } catch (_error) {
             recentUrlsDiv.innerHTML = '<div class="empty-state">Error loading recent URLs</div>';
         }
     }
