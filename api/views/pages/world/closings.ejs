@@ -1,16 +1,21 @@
 <div class="hero fade-in">
-    <h1>School Closings</h1>
-    <p class="lead">View local school closure information</p>
+    <h1><i class="bi bi-snow"></i> School Closings</h1>
+    <p class="lead">Real-time school closure information for Central New York</p>
 </div>
 
 <div class="row">
-    <div class="col-md-8 mx-auto">
+    <div class="col-lg-10 mx-auto">
         <div class="card">
-            <h2 class="card-title">Current Closings</h2>
-            <p class="card-text">Check for school closures in your area</p>
-            
-            <div id="closingsResult" class="result-container mt-4">
-                <div class="loading">Loading school closings...</div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="card-title mb-0">Current Closings</h2>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshClosings()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            <p id="lastUpdated" class="text-muted small"></p>
+
+            <div id="closingsResult" class="result-container">
+                <div class="loading"><i class="bi bi-hourglass-split"></i> Loading closings...</div>
             </div>
         </div>
     </div>
@@ -24,14 +29,19 @@
 
 .closing-item {
     background: var(--bg-secondary);
-    padding: 1.5rem;
+    padding: 1.25rem;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--red);
+}
+
+.closing-item.delayed {
+    border-left-color: var(--yellow);
 }
 
 .closing-item h5 {
-    color: var(--purple);
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    font-size: 1.1rem;
 }
 
 .closing-status {
@@ -44,14 +54,33 @@
     margin-bottom: 0.5rem;
 }
 
-.closing-reason {
+.closing-item.delayed .closing-status {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--yellow);
+}
+
+.closing-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
     color: var(--text-secondary);
     font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.closing-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.closing-meta i {
+    color: var(--purple);
 }
 
 .loading {
     text-align: center;
-    padding: 2rem;
+    padding: 3rem;
     color: var(--cyan);
 }
 
@@ -59,18 +88,68 @@
     color: var(--red);
     text-align: center;
     padding: 2rem;
+    background: rgba(255, 85, 85, 0.1);
+    border-radius: var(--radius-md);
 }
 
 .empty-state {
     text-align: center;
     padding: 3rem;
     color: var(--text-secondary);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--green);
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.summary-bar {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item .count {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--purple);
+}
+
+.summary-item .label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
+    loadClosings();
+});
+
+async function refreshClosings() {
+    const btn = document.querySelector('button[onclick="refreshClosings()"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+    await loadClosings();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh';
+}
+
+async function loadClosings() {
     const resultDiv = document.getElementById('closingsResult');
+    const lastUpdatedDiv = document.getElementById('lastUpdated');
 
     try {
         const response = await fetch('/api/v1/world/closings');
@@ -88,26 +167,52 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
 
+        lastUpdatedDiv.innerHTML = `<i class="bi bi-clock"></i> Last updated: ${data.lastUpdated || new Date().toLocaleString()}`;
+
         if (allClosings.length > 0) {
-            const html = allClosings.map(closing => `
-                <div class="closing-item">
-                    <h5>${closing.name || 'Unknown'}</h5>
-                    <div class="closing-status">${closing.status || 'Closed'}</div>
-                    ${closing.region ? `<div class="closing-reason">Region: ${closing.region}</div>` : ''}
-                    ${closing.lastUpdated ? `<div class="closing-reason">Updated: ${closing.lastUpdated}</div>` : ''}
-                </div>
-            `).join('');
+            const html = allClosings.map(closing => {
+                const isDelayed = (closing.status || '').toLowerCase().includes('delay');
+                return `
+                    <div class="closing-item ${isDelayed ? 'delayed' : ''}">
+                        <h5>${closing.name || 'Unknown'}</h5>
+                        <div class="closing-status">${closing.status || 'Closed'}</div>
+                        <div class="closing-meta">
+                            ${closing.region ? `<span><i class="bi bi-geo-alt"></i> ${closing.region}</span>` : ''}
+                            ${closing.category ? `<span><i class="bi bi-tag"></i> ${closing.category}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             resultDiv.innerHTML = `
-                <p class="text-muted mb-3">Last updated: ${data.lastUpdated || 'Unknown'}</p>
-                <h4 class="mb-3">Found ${data.closures || allClosings.length} closings</h4>
+                <div class="summary-bar">
+                    <div class="summary-item">
+                        <div class="count">${data.closures || allClosings.length}</div>
+                        <div class="label">Total Closings</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="count">${data.schools?.length || 0}</div>
+                        <div class="label">Schools</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="count">${data.colleges?.length || 0}</div>
+                        <div class="label">Colleges</div>
+                    </div>
+                </div>
                 <div class="closings-list">${html}</div>
             `;
         } else {
-            resultDiv.innerHTML = '<div class="empty-state">No school closings reported at this time</div>';
+            resultDiv.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-check-circle"></i>
+                    <h4>All Clear!</h4>
+                    <p>No school closings or delays reported at this time.</p>
+                </div>
+            `;
         }
     } catch (error) {
-        resultDiv.innerHTML = '<div class="error">Error loading school closings</div>';
+        console.error('Error loading closings:', error);
+        resultDiv.innerHTML = '<div class="error"><i class="bi bi-exclamation-triangle"></i> Error loading school closings. Please try again.</div>';
     }
-});
+}
 </script>
