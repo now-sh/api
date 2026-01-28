@@ -501,6 +501,19 @@ defaultRoute.get('/commit', cors(), (req, res) => {
   res.redirect('/tools/commit');
 });
 
+defaultRoute.get('/version', cors(), (req, res) => {
+  try {
+    res.render('pages/system/version', {
+      title: 'Version & Status - Backend API',
+      description: 'API version information and system status',
+      activePage: 'version',
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Generic legacy frontend route handler for specific static endpoints only
 defaultRoute.get('/:endpoint', cors(), (req, res) => {
   try {
