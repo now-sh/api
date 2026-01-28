@@ -7,27 +7,27 @@
     <h2 class="card-title">Base64 Converter</h2>
     <p class="card-text mb-4">Enter text to encode or Base64 string to decode</p>
     
-    <form method="POST" action="/utilities/base64" class="api-form">
+    <form id="base64Form" class="api-form">
         <div class="form-group">
             <label for="text" class="form-label">Input Text</label>
-            <textarea 
-                id="text" 
-                name="text" 
-                class="form-control" 
+            <textarea
+                id="text"
+                name="text"
+                class="form-control"
                 placeholder="Enter text to encode or Base64 to decode..."
                 required
                 rows="4"
             >Hello World</textarea>
         </div>
-        
+
         <div class="form-group">
-            <label for="action" class="form-label">Action</label>
+            <label for="operation" class="form-label">Action</label>
             <select id="operation" name="operation" class="form-control" required>
                 <option value="encode" selected>Encode to Base64</option>
                 <option value="decode">Decode from Base64</option>
             </select>
         </div>
-        
+
         <div class="btn-group mt-4">
             <button type="submit" class="btn btn-primary">
                 Process
@@ -37,22 +37,12 @@
             </button>
         </div>
     </form>
-    
-    <% if (typeof toolResult !== 'undefined' && toolResult) { %>
-        <div class="result-container mt-6">
-            <h3 class="mb-3">Result:</h3>
-            <% if (toolResult.success && toolResult.data) { %>
-                <pre class="result-output"><%= toolResult.data.encoded || toolResult.data.decoded || JSON.stringify(toolResult.data, null, 2) %></pre>
-                <button onclick="copyText('<%= (toolResult.data.encoded || toolResult.data.decoded || '').replace(/'/g, "\\'") %>')" class="btn btn-sm btn-secondary mt-2">Copy Result</button>
-            <% } else { %>
-                <div class="error-message">Error: <%= toolResult.error || 'Conversion failed' %></div>
-            <% } %>
-        </div>
-    <% } else if (typeof toolError !== 'undefined' && toolError) { %>
-        <div class="result-container mt-6">
-            <div class="error-message">Error: <%= toolError %></div>
-        </div>
-    <% } %>
+
+    <div id="base64Form-result" class="result-container mt-6" style="display: none;">
+        <h3 class="mb-3">Result:</h3>
+        <pre class="result-output"></pre>
+        <button class="btn btn-sm btn-secondary mt-2 copy-btn">Copy Result</button>
+    </div>
 </div>
 
 <div class="card mt-4">
@@ -75,67 +65,48 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('base64Form');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const text = formData.get('text');
-            const action = formData.get('action');
-            const resultDiv = document.getElementById('base64Form-result');
-            const resultOutput = resultDiv.querySelector('.result-output');
-            
-            // Show loading
-            resultOutput.innerHTML = '<div class="loading">Processing...</div>';
-            resultDiv.style.display = 'block';
-            
-            try {
-                const response = await fetch(`/api/v1/tools/base64/${action}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    if (action === 'encode') {
-                        resultOutput.textContent = data.data.encoded;
-                    } else {
-                        resultOutput.textContent = data.data.decoded;
-                    }
-                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                } else {
-                    resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Operation failed'}</div>`;
-                }
-            } catch (error) {
-                resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+    const resultDiv = document.getElementById('base64Form-result');
+    const resultOutput = resultDiv.querySelector('.result-output');
+    const copyBtn = resultDiv.querySelector('.copy-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const text = document.getElementById('text').value;
+        const operation = document.getElementById('operation').value;
+
+        resultOutput.innerHTML = '<div class="loading">Processing...</div>';
+        resultDiv.style.display = 'block';
+
+        try {
+            const response = await fetch(`/api/v1/tools/base64/${operation}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                resultOutput.textContent = data.data.encoded || data.data.decoded;
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                resultOutput.innerHTML = `<div class="error">Error: ${data.error || 'Operation failed'}</div>`;
             }
-        });
-    }
-    
-    // Copy button
-    document.querySelector('.copy-btn').addEventListener('click', function() {
-        const output = document.querySelector('.result-output');
-        const text = output.textContent;
-        
+        } catch (error) {
+            resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+
+    copyBtn.addEventListener('click', function() {
+        const text = resultOutput.textContent;
         navigator.clipboard.writeText(text).then(() => {
             this.textContent = 'Copied!';
-            this.classList.add('copied');
-            
-            setTimeout(() => {
-                this.textContent = 'Copy Result';
-                this.classList.remove('copied');
-            }, 2000);
+            setTimeout(() => { this.textContent = 'Copy Result'; }, 2000);
         });
     });
-});
 
-function copyText(text) {
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => showModal('Text copied to clipboard!', 'Copied', 'success'));
-    }
-}
+    // Auto-run on load
+    form.dispatchEvent(new Event('submit'));
+});
 </script>
