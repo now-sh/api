@@ -196,9 +196,9 @@ async function loadUserRepos(username) {
     const reposDiv = document.getElementById('userRepos');
     reposDiv.style.display = 'block';
     reposDiv.innerHTML = '<div class="loading">Loading repositories...</div>';
-    
+
     try {
-        const response = await fetch(`/api/v1/social/github/users/${username}/repos?sort=updated&per_page=10`);
+        const response = await fetch(`/api/v1/social/github/repos/${username}`);
         const repos = await response.json();
         
         if (response.ok) {
@@ -214,25 +214,8 @@ async function loadUserRepos(username) {
 async function searchRepositories(query, language) {
     const resultsDiv = document.getElementById('repoResults');
     resultsDiv.style.display = 'block';
-    resultsDiv.innerHTML = '<div class="loading">Searching repositories...</div>';
-    
-    try {
-        let searchQuery = query;
-        if (language) {
-            searchQuery += ` language:${language}`;
-        }
-        
-        const response = await fetch(`/api/v1/social/github/search/repos?q=${encodeURIComponent(searchQuery)}&sort=stars`);
-        const data = await response.json();
-        
-        if (response.ok) {
-            displaySearchResults(data.items || []);
-        } else {
-            resultsDiv.innerHTML = '<div class="error">No repositories found</div>';
-        }
-    } catch (error) {
-        resultsDiv.innerHTML = '<div class="error">Error searching repositories</div>';
-    }
+    // Repository search requires GitHub API search endpoint - not currently available
+    resultsDiv.innerHTML = '<div class="error">Repository search is not available. Use the User Search to find repositories by username.</div>';
 }
 
 function displaySearchResults(repos) {
@@ -292,31 +275,9 @@ function createRepoCard(repo) {
 }
 
 async function loadTrending() {
-    const language = document.getElementById('trendingLanguage').value;
-    const period = document.getElementById('trendingPeriod').value;
     const container = document.getElementById('trendingRepos');
-    
-    container.innerHTML = '<div class="loading">Loading trending repositories...</div>';
-    
-    try {
-        let url = '/api/v1/social/github/trending';
-        const params = new URLSearchParams();
-        if (language) params.append('language', language);
-        if (period) params.append('since', period);
-        if (params.toString()) url += '?' + params.toString();
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            displayTrending(data.data);
-        } else {
-            // Mock trending data
-            container.innerHTML = '<div class="error">Trending data not available</div>';
-        }
-    } catch (error) {
-        container.innerHTML = '<div class="error">Failed to load trending repositories</div>';
-    }
+    // Trending requires scraping or a third-party API - not currently available
+    container.innerHTML = '<div class="no-results">Trending repositories feature is not available. Use the User Search above to explore GitHub users and their repositories.</div>';
 }
 
 // Removed mock trending function
