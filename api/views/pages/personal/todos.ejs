@@ -4,8 +4,6 @@
 </div>
 
 <div class="card mb-6">
-    <h2 class="card-title">Add New Todo</h2>
-    
     <form id="todoForm" class="api-form">
         <div class="form-group">
             <label for="title" class="form-label">Todo Title</label>
@@ -308,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         try {
-            const response = await fetch('/api/v1/data/todos', {
+            const response = await fetch('/api/v1/data/todos/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -338,23 +336,24 @@ async function loadTodos() {
         showAuthRequired();
         return;
     }
-    
+
     try {
         const response = await fetch('/api/v1/data/todos/list', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             if (response.status === 401) {
                 localStorage.removeItem('authToken');
                 showAuthRequired();
                 return;
             }
-            throw new Error('Failed to load todos');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to load todos');
         }
-        
+
         const data = await response.json();
         // Handle different API response structures
         if (data.data && data.data.todos) {
@@ -364,8 +363,8 @@ async function loadTodos() {
         }
         renderTodos();
     } catch (error) {
-        document.getElementById('todosList').innerHTML = 
-            '<div class="empty-state">Error loading todos. Please try again.</div>';
+        document.getElementById('todosList').innerHTML =
+            '<div class="empty-state">Error loading todos. The database may be unavailable.</div>';
     }
 }
 
