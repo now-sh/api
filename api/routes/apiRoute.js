@@ -195,20 +195,20 @@ const versionHandler = async (req, res) => {
       Today: today,
       Time: curtime,
 
-      // External Data Sources (safe to show)
+      // External Data Sources (showing actual values/defaults used)
       DataSources: {
-        GitMessages: process.env.GIT_MESSAGE_URL || 'Not Configured',
-        Timezones: process.env.TIMEZONE_URL || 'Not Configured',
-        Countries: process.env.COUNTRIES_URL || 'Not Configured',
-        Domains: process.env.DOMAINS_URL || 'Not Configured',
-        MyGitHub: process.env.MY_GITHUB_USER || 'Not Configured',
-        MyReddit: process.env.MY_REDDIT_USER || 'Not Configured',
-        BlogRepo: process.env.BLOG_POSTS_REPO || 'Not Configured',
+        GitMessages: process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/gitmessages/main/src/data/messages.json',
+        Timezones: process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/main/src/data/timezones.json',
+        Countries: process.env.COUNTRIES_URL || 'https://raw.githubusercontent.com/apimgr/countries/main/countries.json',
+        Domains: process.env.DOMAINS_URL || 'https://raw.githubusercontent.com/casjay/public/main/domains.json',
+        GitHubUser: process.env.GITHUB_USERNAME || 'casjay',
+        RedditUser: process.env.MY_REDDIT_USER || 'casjay',
+        BlogRepo: process.env.BLOG_URL || 'https://api.github.com/repos/malaks-us/jason/contents/_posts',
       },
 
       // API Keys Status (masked)
       APIKeys: {
-        GitHub: maskSensitive(process.env.GITHUB_TOKEN),
+        GitHub: maskSensitive(process.env.GITHUB_API_KEY),
         Reddit: maskSensitive(process.env.REDDIT_CLIENT_ID),
         GoogleMaps: maskSensitive(process.env.GOOGLE_MAPS_API_KEY),
         OpenAI: maskSensitive(process.env.OPENAI_API_KEY),
