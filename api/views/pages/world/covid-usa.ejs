@@ -172,45 +172,37 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadUSAStats() {
     const usaDiv = document.getElementById('usaStats');
-    
+
     try {
-        // Get USA data from disease API
-        const response = await fetch('/api/v1/world/disease');
+        // Get USA data from disease.sh via proxy
+        const response = await fetch('/api/v1/world/disease/covid-19/countries/USA');
         const data = await response.json();
-        
-        // Find USA in countries array
-        let usaData = null;
-        if (data.countries && data.countries.length > 0) {
-            usaData = data.countries.find(country => 
-                country.country === 'USA' || 
-                country.country === 'US' || 
-                country.country === 'United States'
-            );
-        }
-        
-        if (usaData) {
+
+        if (data && data.cases) {
             usaDiv.innerHTML = `
                 <div class="stat-card">
                     <span class="stat-emoji">😷</span>
-                    <div class="stat-number">${formatNumber(usaData.cases)}</div>
+                    <div class="stat-number">${formatNumber(data.cases)}</div>
                     <div class="stat-label">Total Cases</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-emoji">💀</span>
-                    <div class="stat-number">${formatNumber(usaData.deaths)}</div>
+                    <div class="stat-number">${formatNumber(data.deaths)}</div>
                     <div class="stat-label">Deaths</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-emoji">💚</span>
-                    <div class="stat-number">${formatNumber(usaData.recovered || 0)}</div>
+                    <div class="stat-number">${formatNumber(data.recovered || 0)}</div>
                     <div class="stat-label">Recovered</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-emoji">🏥</span>
-                    <div class="stat-number">${formatNumber(usaData.active || (usaData.cases - usaData.deaths - (usaData.recovered || 0)))}</div>
+                    <div class="stat-number">${formatNumber(data.active || (data.cases - data.deaths - (data.recovered || 0)))}</div>
                     <div class="stat-label">Active Cases</div>
                 </div>
             `;
+        } else if (data.message) {
+            usaDiv.innerHTML = `<div class="error">${data.message}</div>`;
         } else {
             usaDiv.innerHTML = '<div class="error">Unable to load USA statistics</div>';
         }
@@ -221,13 +213,19 @@ async function loadUSAStats() {
 
 async function loadTopStates() {
     const statesDiv = document.getElementById('topStates');
-    
+
     try {
-        const response = await fetch('/api/v1/world/usa');
+        // Get all US states data from disease.sh
+        const response = await fetch('/api/v1/world/disease/covid-19/states');
         const data = await response.json();
-        
-        if (data.success && data.states && data.states.length > 0) {
-            const topStates = data.states.slice(0, 12);
+
+        if (Array.isArray(data) && data.length > 0) {
+            // Sort by cases and take top 12
+            const topStates = data
+                .filter(s => s.state && s.cases)
+                .sort((a, b) => b.cases - a.cases)
+                .slice(0, 12);
+
             const html = topStates.map(state => `
                 <div class="state-card">
                     <div class="state-name">
@@ -250,8 +248,10 @@ async function loadTopStates() {
                     </div>
                 </div>
             `).join('');
-            
+
             statesDiv.innerHTML = html;
+        } else if (data.message) {
+            statesDiv.innerHTML = `<div class="error">${data.message}</div>`;
         } else {
             statesDiv.innerHTML = '<div class="error">Unable to load states data</div>';
         }
