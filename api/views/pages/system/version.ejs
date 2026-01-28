@@ -1,259 +1,352 @@
 <div class="hero fade-in">
-    <h1>📊 API Version & Status</h1>
-    <p class="lead">Complete API version information and system status</p>
+    <h1>API Version & Status</h1>
+    <p class="lead">Real-time API version information and system status</p>
 </div>
 
 <div class="row">
     <div class="col-md-10 mx-auto">
-        <!-- Greeting Banner -->
-        <% if (typeof versionData !== 'undefined' && versionData && versionData.Greetings) { %>
-            <div class="greeting-banner mb-4">
-                <%= versionData.Greetings %>
-            </div>
-        <% } %>
-
-        <!-- API Version Information -->
-        <div class="card mb-4">
-            <h2 class="card-title">🔖 Version Information</h2>
-            <div class="version-info">
-                <% if (typeof versionData !== 'undefined' && versionData) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">API Version</span>
-                            <span class="info-value"><%= versionData.Version || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Time Zone</span>
-                            <span class="info-value"><%= versionData.TimeZone || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Current Time</span>
-                            <span class="info-value"><%= versionData.Time || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Today</span>
-                            <span class="info-value"><%= versionData.Today || 'Unknown' %></span>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Unable to load version information</div>
-                <% } %>
+        <!-- Loading State -->
+        <div id="loadingState" class="card mb-4">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Loading system status...</p>
             </div>
         </div>
 
-        <!-- External Data Sources -->
-        <div class="card mb-4">
-            <h2 class="card-title">🔗 External Data Sources</h2>
-            <div class="data-sources">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.DataSources) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Git Messages</span>
-                            <span class="info-value"><%= versionData.DataSources.GitMessages %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Timezones</span>
-                            <span class="info-value"><%= versionData.DataSources.Timezones %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Countries</span>
-                            <span class="info-value"><%= versionData.DataSources.Countries %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Domains</span>
-                            <span class="info-value"><%= versionData.DataSources.Domains %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">My GitHub</span>
-                            <span class="info-value"><%= versionData.DataSources.MyGitHub %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">My Reddit</span>
-                            <span class="info-value"><%= versionData.DataSources.MyReddit %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Blog Repository</span>
-                            <span class="info-value"><%= versionData.DataSources.BlogRepo %></span>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Data sources information not available</div>
-                <% } %>
+        <!-- Error State -->
+        <div id="errorState" class="card mb-4" style="display: none;">
+            <div class="error-container">
+                <span class="error-icon">!</span>
+                <h3>Unable to load system status</h3>
+                <p id="errorMessage">Please try again later.</p>
+                <button class="btn btn-primary" onclick="loadVersionData()">Retry</button>
             </div>
         </div>
 
-        <!-- API Keys Status -->
-        <div class="card mb-4">
-            <h2 class="card-title">🔐 API Keys Status</h2>
-            <div class="api-keys-status">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.APIKeys) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">GitHub</span>
-                            <span class="info-value <%= versionData.APIKeys.GitHub === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.GitHub %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Reddit</span>
-                            <span class="info-value <%= versionData.APIKeys.Reddit === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.Reddit %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Google Maps</span>
-                            <span class="info-value <%= versionData.APIKeys.GoogleMaps === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.GoogleMaps %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">OpenAI</span>
-                            <span class="info-value <%= versionData.APIKeys.OpenAI === 'Configured ✓' ? 'success' : '' %>"><%= versionData.APIKeys.OpenAI %></span>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">API keys information not available</div>
-                <% } %>
-            </div>
-        </div>
+        <!-- Content (hidden until loaded) -->
+        <div id="versionContent" style="display: none;">
+            <!-- Greeting Banner -->
+            <div id="greetingBanner" class="greeting-banner mb-4" style="display: none;"></div>
 
-        <!-- Authentication Status -->
-        <div class="card mb-4">
-            <h2 class="card-title">👤 User Authentication</h2>
-            <div class="auth-status">
-                <% if (typeof versionData !== 'undefined' && versionData) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Current Session</span>
-                            <span class="info-value <%= versionData.Auth !== 'no' ? 'success' : 'warning' %>"><%= versionData.Auth || 'Unknown' %></span>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Unable to load authentication status</div>
-                <% } %>
+            <!-- Health Status -->
+            <div class="card mb-4">
+                <h2 class="card-title">Health Status</h2>
+                <div id="healthStatus" class="health-status"></div>
             </div>
-        </div>
 
-        <!-- Health Status -->
-        <div class="card mb-4">
-            <h2 class="card-title">🏥 Health Status</h2>
-            <div class="health-status">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.Health) { %>
-                    <div class="status-indicator <%= versionData.Health.Status === 'healthy' ? 'success' : 'warning' %>">
-                        <span class="status-dot"></span>
-                        <span class="status-text"><%= versionData.Health.Status %></span>
-                    </div>
-                    <div class="info-item mt-3">
-                        <span class="info-label">Issues</span>
-                        <span class="info-value"><%= versionData.Health.Issues?.length || 0 %> issues</span>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Health information not available</div>
-                <% } %>
+            <!-- Version Information -->
+            <div class="card mb-4">
+                <h2 class="card-title">Version Information</h2>
+                <div id="versionInfo" class="info-grid"></div>
             </div>
-        </div>
 
-        <!-- Database Status -->
-        <div class="card mb-4">
-            <h2 class="card-title">🗄️ Database Status</h2>
-            <div class="database-status">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.Database) { %>
-                    <div class="status-indicator <%= versionData.Database.Status === 'Connected' ? 'success' : 'error' %>">
-                        <span class="status-dot"></span>
-                        <span class="status-text"><%= versionData.Database.Status %></span>
-                    </div>
-                    <% if (versionData.Database.Details) { %>
-                        <div class="info-item mt-3">
-                            <span class="info-label">State</span>
-                            <span class="info-value"><%= versionData.Database.Details.State %></span>
-                        </div>
-                    <% } %>
-                <% } else { %>
-                    <div class="error-message">Database information not available</div>
-                <% } %>
+            <!-- Database Status -->
+            <div class="card mb-4">
+                <h2 class="card-title">Database Status</h2>
+                <div id="databaseStatus" class="database-status"></div>
             </div>
-        </div>
 
-        <!-- Environment Information -->
-        <div class="card mb-4">
-            <h2 class="card-title">🌍 Environment</h2>
-            <div class="environment-info">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.Environment) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Node Environment</span>
-                            <span class="info-value"><%= versionData.Environment.NodeEnv || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Port</span>
-                            <span class="info-value"><%= versionData.Environment.Port || 'Unknown' %></span>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Environment information not available</div>
-                <% } %>
+            <!-- API Keys Status -->
+            <div class="card mb-4">
+                <h2 class="card-title">API Keys Status</h2>
+                <div id="apiKeysStatus" class="info-grid"></div>
             </div>
-        </div>
 
-        <!-- System Information -->
-        <div class="card mb-4">
-            <h2 class="card-title">⚙️ System Information</h2>
-            <div class="system-info">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.System) { %>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Node Version</span>
-                            <span class="info-value"><%= versionData.System.NodeVersion || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Platform</span>
-                            <span class="info-value"><%= versionData.System.Platform || 'Unknown' %></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Uptime</span>
-                            <span class="info-value"><%= versionData.System.Uptime || 'Unknown' %></span>
-                        </div>
-                        <% if (versionData.System.Memory) { %>
-                            <div class="info-item">
-                                <span class="info-label">Memory</span>
-                                <span class="info-value"><%= versionData.System.Memory.HeapUsed %> / <%= versionData.System.Memory.HeapTotal %></span>
-                            </div>
-                        <% } %>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">System information not available</div>
-                <% } %>
+            <!-- External Data Sources -->
+            <div class="card mb-4">
+                <h2 class="card-title">External Data Sources</h2>
+                <div id="dataSources" class="info-grid"></div>
             </div>
-        </div>
 
-        <!-- Proxy Configuration -->
-        <div class="card mb-4">
-            <h2 class="card-title">🔗 Proxy Configuration</h2>
-            <div class="proxy-config">
-                <% if (typeof versionData !== 'undefined' && versionData && versionData.Proxies) { %>
-                    <div class="proxy-list">
-                        <% Object.entries(versionData.Proxies).forEach(([name, config]) => { %>
-                            <div class="proxy-item">
-                                <span class="proxy-path"><%= name %></span>
-                                <span class="proxy-arrow">→</span>
-                                <span class="proxy-target"><%= config.target || config %></span>
-                                <% if (config.status) { %>
-                                    <span class="badge bg-success ms-2"><%= config.status %></span>
-                                <% } %>
-                            </div>
-                        <% }) %>
-                    </div>
-                <% } else { %>
-                    <div class="error-message">Proxy configuration not available</div>
-                <% } %>
+            <!-- System Information -->
+            <div class="card mb-4">
+                <h2 class="card-title">System Information</h2>
+                <div id="systemInfo" class="info-grid"></div>
+            </div>
+
+            <!-- Environment -->
+            <div class="card mb-4">
+                <h2 class="card-title">Environment</h2>
+                <div id="environmentInfo" class="info-grid"></div>
+            </div>
+
+            <!-- Proxy Configuration -->
+            <div class="card mb-4">
+                <h2 class="card-title">Proxy Configuration</h2>
+                <div id="proxyConfig" class="proxy-list"></div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="text-center text-muted mt-4">
+                <small>Last updated: <span id="lastUpdated">-</span></small>
+                <button class="btn btn-sm btn-outline-primary ms-3" onclick="loadVersionData()">
+                    Refresh
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- No JavaScript needed - all data rendered server-side -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadVersionData();
+});
+
+async function loadVersionData() {
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const versionContent = document.getElementById('versionContent');
+
+    loadingState.style.display = 'block';
+    errorState.style.display = 'none';
+    versionContent.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/v1/version');
+        const data = await response.json();
+
+        if (!response.ok && !data.Health) {
+            throw new Error(data.error || 'Failed to load version data');
+        }
+
+        renderVersionData(data);
+        loadingState.style.display = 'none';
+        versionContent.style.display = 'block';
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+    } catch (error) {
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        document.getElementById('errorMessage').textContent = error.message;
+    }
+}
+
+function renderVersionData(data) {
+    // Greeting Banner
+    if (data.Greetings) {
+        const banner = document.getElementById('greetingBanner');
+        banner.textContent = data.Greetings;
+        banner.style.display = 'block';
+    }
+
+    // Health Status
+    const healthDiv = document.getElementById('healthStatus');
+    if (data.Health) {
+        const statusClass = data.Health.Status === 'healthy' ? 'success' :
+                          data.Health.Status === 'degraded' ? 'warning' : 'error';
+        healthDiv.innerHTML = `
+            <div class="status-indicator ${statusClass}">
+                <span class="status-dot"></span>
+                <span class="status-text">${data.Health.Status}</span>
+            </div>
+            ${data.Health.Issues && data.Health.Issues.length > 0 ? `
+                <div class="issues-list mt-3">
+                    <strong>Issues:</strong>
+                    <ul>
+                        ${data.Health.Issues.map(issue => `<li class="text-warning">${issue}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : '<p class="text-success mt-2">No issues detected</p>'}
+        `;
+    } else {
+        healthDiv.innerHTML = '<p class="text-muted">Health information not available</p>';
+    }
+
+    // Version Information
+    const versionDiv = document.getElementById('versionInfo');
+    versionDiv.innerHTML = `
+        <div class="info-item">
+            <span class="info-label">API Version</span>
+            <span class="info-value">${data.Version || 'Unknown'}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Time Zone</span>
+            <span class="info-value">${data.TimeZone || 'Unknown'}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Current Time</span>
+            <span class="info-value">${data.Time || 'Unknown'}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Today</span>
+            <span class="info-value">${data.Today || 'Unknown'}</span>
+        </div>
+    `;
+
+    // Database Status
+    const dbDiv = document.getElementById('databaseStatus');
+    if (data.Database) {
+        const dbStatusClass = data.Database.Status === 'Connected' ? 'success' : 'error';
+        dbDiv.innerHTML = `
+            <div class="status-indicator ${dbStatusClass}">
+                <span class="status-dot"></span>
+                <span class="status-text">${data.Database.Status}</span>
+            </div>
+            ${data.Database.Details ? `
+                <div class="info-grid mt-3">
+                    <div class="info-item">
+                        <span class="info-label">State</span>
+                        <span class="info-value">${data.Database.Details.State || 'Unknown'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Configured</span>
+                        <span class="info-value">${data.Database.Details.Configured ? 'Yes' : 'No'}</span>
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    } else {
+        dbDiv.innerHTML = '<p class="text-muted">Database information not available</p>';
+    }
+
+    // API Keys Status
+    const apiKeysDiv = document.getElementById('apiKeysStatus');
+    if (data.APIKeys) {
+        apiKeysDiv.innerHTML = Object.entries(data.APIKeys).map(([key, value]) => `
+            <div class="info-item">
+                <span class="info-label">${key}</span>
+                <span class="info-value ${value === 'Configured ✓' ? 'success' : 'warning'}">${value}</span>
+            </div>
+        `).join('');
+    } else {
+        apiKeysDiv.innerHTML = '<p class="text-muted">API keys information not available</p>';
+    }
+
+    // Data Sources
+    const sourcesDiv = document.getElementById('dataSources');
+    if (data.DataSources) {
+        sourcesDiv.innerHTML = Object.entries(data.DataSources).map(([key, value]) => `
+            <div class="info-item">
+                <span class="info-label">${key}</span>
+                <span class="info-value ${value === 'Not Configured' ? 'warning' : ''}">${value}</span>
+            </div>
+        `).join('');
+    } else {
+        sourcesDiv.innerHTML = '<p class="text-muted">Data sources information not available</p>';
+    }
+
+    // System Information
+    const systemDiv = document.getElementById('systemInfo');
+    if (data.System) {
+        systemDiv.innerHTML = `
+            <div class="info-item">
+                <span class="info-label">Node Version</span>
+                <span class="info-value">${data.System.NodeVersion || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Platform</span>
+                <span class="info-value">${data.System.Platform || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Architecture</span>
+                <span class="info-value">${data.System.Architecture || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Uptime</span>
+                <span class="info-value">${data.System.Uptime || 'Unknown'}</span>
+            </div>
+            ${data.System.Memory ? `
+                <div class="info-item">
+                    <span class="info-label">Heap Memory</span>
+                    <span class="info-value">${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Heap Usage</span>
+                    <span class="info-value">${data.System.Memory.HeapPercentage}</span>
+                </div>
+            ` : ''}
+            ${data.System.CPUs ? `
+                <div class="info-item">
+                    <span class="info-label">CPUs</span>
+                    <span class="info-value">${data.System.CPUs}</span>
+                </div>
+            ` : ''}
+        `;
+    } else {
+        systemDiv.innerHTML = '<p class="text-muted">System information not available</p>';
+    }
+
+    // Environment
+    const envDiv = document.getElementById('environmentInfo');
+    if (data.Environment) {
+        envDiv.innerHTML = `
+            <div class="info-item">
+                <span class="info-label">Node Environment</span>
+                <span class="info-value">${data.Environment.NodeEnv || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Port</span>
+                <span class="info-value">${data.Environment.Port || 'Unknown'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Running on Vercel</span>
+                <span class="info-value">${data.Environment.IsVercel || 'Unknown'}</span>
+            </div>
+            ${data.Environment.Region && data.Environment.Region !== 'N/A' ? `
+                <div class="info-item">
+                    <span class="info-label">Region</span>
+                    <span class="info-value">${data.Environment.Region}</span>
+                </div>
+            ` : ''}
+        `;
+    } else {
+        envDiv.innerHTML = '<p class="text-muted">Environment information not available</p>';
+    }
+
+    // Proxy Configuration
+    const proxyDiv = document.getElementById('proxyConfig');
+    if (data.Proxies && Object.keys(data.Proxies).length > 0) {
+        proxyDiv.innerHTML = Object.entries(data.Proxies).map(([name, config]) => `
+            <div class="proxy-item">
+                <span class="proxy-path">${name}</span>
+                <span class="proxy-arrow">→</span>
+                <span class="proxy-target">${config.target || config}</span>
+                ${config.status ? `<span class="badge bg-success ms-2">${config.status}</span>` : ''}
+            </div>
+        `).join('');
+    } else {
+        proxyDiv.innerHTML = '<p class="text-muted">No proxy configuration available</p>';
+    }
+}
+</script>
 
 <style>
-.version-info,
-.database-status,
-.routes-list,
-.proxy-config,
-.system-info {
-    padding: 1.5rem;
+.loading-container {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.error-container {
+    text-align: center;
+    padding: 3rem;
+}
+
+.error-icon {
+    display: inline-flex;
+    width: 60px;
+    height: 60px;
+    background-color: var(--red);
+    color: white;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
 .info-grid {
@@ -279,7 +372,19 @@
 .info-value {
     color: var(--text-primary);
     font-size: 1.125rem;
-    font-weight: 400;
+}
+
+.info-value.success {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.info-value.warning {
+    color: var(--yellow);
+}
+
+.info-value.error {
+    color: var(--red);
 }
 
 .status-indicator {
@@ -297,74 +402,22 @@
     animation: pulse 2s infinite;
 }
 
-.status-indicator.success .status-dot {
-    background-color: var(--green);
+.status-indicator.success .status-dot { background-color: var(--green); }
+.status-indicator.error .status-dot { background-color: var(--red); }
+.status-indicator.warning .status-dot { background-color: var(--yellow); }
+.status-indicator.success .status-text { color: var(--green); }
+.status-indicator.error .status-text { color: var(--red); }
+.status-indicator.warning .status-text { color: var(--yellow); }
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 currentColor; }
+    70% { box-shadow: 0 0 0 10px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-.status-indicator.error .status-dot {
-    background-color: var(--red);
-}
-
-.status-indicator.warning .status-dot {
-    background-color: var(--yellow);
-}
-
-.status-indicator.success .status-text {
-    color: var(--green);
-}
-
-.status-indicator.error .status-text {
-    color: var(--red);
-}
-
-.status-indicator.warning .status-text {
-    color: var(--yellow);
-}
-
-.route-category {
-    margin-bottom: 2rem;
-}
-
-.route-category:last-child {
-    margin-bottom: 0;
-}
-
-.category-title {
-    color: var(--purple);
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.route-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-}
-
-/* Mobile-first responsive */
-@media (min-width: 576px) {
-    .route-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-}
-
-@media (min-width: 768px) {
-    .route-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
-}
-
-.route-item {
-    background-color: var(--bg-secondary);
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
-}
-
-.route-item code {
-    color: var(--cyan);
-    font-size: 0.875rem;
+.issues-list ul {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
 }
 
 .proxy-list {
@@ -399,78 +452,20 @@
     font-size: 0.875rem;
 }
 
-.no-data {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 2rem;
-    font-style: italic;
-}
-
 .greeting-banner {
     background: linear-gradient(135deg, var(--purple) 0%, var(--cyan) 100%);
     color: white;
     padding: 1rem;
     border-radius: var(--radius-md);
     text-align: center;
-    margin-top: 1rem;
     font-weight: 600;
-}
-
-.info-value.success {
-    color: var(--green);
-    font-weight: 600;
-}
-
-.info-value.error {
-    color: var(--red);
-    font-weight: 600;
-}
-
-.info-value.warning {
-    color: var(--yellow);
-    font-weight: 600;
-}
-
-.error-message {
-    text-align: center;
-    color: var(--red);
-    padding: 2rem;
-    font-size: 1.125rem;
-}
-
-.error-message i {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-}
-
-.loading {
-    text-align: center;
-    color: var(--cyan);
-    padding: 2rem;
-    font-size: 1.125rem;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 currentColor;
-    }
-    70% {
-        box-shadow: 0 0 0 10px transparent;
-    }
-    100% {
-        box-shadow: 0 0 0 0 transparent;
-    }
 }
 
 @media (max-width: 768px) {
     .info-grid {
         grid-template-columns: 1fr;
     }
-    
-    .route-grid {
-        grid-template-columns: 1fr;
-    }
-    
+
     .proxy-item {
         flex-direction: column;
         align-items: flex-start;
