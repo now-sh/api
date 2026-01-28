@@ -6,9 +6,6 @@
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card" id="setupCard">
-            <h2 class="card-title">Start a New Quiz</h2>
-            <p class="card-text">Choose your quiz settings and begin!</p>
-            
             <form id="triviaSetup" class="api-form">
                 <div class="row">
                     <div class="col-md-6">
@@ -186,10 +183,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const response = await fetch(url);
             const data = await response.json();
-            
-            if (response.ok && data.success) {
+
+            if (response.ok) {
+                // Handle both wrapped {success, data} and unwrapped responses
+                const questions = data.success ? (data.data.questions || data.data) : (data.questions || (Array.isArray(data) ? data : [data]));
                 currentQuiz = {
-                    questions: data.data.questions || data.data,
+                    questions: questions,
                     currentIndex: 0,
                     score: 0,
                     answers: [],
