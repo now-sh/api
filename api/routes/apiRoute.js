@@ -210,8 +210,6 @@ const versionHandler = async (req, res) => {
       APIKeys: {
         GitHub: maskSensitive(process.env.GITHUB_API_KEY),
         Reddit: maskSensitive(process.env.REDDIT_CLIENT_ID),
-        GoogleMaps: maskSensitive(process.env.GOOGLE_MAPS_API_KEY),
-        OpenAI: maskSensitive(process.env.OPENAI_API_KEY),
       },
 
       GitHubToken: githubHeader,
