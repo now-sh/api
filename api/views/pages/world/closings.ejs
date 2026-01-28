@@ -71,33 +71,40 @@
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     const resultDiv = document.getElementById('closingsResult');
-    
+
     try {
         const response = await fetch('/api/v1/world/closings');
         const data = await response.json();
-        
-        if (data.success && data.data && data.data.closings) {
-            const closings = data.data.closings;
-            
-            if (closings.length === 0) {
-                resultDiv.innerHTML = '<div class="empty-state">No school closings reported at this time</div>';
-            } else {
-                const html = closings.map(closing => `
-                    <div class="closing-item">
-                        <h5>${closing.name || 'Unknown School'}</h5>
-                        <div class="closing-status">${closing.status || 'Closed'}</div>
-                        ${closing.reason ? `<div class="closing-reason">Reason: ${closing.reason}</div>` : ''}
-                        ${closing.date ? `<div class="closing-reason">Date: ${new Date(closing.date).toLocaleDateString()}</div>` : ''}
-                    </div>
-                `).join('');
-                
-                resultDiv.innerHTML = `
-                    <h4 class="mb-3">Found ${closings.length} closings</h4>
-                    <div class="closings-list">${html}</div>
-                `;
+
+        // Collect all closings from different categories
+        const categories = ['schools', 'colleges', 'churches', 'government', 'public', 'organizations', 'business'];
+        const allClosings = [];
+
+        categories.forEach(category => {
+            if (data[category] && Array.isArray(data[category])) {
+                data[category].forEach(item => {
+                    allClosings.push({ ...item, category: category });
+                });
             }
+        });
+
+        if (allClosings.length > 0) {
+            const html = allClosings.map(closing => `
+                <div class="closing-item">
+                    <h5>${closing.name || 'Unknown'}</h5>
+                    <div class="closing-status">${closing.status || 'Closed'}</div>
+                    ${closing.region ? `<div class="closing-reason">Region: ${closing.region}</div>` : ''}
+                    ${closing.lastUpdated ? `<div class="closing-reason">Updated: ${closing.lastUpdated}</div>` : ''}
+                </div>
+            `).join('');
+
+            resultDiv.innerHTML = `
+                <p class="text-muted mb-3">Last updated: ${data.lastUpdated || 'Unknown'}</p>
+                <h4 class="mb-3">Found ${data.closures || allClosings.length} closings</h4>
+                <div class="closings-list">${html}</div>
+            `;
         } else {
-            resultDiv.innerHTML = '<div class="empty-state">No school closings data available</div>';
+            resultDiv.innerHTML = '<div class="empty-state">No school closings reported at this time</div>';
         }
     } catch (error) {
         resultDiv.innerHTML = '<div class="error">Error loading school closings</div>';
