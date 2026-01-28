@@ -245,23 +245,46 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function loadNotes() {
+    const token = localStorage.getItem('authToken');
+    const notesList = document.getElementById('notesList');
+
+    if (!token) {
+        notesList.innerHTML = `
+            <div class="empty-state">
+                <p>Please sign in to view your notes.</p>
+                <a href="/auth" class="btn btn-primary mt-3">Sign In</a>
+            </div>
+        `;
+        return;
+    }
+
     try {
-        const response = await fetch('/api/v1/data/notes/list');
-        
+        const response = await fetch('/api/v1/data/notes/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
         if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                notesList.innerHTML = `
+                    <div class="empty-state">
+                        <p>Session expired. Please sign in again.</p>
+                        <a href="/auth" class="btn btn-primary mt-3">Sign In</a>
+                    </div>
+                `;
+                return;
+            }
             throw new Error('Failed to load notes');
         }
-        
+
         const data = await response.json();
         const notes = data.data?.notes || data.notes || [];
-        
-        const notesList = document.getElementById('notesList');
-        
+
         if (notes.length === 0) {
             notesList.innerHTML = '<div class="empty-state">No notes available. Create your first note!</div>';
             return;
         }
-        
+
         const html = notes.map(note => `
             <div class="note-item" onclick="selectNote('${note._id || note.id}')">
                 <div class="note-item-title">${escapeHtml(note.title || 'Untitled')}</div>
@@ -272,11 +295,11 @@ async function loadNotes() {
                 </div>
             </div>
         `).join('');
-        
+
         notesList.innerHTML = html;
     } catch (error) {
-        document.getElementById('notesList').innerHTML = 
-            '<div class="empty-state">Error loading notes. Please try again.</div>';
+        notesList.innerHTML =
+            '<div class="empty-state">Error loading notes. The database may be unavailable.</div>';
     }
 }
 
