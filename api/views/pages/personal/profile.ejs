@@ -344,4 +344,174 @@
 }
 </style>
 
-<%- locals.customScripts = '<script src="/js/profile.js"></script>' %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuth();
+});
+
+function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        document.getElementById('authRequired').style.display = 'block';
+        document.getElementById('profileContent').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('authRequired').style.display = 'none';
+    document.getElementById('profileContent').style.display = 'block';
+    loadProfile(token);
+    loadStats(token);
+    loadRecentUrls(token);
+}
+
+async function loadProfile(token) {
+    try {
+        const response = await fetch('/api/v1/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                checkAuth();
+                return;
+            }
+            throw new Error('Failed to load profile');
+        }
+
+        const data = await response.json();
+        const user = data.data?.user || data.user || data;
+
+        document.getElementById('userName').textContent = user.name || 'Not set';
+        document.getElementById('userEmail').textContent = user.email || 'Not set';
+        document.getElementById('userId').textContent = user._id || user.id || 'Unknown';
+        document.getElementById('userCreated').textContent = user.createdAt ?
+            new Date(user.createdAt).toLocaleDateString() : 'Unknown';
+
+        // Pre-fill update form
+        document.getElementById('updateName').value = user.name || '';
+        document.getElementById('updateEmail').value = user.email || '';
+    } catch (error) {
+        console.error('Profile load error:', error);
+    }
+}
+
+async function loadStats(token) {
+    try {
+        // Load todo stats
+        const todoResponse = await fetch('/api/v1/data/todos/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (todoResponse.ok) {
+            const todoData = await todoResponse.json();
+            const todos = todoData.data?.todos || todoData.todos || [];
+            document.getElementById('todoCount').textContent = todos.length;
+        }
+
+        // Load notes stats
+        const notesResponse = await fetch('/api/v1/data/notes/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (notesResponse.ok) {
+            const notesData = await notesResponse.json();
+            const notes = notesData.data?.notes || notesData.notes || [];
+            document.getElementById('noteCount').textContent = notes.length;
+        }
+    } catch (error) {
+        console.error('Stats load error:', error);
+    }
+}
+
+async function loadRecentUrls(token) {
+    const container = document.getElementById('recentUrls');
+    try {
+        const response = await fetch('/api/v1/services/url/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            container.innerHTML = '<div class="empty-state">No recent URLs</div>';
+            return;
+        }
+
+        const data = await response.json();
+        const urls = data.data?.urls || data.urls || [];
+
+        document.getElementById('urlCount').textContent = urls.length;
+
+        if (urls.length === 0) {
+            container.innerHTML = '<div class="empty-state">No URLs created yet</div>';
+            return;
+        }
+
+        container.innerHTML = urls.slice(0, 5).map(url => `
+            <div class="recent-item">
+                <a href="${url.shortUrl || url.short}" target="_blank">${url.shortUrl || url.short}</a>
+                <span class="recent-meta">${url.clicks || 0} clicks</span>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state">Could not load recent URLs</div>';
+    }
+}
+
+// Update profile modal
+document.getElementById('updateProfileBtn').addEventListener('click', function() {
+    document.getElementById('updateModal').style.display = 'flex';
+});
+
+function closeModal() {
+    document.getElementById('updateModal').style.display = 'none';
+}
+
+document.getElementById('updateModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.getElementById('updateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('authToken');
+
+    const updateData = {
+        name: document.getElementById('updateName').value,
+        email: document.getElementById('updateEmail').value,
+        currentPassword: document.getElementById('currentPassword').value
+    };
+
+    const newPassword = document.getElementById('newPassword').value;
+    if (newPassword) {
+        updateData.newPassword = newPassword;
+    }
+
+    try {
+        const response = await fetch('/api/v1/auth/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+            showModal('Profile updated successfully!', 'Success', 'success');
+            closeModal();
+            loadProfile(token);
+        } else {
+            const error = await response.json();
+            showModal(error.message || 'Failed to update profile', 'Error', 'error');
+        }
+    } catch (error) {
+        showModal('Error updating profile', 'Error', 'error');
+    }
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    localStorage.removeItem('authToken');
+    showModal('Signed out successfully', 'Goodbye', 'info');
+    setTimeout(() => {
+        window.location.href = '/';
+    }, 1500);
+});
+</script>
