@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { marked } = require('marked');
-const { markedHighlight } = require('marked-highlight');
 const hljs = require('highlight.js');
 const { setStandardHeaders } = require('../utils/standardHeaders');
 
@@ -26,10 +25,12 @@ try {
 
 const markdownRoute = express.Router();
 
-// Configure marked with highlight extension
-marked.use(markedHighlight({
+// Configure marked v4 with highlight
+marked.setOptions({
+  breaks: true,
+  gfm: true,
   langPrefix: 'hljs language-',
-  highlight(code, lang) {
+  highlight: function(code, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(code, { language: lang }).value;
@@ -39,11 +40,6 @@ marked.use(markedHighlight({
     }
     return hljs.highlightAuto(code).value;
   }
-}));
-
-marked.use({
-  breaks: true,
-  gfm: true
 });
 
 /**
