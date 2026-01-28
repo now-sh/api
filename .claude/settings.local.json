@@ -11,7 +11,8 @@
       "Bash(npm run lint:*)",
       "Bash(npx eslint:*)",
       "Bash(node -c:*)",
-      "Bash(vercel logs:*)"
+      "Bash(vercel logs:*)",
+      "Bash(vercel inspect:*)"
     ]
   }
 }
