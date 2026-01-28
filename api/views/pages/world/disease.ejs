@@ -173,24 +173,37 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadOutbreakData() {
         const outbreakList = document.getElementById('outbreakList');
         outbreakList.innerHTML = '<div class="loading">Loading outbreak data...</div>';
-        
+
         try {
-            let url = '/api/v1/disease';
-            const params = new URLSearchParams();
-            
-            if (diseaseType.value !== 'all') params.append('disease', diseaseType.value);
-            if (region.value !== 'global') params.append('region', region.value);
-            if (timeframe.value !== 'current') params.append('timeframe', timeframe.value);
-            
-            if (params.toString()) url += '?' + params.toString();
-            
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                displayOutbreakData(data.data);
+            // Fetch global COVID-19 data from disease.sh via proxy
+            const response = await fetch('/api/v1/world/disease/covid-19/all');
+            const globalData = await response.json();
+
+            // Also fetch countries data for the outbreak list
+            const countriesResponse = await fetch('/api/v1/world/disease/covid-19/countries?sort=cases');
+            const countriesData = await countriesResponse.json();
+
+            if (globalData && globalData.cases) {
+                // Format the data for display
+                const formattedData = {
+                    statistics: {
+                        totalOutbreaks: Array.isArray(countriesData) ? countriesData.length : 0,
+                        affectedCountries: Array.isArray(countriesData) ? countriesData.length : 0,
+                        totalCases: globalData.cases,
+                        lastUpdate: globalData.updated
+                    },
+                    outbreaks: Array.isArray(countriesData) ? countriesData.slice(0, 20).map(c => ({
+                        disease: 'COVID-19',
+                        location: c.country,
+                        cases: c.cases,
+                        deaths: c.deaths,
+                        severity: c.cases > 10000000 ? 'high' : c.cases > 1000000 ? 'medium' : 'low',
+                        reportDate: c.updated
+                    })) : []
+                };
+                displayOutbreakData(formattedData);
             } else {
-                outbreakList.innerHTML = '<div class="error">Failed to load outbreak data</div>';
+                outbreakList.innerHTML = '<div class="error">Disease tracking data unavailable</div>';
             }
         } catch (error) {
             outbreakList.innerHTML = '<div class="error">Error loading data: ' + error.message + '</div>';
@@ -249,18 +262,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const diseaseInfoDiv = document.getElementById('diseaseInfo');
         diseaseInfoDiv.style.display = 'block';
         diseaseInfoDiv.innerHTML = '<div class="loading">Loading disease information...</div>';
-        
-        try {
-            const response = await fetch(`/api/v1/world/disease/info/${encodeURIComponent(disease)}`);
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                displayDiseaseInfo(data.data);
-            } else {
-                diseaseInfoDiv.innerHTML = `<div class="error">No information found for "${disease}"</div>`;
+
+        // Disease info is static since there's no external API for this
+        const diseaseDatabase = {
+            'covid-19': {
+                name: 'COVID-19',
+                description: 'Coronavirus disease (COVID-19) is an infectious disease caused by the SARS-CoV-2 virus.',
+                transmission: 'Spreads primarily through respiratory droplets and aerosols when an infected person coughs, sneezes, or talks.',
+                symptoms: ['Fever', 'Cough', 'Fatigue', 'Loss of taste/smell', 'Difficulty breathing'],
+                prevention: 'Vaccination, wearing masks, social distancing, hand hygiene, and good ventilation.',
+                treatment: 'Supportive care, antiviral medications for severe cases, oxygen therapy.',
+                source: 'WHO'
+            },
+            'influenza': {
+                name: 'Influenza (Flu)',
+                description: 'A contagious respiratory illness caused by influenza viruses.',
+                transmission: 'Spreads through respiratory droplets when infected people cough, sneeze, or talk.',
+                symptoms: ['Fever', 'Chills', 'Muscle aches', 'Cough', 'Headache', 'Fatigue'],
+                prevention: 'Annual flu vaccination, hand hygiene, avoiding close contact with sick people.',
+                treatment: 'Rest, fluids, antiviral medications if diagnosed early.',
+                source: 'CDC'
+            },
+            'malaria': {
+                name: 'Malaria',
+                description: 'A life-threatening disease caused by parasites transmitted through infected mosquito bites.',
+                transmission: 'Transmitted through bites from infected Anopheles mosquitoes.',
+                symptoms: ['Fever', 'Chills', 'Headache', 'Nausea', 'Muscle pain'],
+                prevention: 'Mosquito nets, insect repellent, antimalarial medications in endemic areas.',
+                treatment: 'Antimalarial medications like artemisinin-based combination therapies.',
+                source: 'WHO'
             }
-        } catch (error) {
-            diseaseInfoDiv.innerHTML = '<div class="error">Error loading information: ' + error.message + '</div>';
+        };
+
+        const normalizedDisease = disease.toLowerCase().replace(/\s+/g, '-');
+        const info = diseaseDatabase[normalizedDisease];
+
+        if (info) {
+            displayDiseaseInfo(info);
+        } else {
+            diseaseInfoDiv.innerHTML = `<div class="error">No information found for "${disease}". Try searching for COVID-19, Influenza, or Malaria.</div>`;
         }
     }
     
