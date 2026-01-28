@@ -172,13 +172,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadNYSStats() {
     const nysDiv = document.getElementById('nysStats');
-    
+
     try {
         const response = await fetch('/api/v1/world/nys');
         const data = await response.json();
-        
-        if (data.success && data.nys) {
-            const stats = data.nys;
+
+        // API returns { nys: {...} } without success wrapper
+        const stats = data.nys || data;
+        if (stats && (stats.cases || stats.state)) {
             nysDiv.innerHTML = `
                 <div class="stat-card">
                     <span class="stat-emoji">😷</span>
@@ -201,6 +202,8 @@ async function loadNYSStats() {
                     <div class="stat-label">Active Cases</div>
                 </div>
             `;
+        } else if (data.error) {
+            nysDiv.innerHTML = `<div class="error">${data.error}</div>`;
         } else {
             nysDiv.innerHTML = '<div class="error">Unable to load New York State statistics</div>';
         }
@@ -211,14 +214,30 @@ async function loadNYSStats() {
 
 async function loadTopCounties() {
     const countiesDiv = document.getElementById('topCounties');
-    
+
     try {
-        const response = await fetch('/api/v1/world/nys');
+        // NYS county data from disease.sh
+        const response = await fetch('/api/v1/world/disease/covid-19/nyt/counties');
         const data = await response.json();
-        
-        if (data.success && data.counties && data.counties.length > 0) {
-            const topCounties = data.counties.slice(0, 12);
-            const html = topCounties.map(county => `
+
+        // Filter for NY state and get recent data
+        let counties = [];
+        if (Array.isArray(data)) {
+            const nyCounties = data.filter(c => c.state === 'New York');
+            // Get unique counties with latest data
+            const countyMap = new Map();
+            nyCounties.forEach(c => {
+                if (!countyMap.has(c.county) || new Date(c.date) > new Date(countyMap.get(c.county).date)) {
+                    countyMap.set(c.county, c);
+                }
+            });
+            counties = Array.from(countyMap.values())
+                .sort((a, b) => (b.cases || 0) - (a.cases || 0))
+                .slice(0, 12);
+        }
+
+        if (counties.length > 0) {
+            const html = counties.map(county => `
                 <div class="county-card">
                     <div class="county-name">
                         <span>${getCountyEmoji(county.county)}</span>
@@ -240,13 +259,13 @@ async function loadTopCounties() {
                     </div>
                 </div>
             `).join('');
-            
+
             countiesDiv.innerHTML = html;
         } else {
-            countiesDiv.innerHTML = '<div class="error">Unable to load counties data</div>';
+            countiesDiv.innerHTML = '<div class="error">County data unavailable. The NYT county dataset may have been discontinued.</div>';
         }
     } catch (error) {
-        countiesDiv.innerHTML = '<div class="error">Error loading counties data</div>';
+        countiesDiv.innerHTML = '<div class="error">County data unavailable</div>';
     }
 }
 
