@@ -1,65 +1,110 @@
-# 👋 Welcome to the API Project 👋
+# API Server
 
 A comprehensive Express.js API server featuring categorized endpoints,
 authentication, todos, notes, URL shortener, and various utility services.
 
-## 📋 Prerequisites
+## Official Site
+
+- **Live API**: [https://api.casjay.coffee](https://api.casjay.coffee)
+- **API Documentation**: [https://api.casjay.coffee/api/docs](https://api.casjay.coffee/api/docs)
+- **Version Info**: [https://api.casjay.coffee/version](https://api.casjay.coffee/version)
+
+## Prerequisites
 
 - **Node.js** (v16+ recommended)
 - **npm** or **yarn**
 - **MongoDB** (local or remote)
 
-### Quick MongoDB Setup
+## Installation
 
 ```shell
-# Docker (recommended for development)
-docker run -p 0.0.0.0:27017:27017 --name mongo-dev -d mongo:latest
+# Clone the repository
+git clone https://github.com/casjay/api.git
+cd api
 
-# Or use MongoDB Atlas for cloud hosting
+# Install dependencies
+npm install
+
+# Copy and configure environment
+cp .env.sample .env
+# Edit .env with your settings
 ```
 
-## 🚀 Quick Start
+## Production
 
-### Production
+### Quick Start
 
 ```shell
-npm install
+npm install --production
 npm run start
 ```
 
-### Development
+### Using PM2 (Recommended)
 
 ```shell
-npm install
-npm run dev
+# Install PM2 globally
+npm install -g pm2
+
+# Start the application
+pm2 start api/index.js --name "api-server"
+
+# Save PM2 configuration
+pm2 save
+
+# Setup startup script
+pm2 startup
 ```
 
-## ⚙️ Environment Configuration
+### Docker
+
+```shell
+# Build the image
+docker build -t api-server .
+
+# Run the container
+docker run -d \
+  --name api-server \
+  -p 1919:1919 \
+  -e MONGODB_URI=mongodb://your-mongo-host:27017/api \
+  -e JWT_SECRET=your-secret-key \
+  api-server
+```
+
+### Production Considerations
+
+- Use **PM2** or similar for process management
+- Set up **reverse proxy** (nginx/caddy)
+- Configure **SSL certificates**
+- Monitor **database connections**
+- Set up **logging** and **monitoring**
+
+## Environment Configuration
 
 Copy `.env.sample` to `.env` and configure:
 
 ```env
 # Server Configuration
 PORT=1919
-VERSION=1.9.2
+HOSTNAME=api.example.com
+VERSION=1.9.4
 TIMEZONE=America/New_York
 
 # Authentication
 JWT_SECRET=your-very-long-secret-key
 
-# MongoDB Connections (separate databases for different features)
-MONGODB_URI_API=mongodb://localhost/api?retryWrites=true&w=majority
-MONGODB_URI_TODOS=mongodb://localhost/todo?retryWrites=true&w=majority
-MONGODB_URI_NOTES=mongodb://localhost/notes?retryWrites=true&w=majority
-MONGODB_URI_SHRTNR=mongodb://localhost/shrtnr?retryWrites=true&w=majority
+# MongoDB Connection
+MONGODB_URI=mongodb://your-mongo-host:27017/api?retryWrites=true&w=majority
 
 # External APIs
 GITHUB_API_KEY=your-github-token
+GITHUB_USERNAME=your-github-username
+REDDIT_CLIENT_ID=your-reddit-client-id
+REDDIT_CLIENT_SECRET=your-reddit-client-secret
 HEADER_AGENT=YourApp/1.0 (+https://yoursite.com)
 
-# Optional URLs
+# Data Sources (optional - defaults provided)
 BLOG_URL=https://api.github.com/repos/user/repo/contents/_posts
-DOMAIN_LIST=https://example.com/domains.json
+DOMAINS_URL=https://example.com/domains.json
 ```
 
 ### HEADER_AGENT Configuration
@@ -85,52 +130,36 @@ HEADER_AGENT="MyGitHubApp/1.0"
 
 # Personal projects
 HEADER_AGENT="JohnsAPI/1.0 (john@example.com)"
-
-# Company services
-HEADER_AGENT="AcmeCorp-API/2.1 (+https://api.acmecorp.com)"
 ```
 
-**Default value:** `API-Server/1.0 (+https://github.com/now-sh/api)`
+## CLI Usage
 
-## 🏗️ Architecture
+### Health Check
 
-### MVC Structure
+```shell
+curl -q -LSsf https://api.casjay.coffee/api/v1/version
+```
 
-- **Models** (`/models/`) - MongoDB schemas using Mongoose
-- **Controllers** (`/controllers/`) - Business logic
-- **Routes** (`/routes/`) - API endpoints with categorized structure
-- **Middleware** (`/middleware/`) - Authentication, rate limiting, etc.
+### Authentication
 
-### Database Architecture
+```shell
+# Sign up
+curl -q -LSsf -X POST https://api.casjay.coffee/api/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@example.com","password":"secure123"}'
 
-Multiple MongoDB databases for separation of concerns:
+# Login
+curl -q -LSsf -X POST https://api.casjay.coffee/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john@example.com","password":"secure123"}'
 
-- **API Database** - Users, authentication tokens
-- **Todos Database** - Todo items and lists
-- **Notes Database** - Notes, gists, and documents
-- **Shortener Database** - URL shortening service
+# Use token in requests
+curl -q -LSsf -H "Authorization: Bearer YOUR_TOKEN" https://api.casjay.coffee/api/v1/auth/me
+```
 
-### Route Organization
+## API Endpoints
 
-API endpoints are organized into logical categories:
-
-- **🔧 Utilities** - Encoding, hashing, UUID, passwords, JWT, QR codes
-- **🛠️ Tools** - Commit generators, development utilities  
-- **📊 Data** - External APIs, time zones, domains
-- **⚕️ Health** - COVID data, monitoring endpoints
-- **👤 Personal** - Notes, todos, user management
-- **🌐 Services** - URL shortener, authentication
-
-## 🔐 Authentication System
-
-### Token-based Authentication (JWT)
-
-- **Never-expiring tokens** (configurable)
-- **Token rotation** for security
-- **Revocation support** (individual or all tokens)
-- **Database tracking** of all tokens
-
-### Endpoints
+### Authentication (`/api/v1/auth`)
 
 ```text
 GET    /api/v1/auth         # Authentication info
@@ -141,95 +170,100 @@ PUT    /api/v1/auth/update  # Update profile
 POST   /api/v1/auth/rotate  # Rotate token
 GET    /api/v1/auth/tokens  # List active tokens
 POST   /api/v1/auth/revoke  # Revoke token(s)
-POST   /api/v1/auth/revoke-all # Revoke all tokens
 ```
 
-### Usage
+### Tools (`/api/v1/tools/`)
 
-```bash
-# Sign up
-curl -X POST /api/v1/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John","email":"john@example.com","password":"secure123"}'
+- **Base64** encode/decode (`/tools/base64`)
+- **Hashing** (MD5, SHA1, SHA256, SHA512) (`/tools/hash`)
+- **UUID** generation (`/tools/uuid`)
+- **Password** generation (`/tools/passwd`)
+- **JWT** decoding/validation (`/tools/jwt`)
+- **QR Code** generation (`/tools/qr`)
+- **Color** conversion (`/tools/color`)
+- **Lorem Ipsum** generation (`/tools/lorem`)
+- **Commit** message generator (`/tools/commit`)
+- **Markdown** preview (`/tools/markdown`)
+- **Cron** expression parser (`/tools/cron`)
+- **Regex** tester (`/tools/regex`)
+- **Diff** comparison (`/tools/diff`)
+- **Dictionary** lookup (`/tools/dictionary`)
 
-# Use token in requests
-curl -H "Authorization: Bearer YOUR_TOKEN" /api/v1/auth/me
+### Data (`/api/v1/data/`)
 
-# Rotate token for security
-curl -X POST /api/v1/auth/rotate \
-  -H "Authorization: Bearer YOUR_CURRENT_TOKEN"
-```
+- **Todos** management (`/data/todos`)
+- **Notes** management (`/data/notes`)
+- **URLs** shortener (`/data/urls`)
 
-## 📝 Features
+### World (`/api/v1/world/`)
 
-### Todos API (`/api/v1/todos`)
+- **COVID** data (`/world/covid`)
+- **Disease** statistics (`/world/disease`)
+- **Timezones** (`/world/timezones`)
+- **School Closings** (`/world/closings`)
+- **USA** data (`/world/usa`)
+- **NYS** data (`/world/nys`)
+
+### Social (`/api/v1/social/`)
+
+- **GitHub** integration (`/social/github`)
+- **Reddit** integration (`/social/reddit`)
+- **Blogs** (`/social/blogs`)
+
+### Fun (`/api/v1/fun/`)
+
+- **Jokes** (`/fun/jokes`)
+- **Facts** (`/fun/facts`)
+- **Trivia** (`/fun/trivia`)
+- **Anime** quotes (`/fun/anime`)
+
+### Personal (`/api/v1/me/`)
+
+- **Info** (`/me/info`)
+- **Domains** (`/me/domains`)
+- **Blog** (`/me/blog`)
+
+## Features
+
+### Todos API
 
 - **Public by default** (can be made private)
 - **Authentication required** for creation/modification
-- **No auth needed** for reading public todos
 - Features: tags, priorities, due dates, completion tracking
 
-### Notes API (`/api/v1/notes`)
+### Notes API
 
 - **Google Keep + GitHub Gists style**
-- **Public by default** (can be made private)
 - **Multiple content types:** text, markdown, code
-- Features: syntax highlighting, collaboration, pinning, attachments
+- Features: syntax highlighting, pinning, attachments
 
-### URL Shortener (`/api/v1/url`)
+### URL Shortener
 
 - **Custom aliases** and **expiration dates**
 - **Click tracking** and **statistics**
 - **Public/private** URLs
-- **User-owned** URLs with authentication
 
-### Categorized API Endpoints
+## Architecture
 
-#### 🔧 Utilities (`/api/v1/utilities/`)
-- **Base64** encode/decode (`/utilities/base64`)
-- **Hashing** (MD5, SHA1, SHA256, SHA512) (`/utilities/hash`)
-- **UUID** generation (`/utilities/uuid`)
-- **Password** generation (`/utilities/passwd`)
-- **JWT** decoding/validation (`/utilities/jwt`)
-- **QR Code** generation (`/utilities/qr`)
-- **Color** conversion (`/utilities/color`)
-- **Lorem Ipsum** generation (`/utilities/lorem`)
+### MVC Structure
 
-#### 🛠️ Tools (`/api/v1/tools/`)
-- **Commit Generator** (`/tools/commit`)
+- **Models** (`/models/`) - MongoDB schemas using Mongoose
+- **Controllers** (`/controllers/`) - Business logic
+- **Routes** (`/routes/`) - API endpoints with categorized structure
+- **Middleware** (`/middleware/`) - Authentication, rate limiting, etc.
 
-#### 📊 Data (`/api/v1/data/`)
-- **Time zones** (`/data/timezones`)
-- **Domains** (`/data/domains`)
-- **School closings** (`/data/closings`)
+### Route Organization
 
-#### ⚕️ Health (`/api/v1/health/`)
-- **COVID data** (`/health/disease`)
-- **Global stats** (`/health/global`)
+API endpoints are organized into logical categories:
 
-#### 👤 Personal (`/api/v1/personal/`)
-- **Todos** management (`/personal/todos`)
-- **Notes** management (`/personal/notes`)
+- **Tools** - Developer tools and utilities
+- **Data** - Data storage and management
+- **World** - Global information and statistics
+- **Social** - Social media integrations
+- **Fun** - Entertainment APIs
+- **Me** - Personal data endpoints
 
-#### 🌐 Services (`/api/v1/services/`)
-- **URL Shortener** (`/services/url`)
-
-### Legacy Compatibility
-
-All original endpoints remain available for backward compatibility:
-- `/api/v1/base64` → `/api/v1/utilities/base64`
-- `/api/v1/hash` → `/api/v1/utilities/hash`
-- *etc.*
-
-### Additional Endpoints
-
-#### Legacy & Special Routes
-- **GitHub** integration (`/api/v1/git`)
-- **Anime** quotes (`/api/v1/anime`) 
-- **Version** info (`/api/v1/version`)
-- **API Help** (`/api/help`)
-
-## 🛡️ Security Features
+## Security Features
 
 - **Rate limiting** with express-rate-limit
 - **Input validation** with express-validator
@@ -239,7 +273,14 @@ All original endpoints remain available for backward compatibility:
 - **Token blacklisting/revocation**
 - **Request timeout protection**
 
-## 🔧 Development
+## Development
+
+### Quick Start
+
+```shell
+npm install
+npm run dev
+```
 
 ### Scripts
 
@@ -250,9 +291,21 @@ npm run lint      # ESLint code checking
 npm run commit    # Automated git commits
 ```
 
+### MongoDB Setup for Development
+
+```shell
+# Docker (recommended)
+docker run -d \
+  --name mongo-dev \
+  -p 27017:27017 \
+  mongo:latest
+
+# Or use MongoDB Atlas for cloud hosting
+```
+
 ### Code Organization
 
-- **JavaScript** codebase with CommonJS modules  
+- **JavaScript** codebase with CommonJS modules
 - **Express.js** with modular router architecture
 - **VS Code** integration with proper settings
 - **ESLint** for code quality and consistency
@@ -265,7 +318,7 @@ All external requests include 5-second timeouts and proper error handling:
 - **Cheerio scraping** - with timeout wrapper
 - **Axios/Fetch** - with timeout utilities
 
-## 📊 API Documentation
+## API Documentation
 
 Visit `/api/docs` for interactive Swagger documentation when the server is running.
 
@@ -291,48 +344,21 @@ Visit `/api/docs` for interactive Swagger documentation when the server is runni
 }
 ```
 
-## 🔄 Pagination Support
-
-The GitHub API endpoints automatically handle pagination to fetch all results:
-
-- Fetches multiple pages automatically
-- Combines results from all pages
-- Handles rate limiting appropriately
-- Returns complete datasets
-
-## 📦 Deployment
-
-### Environment Setup
-
-1. Set all required environment variables
-2. Ensure MongoDB connections are accessible
-3. Configure external API keys (GitHub, etc.)
-
-### Production Considerations
-
-- Use **PM2** or similar for process management
-- Set up **reverse proxy** (nginx)
-- Configure **SSL certificates**
-- Monitor **database connections**
-- Set up **logging** and **monitoring**
-
-## 🤝 Contributing
+## Contributing
 
 1. Follow the existing code style
-2. Use TypeScript for new features
-3. Add proper error handling
-4. Include input validation
-5. Update documentation
+2. Add proper error handling
+3. Include input validation
+4. Update documentation
 
-## 📄 License
+## License
 
 MIT
 
-## 👤 Author
+## Author
 
 Jason Hempstead
 
 ---
 
-🔥 **Pro Tip:** Use the `/help` endpoint on any route to see available
-options and examples!
+**Pro Tip:** Use the `/help` endpoint on any route to see available options and examples!
