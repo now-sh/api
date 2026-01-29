@@ -20,10 +20,13 @@
                         <article class="blog-post">
                             <div class="blog-header">
                                 <h3 class="blog-title">
-                                    <a href="<%= post.html_url %>" target="_blank"><%= post.title %></a>
+                                    <a href="/data/blogs/<%= post.slug %>"><%= post.title %></a>
                                 </h3>
                                 <div class="blog-meta">
-                                    <span class="blog-date">📅 <%= post.date %></span>
+                                    <span class="blog-date">📅 <%= post.dateFormatted || post.date %></span>
+                                    <% if (post.dateRelative) { %>
+                                        <span class="blog-relative text-muted">(<%= post.dateRelative %>)</span>
+                                    <% } %>
                                     <% if (post.author) { %>
                                         <span class="blog-author">👤 <%= post.author %></span>
                                     <% } %>
@@ -36,13 +39,16 @@
                                 <div class="blog-excerpt">
                                     <%= post.excerpt.substring(0, 300) %>
                                     <% if (post.excerpt.length > 300) { %>...
-                                        <a href="<%= post.html_url %>" target="_blank" class="read-more">Read More</a>
+                                        <a href="/data/blogs/<%= post.slug %>" class="read-more">Read More</a>
                                     <% } %>
                                 </div>
                             <% } %>
                             <div class="blog-footer">
-                                <a href="<%= post.html_url %>" target="_blank" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-box-arrow-up-right"></i> Read Post
+                                <a href="/data/blogs/<%= post.slug %>" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-book"></i> Read Post
+                                </a>
+                                <a href="<%= post.html_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-github"></i> GitHub
                                 </a>
                                 <span class="post-number">#<%= index + 1 %></span>
                             </div>
@@ -188,6 +194,19 @@ article.blog-post:hover::before {
 
 .blog-post .read-more:hover {
     color: var(--purple);
+}
+
+.blog-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.blog-footer .post-number {
+    margin-left: auto;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 
 .blog-post .full-content {
