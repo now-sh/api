@@ -251,7 +251,7 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 - `/data/git` - GitHub data viewer
 - `/data/reddit` - Reddit activity viewer
 - `/data/covid` - COVID-19 statistics
-- `/data/anime` - Anime quotes
+- `/fun/anime` - Anime quotes
 - `/data/domains` - Domain list (displays domains and subdomains in separate sections with copy functionality)
 - `/data/timezones` - World timezones
 - `/data/closings` - School closings
