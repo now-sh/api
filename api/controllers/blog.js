@@ -2,6 +2,15 @@ const { getText } = require('../utils/httpClient');
 const { getHeaders } = require('../middleware/headers');
 const { fetchAllGitHubPages } = require('../utils/pagination');
 const { getPostDateLabel } = require('../utils/dateUtils');
+const { marked } = require('marked');
+
+// Configure marked for safe HTML output
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: true,
+  mangle: false
+});
 
 const githubToken = process.env.GITHUB_API_KEY;
 const DEFAULT_REPO_URL = process.env.BLOG_URL || 'https://api.github.com/repos/malaks-us/jason/contents/_posts';
@@ -169,10 +178,18 @@ const getBlogPosts = async () => {
 
 /**
  * Get single blog post by slug
+ * Includes HTML-converted content
  */
 const getBlogPost = async (slug) => {
   const posts = await getBlogPosts();
-  return posts.find(post => post.slug === slug);
+  const post = posts.find(post => post.slug === slug);
+
+  if (post && post.content) {
+    // Convert markdown content to HTML
+    post.contentHtml = marked.parse(post.content);
+  }
+
+  return post;
 };
 
 /**
