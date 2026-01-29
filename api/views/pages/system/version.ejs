@@ -58,10 +58,10 @@
                 <div id="dataSources" class="info-grid"></div>
             </div>
 
-            <!-- System Information -->
+            <!-- Server Information -->
             <div class="card mb-4">
-                <h2 class="card-title">System Information</h2>
-                <div id="systemInfo" class="info-grid"></div>
+                <h2 class="card-title">Server Information</h2>
+                <div id="serverInfo" class="info-grid"></div>
             </div>
 
             <!-- Environment -->
@@ -214,55 +214,72 @@ function renderVersionData(data) {
     // Data Sources
     const sourcesDiv = document.getElementById('dataSources');
     if (data.DataSources) {
-        sourcesDiv.innerHTML = Object.entries(data.DataSources).map(([key, value]) => `
-            <div class="info-item">
+        sourcesDiv.innerHTML = Object.entries(data.DataSources).map(([key, value]) => {
+            const isUrl = value && (value.startsWith('http://') || value.startsWith('https://'));
+            return `
+            <div class="info-item ${isUrl ? 'info-item-full' : ''}">
                 <span class="info-label">${key}</span>
-                <span class="info-value ${value === 'Not Configured' ? 'warning' : ''}">${value}</span>
+                ${isUrl
+                    ? `<code class="info-url">${value}</code>`
+                    : `<span class="info-value ${value === 'Not Configured' ? 'warning' : ''}">${value}</span>`
+                }
             </div>
-        `).join('');
+        `}).join('');
     } else {
         sourcesDiv.innerHTML = '<p class="text-muted">Data sources information not available</p>';
     }
 
-    // System Information
-    const systemDiv = document.getElementById('systemInfo');
-    if (data.System) {
-        systemDiv.innerHTML = `
+    // Server Information
+    const serverDiv = document.getElementById('serverInfo');
+    if (data.Server) {
+        serverDiv.innerHTML = `
+            <div class="info-item">
+                <span class="info-label">FQDN</span>
+                <span class="info-value">${data.Server.FQDN || 'Unknown'}</span>
+            </div>
             <div class="info-item">
                 <span class="info-label">Node Version</span>
-                <span class="info-value">${data.System.NodeVersion || 'Unknown'}</span>
+                <span class="info-value">${data.Server.NodeVersion || 'Unknown'}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Platform</span>
-                <span class="info-value">${data.System.Platform || 'Unknown'}</span>
+                <span class="info-value">${data.Server.Platform || 'Unknown'}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Architecture</span>
-                <span class="info-value">${data.System.Architecture || 'Unknown'}</span>
+                <span class="info-value">${data.Server.Architecture || 'Unknown'}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Uptime</span>
-                <span class="info-value">${data.System.Uptime || 'Unknown'}</span>
+                <span class="info-value">${data.Server.Uptime || 'Unknown'}</span>
             </div>
-            ${data.System.Memory ? `
+            ${data.Server.Memory ? `
                 <div class="info-item">
                     <span class="info-label">Heap Memory</span>
-                    <span class="info-value">${data.System.Memory.HeapUsed} / ${data.System.Memory.HeapTotal}</span>
+                    <span class="info-value">${data.Server.Memory.HeapUsed} / ${data.Server.Memory.HeapTotal}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Heap Usage</span>
-                    <span class="info-value">${data.System.Memory.HeapPercentage}</span>
+                    <span class="info-value">${data.Server.Memory.HeapPercentage}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Memory</span>
+                    <span class="info-value">${data.Server.Memory.Total}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Free Memory</span>
+                    <span class="info-value">${data.Server.Memory.Free}</span>
                 </div>
             ` : ''}
-            ${data.System.CPUs ? `
+            ${data.Server.CPUs ? `
                 <div class="info-item">
                     <span class="info-label">CPUs</span>
-                    <span class="info-value">${data.System.CPUs}</span>
+                    <span class="info-value">${data.Server.CPUs}</span>
                 </div>
             ` : ''}
         `;
     } else {
-        systemDiv.innerHTML = '<p class="text-muted">System information not available</p>';
+        serverDiv.innerHTML = '<p class="text-muted">Server information not available</p>';
     }
 
     // Environment
@@ -387,6 +404,24 @@ function renderVersionData(data) {
     color: var(--red);
 }
 
+.info-item-full {
+    grid-column: 1 / -1;
+}
+
+.info-url {
+    display: block;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--cyan);
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
 .status-indicator {
     display: flex;
     align-items: center;
@@ -450,6 +485,8 @@ function renderVersionData(data) {
     color: var(--purple);
     font-family: 'Monaco', 'Consolas', monospace;
     font-size: 0.875rem;
+    word-break: break-all;
+    overflow-wrap: anywhere;
 }
 
 .greeting-banner {
