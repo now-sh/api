@@ -292,6 +292,34 @@ app.get('/data/blogs', async (req, res) => {
   }
 });
 
+// Single blog post page
+app.get('/data/blogs/:slug', async (req, res) => {
+  try {
+    const blogController = require('./controllers/blog');
+    const post = await blogController.getBlogPost(req.params.slug);
+
+    if (!post) {
+      res.render('pages/data/blog-post', {
+        error: `Post not found: ${req.params.slug}`,
+        baseUrl: `${req.protocol}://${req.get('host')}`
+      });
+      return;
+    }
+
+    res.render('pages/data/blog-post', {
+      post,
+      title: `${post.title} - Blog`,
+      description: post.excerpt,
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    });
+  } catch (error) {
+    res.render('pages/data/blog-post', {
+      error: error.message,
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    });
+  }
+});
+
 // World pages
 app.get('/world/nys', (req, res) => res.render('pages/world/nys'));
 app.get('/world/usa', (req, res) => res.render('pages/world/usa'));
