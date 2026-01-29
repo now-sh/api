@@ -98,17 +98,17 @@ app.get('/version', (req, res) => {
       Region: process.env.VERCEL_REGION || process.env.NOW_REGION || 'N/A'
     },
 
-    System: {
+    Server: {
       NodeVersion: process.version,
       Platform: os.platform(),
       Architecture: os.arch(),
-      Hostname: os.hostname(),
+      FQDN: process.env.HOSTNAME || process.env.HOST || os.hostname(),
       Uptime: Math.floor(process.uptime()) + ' seconds',
       Memory: {
         HeapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
         HeapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB',
-        SystemTotal: Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB',
-        SystemFree: Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB'
+        Total: Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB',
+        Free: Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10 + ' GB'
       },
       CPUs: os.cpus().length + ' cores'
     },
@@ -174,10 +174,12 @@ const { versionHandler } = require('./routes/apiRoute');
 app.get('/healthz', cors(), versionHandler);
 app.get('/api/healthz', cors(), versionHandler);
 
-// Main routes
-app.use('/', require('./routes/mainRoute'));
-app.use('/api', require('./routes/apiRoute'));
+// API routes must be registered before mainRoute's catch-all /:endpoint handler
 app.use('/api/docs', require('./routes/docsRoute'));
+app.use('/api', require('./routes/apiRoute'));
+
+// Main routes (has catch-all /:endpoint, must be last among these)
+app.use('/', require('./routes/mainRoute'));
 
 // ==== API ROUTES ORGANIZED BY CATEGORY ====
 
@@ -266,7 +268,7 @@ app.get('/world/covid', (req, res) => res.render('pages/world/covid'));
 app.get('/world/covid-global', (req, res) => res.render('pages/world/covid-global'));
 app.get('/world/covid-usa', (req, res) => res.render('pages/world/covid-usa'));
 app.get('/world/covid-nys', (req, res) => res.render('pages/world/covid-nys'));
-app.get('/data/anime', (req, res) => res.render('pages/fun/anime', { baseUrl: `${req.protocol}://${req.get('host')}` }));
+// /data/anime removed - use /fun/anime instead
 app.get('/world/timezones', (req, res) => res.render('pages/world/timezones'));
 app.get('/data/closings', (req, res) => res.render('pages/world/closings'));
 app.get('/data/blogs', async (req, res) => {
