@@ -141,6 +141,18 @@ defaultRoute.post('/data/:source', cors(), async (req, res) => {
 async function handleDataRequest(req, res) {
   try {
     const { source } = req.params;
+
+    // Valid data sources that have pages in pages/data/
+    const validSources = ['domains', 'blogs', 'git', 'reddit', 'timezones', 'closings', 'covid', 'todos', 'notes'];
+
+    if (!validSources.includes(source)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Not Found',
+        message: `Data page not found: ${source}. Valid sources: ${validSources.join(', ')}`
+      });
+    }
+
     const pageTitle = source.charAt(0).toUpperCase() + source.slice(1).replace('-', ' ');
     
     // For data pages, fetch data server-side
