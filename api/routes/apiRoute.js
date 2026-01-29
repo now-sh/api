@@ -7,15 +7,47 @@ const { setStandardHeaders } = require('../utils/standardHeaders');
 const { getDatabaseStatus, connectToDatabase } = require('../db/connection');
 
 const apiRoute = express.Router();
-const dttoday = datetime.create();
-const dtyester = datetime.create();
-dtyester.offsetInHours(-24);
-const yesterday = dtyester.format('Y-m-d');
-const today = dttoday.format('Y-m-d');
-const curtime = dttoday.format('H:M');
 
-const timeZone = process.env.TIMEZONE || 'America/New_York';
-const version = process.env.VERSION;
+const configuredTimeZone = process.env.TIMEZONE || 'America/New_York';
+
+// Detect server's system timezone
+const getServerTimezone = () => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
+// Helper to get current date/time in configured timezone (called on each request)
+// Uses UTC as base and converts to target timezone - works regardless of server TZ
+const getDateTime = (targetTimezone = configuredTimeZone) => {
+  // Date objects in JS are always UTC internally
+  const now = new Date();
+  const options = { timeZone: targetTimezone };
+
+  // Get time in target timezone
+  const curtime = now.toLocaleTimeString('en-US', {
+    ...options,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  // Get today's date in target timezone
+  const today = now.toLocaleDateString('en-CA', options); // en-CA gives YYYY-MM-DD format
+
+  // Get yesterday's date in target timezone
+  const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const yesterday = yesterdayDate.toLocaleDateString('en-CA', options);
+
+  return {
+    yesterday,
+    today,
+    curtime,
+    timezone: targetTimezone,
+    serverTimezone: getServerTimezone(),
+    utc: now.toISOString()
+  };
+};
+const packageJson = require('../../package.json');
+const version = process.env.VERSION || packageJson.version;
 const githubToken = process.env.GITHUB_API_KEY;
 
 // Check if GitHub token is valid (not blank, not placeholder)
@@ -26,14 +58,93 @@ const githubHeader = isValidToken ? 'Token is set' : 'Token is NOT set';
 
 apiRoute.get('/', cors(), (req, res) => {
   try {
+    const baseUrl = `${req.protocol}://${req.headers.host}`;
+    const dt = getDateTime();
     const data = {
       Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
-      Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
+      Message: `The current api endpoint is ${baseUrl}/api/v1`,
       Version: version,
-      TimeZone: timeZone,
-      Time: curtime,
-      Today: today,
-      Yesterday: yesterday,
+      TimeZone: dt.timezone,
+      Time: dt.curtime,
+      Today: dt.today,
+
+      Documentation: `${baseUrl}/api/docs`,
+
+      Routes: {
+        // Tools - Developer Tools & Utilities
+        Tools: {
+          Base64: `${baseUrl}/api/v1/tools/base64`,
+          Hash: `${baseUrl}/api/v1/tools/hash`,
+          UUID: `${baseUrl}/api/v1/tools/uuid`,
+          JWT: `${baseUrl}/api/v1/tools/jwt`,
+          QRCode: `${baseUrl}/api/v1/tools/qr`,
+          Color: `${baseUrl}/api/v1/tools/color`,
+          Lorem: `${baseUrl}/api/v1/tools/lorem`,
+          Password: `${baseUrl}/api/v1/tools/passwd`,
+          Commit: `${baseUrl}/api/v1/tools/commit`,
+          Markdown: `${baseUrl}/api/v1/tools/markdown`,
+          Cron: `${baseUrl}/api/v1/tools/cron`,
+          Regex: `${baseUrl}/api/v1/tools/regex`,
+          Diff: `${baseUrl}/api/v1/tools/diff`,
+          Dictionary: `${baseUrl}/api/v1/tools/dictionary`
+        },
+
+        // Personal Data
+        Me: {
+          Blog: `${baseUrl}/api/v1/me/blog`,
+          Domains: `${baseUrl}/api/v1/me/domains`,
+          Info: `${baseUrl}/api/v1/me/info`
+        },
+
+        // Data Storage
+        Data: {
+          Todos: `${baseUrl}/api/v1/data/todos`,
+          Notes: `${baseUrl}/api/v1/data/notes`,
+          URLs: `${baseUrl}/api/v1/data/urls`
+        },
+
+        // Fun & Entertainment
+        Fun: {
+          Jokes: `${baseUrl}/api/v1/fun/jokes`,
+          Facts: `${baseUrl}/api/v1/fun/facts`,
+          Trivia: `${baseUrl}/api/v1/fun/trivia`,
+          Anime: `${baseUrl}/api/v1/fun/anime`
+        },
+
+        // Social Media APIs
+        Social: {
+          Blogs: `${baseUrl}/api/v1/social/blogs`,
+          GitHub: `${baseUrl}/api/v1/social/github`,
+          Reddit: `${baseUrl}/api/v1/social/reddit`
+        },
+
+        // World Information
+        World: {
+          Covid: `${baseUrl}/api/v1/world/covid`,
+          Disease: `${baseUrl}/api/v1/world/disease`,
+          Closings: `${baseUrl}/api/v1/world/closings`,
+          Timezones: `${baseUrl}/api/v1/world/timezones`,
+          USA: `${baseUrl}/api/v1/world/usa`,
+          NYS: `${baseUrl}/api/v1/world/nys`,
+          ArcGIS: `${baseUrl}/api/v1/world/arcgis`
+        },
+
+        // Authentication
+        Auth: {
+          Login: `${baseUrl}/api/v1/auth/login`,
+          Register: `${baseUrl}/api/v1/auth/register`,
+          Profile: `${baseUrl}/api/v1/profile`
+        },
+
+        // Server
+        Server: {
+          Version: `${baseUrl}/api/v1/version`,
+          Health: `${baseUrl}/api/healthz`,
+          Cache: `${baseUrl}/api/v1/cache`,
+          Docs: `${baseUrl}/api/v1/docs`,
+          Debug: `${baseUrl}/api/v1/debug`
+        }
+      }
     };
     setStandardHeaders(res, data);
     res.send(data);
@@ -44,15 +155,16 @@ apiRoute.get('/', cors(), (req, res) => {
 
 apiRoute.get('/v1', cors(), (req, res) => {
   try {
+    const dt = getDateTime();
     const data = {
       Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
       Message: `The current api endpoint is ${req.protocol}://${req.headers.host}/api/v1`,
       Help: `${req.protocol}://${req.headers.host}/api/help`,
       Version: version,
-      TimeZone: timeZone,
-      Time: curtime,
-      Today: today,
-      Yesterday: yesterday,
+      TimeZone: dt.timezone,
+      Time: dt.curtime,
+      Today: dt.today,
+      Yesterday: dt.yesterday,
     };
     setStandardHeaders(res, data);
     res.send(data);
@@ -182,18 +294,20 @@ const versionHandler = async (req, res) => {
 
   try {
     const os = require('os');
+    const dt = getDateTime();
     const data = {
       Health: {
         Status: healthStatus,
         Issues: healthIssues,
-        Timestamp: new Date().toISOString()
+        Timestamp: dt.utc
       },
       Greetings: ' 🥞 🐛 💜 Welcome to my API Server 💜 🐛 🥞 ',
       Version: version,
-      TimeZone: timeZone,
-      Yesterday: yesterday,
-      Today: today,
-      Time: curtime,
+      TimeZone: dt.timezone,
+      ServerTimeZone: dt.serverTimezone,
+      Yesterday: dt.yesterday,
+      Today: dt.today,
+      Time: dt.curtime,
 
       // External Data Sources (showing actual values/defaults used)
       DataSources: {
@@ -225,19 +339,19 @@ const versionHandler = async (req, res) => {
         }
       },
 
-      System: {
+      Server: {
         NodeVersion: nodeVersion,
         Platform: platform,
         Architecture: arch,
-        Hostname: os.hostname(),
+        FQDN: process.env.HOSTNAME || process.env.HOST || os.hostname(),
         Uptime: `${Math.floor(uptime / 60)} minutes`,
         Memory: {
           HeapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`,
           HeapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`,
           RSS: `${Math.round(memUsage.rss / 1024 / 1024)} MB`,
           HeapPercentage: `${Math.round(heapPercentage)}%`,
-          SystemTotal: `${Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10} GB`,
-          SystemFree: `${Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10} GB`
+          Total: `${Math.round(os.totalmem() / 1024 / 1024 / 1024 * 10) / 10} GB`,
+          Free: `${Math.round(os.freemem() / 1024 / 1024 / 1024 * 10) / 10} GB`
         },
         CPUs: `${os.cpus().length} cores`
       },
@@ -260,11 +374,9 @@ const versionHandler = async (req, res) => {
       Auth: auth,
     };
     
-    // Set appropriate status code based on health
-    const statusCode = healthStatus === 'healthy' ? 200 : 503;
-    
+    // Always return 200 - health status is in the body for monitoring tools
     setStandardHeaders(res, data);
-    res.status(statusCode).send(data);
+    res.status(200).send(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
