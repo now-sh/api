@@ -12,7 +12,9 @@
       "Bash(npx eslint:*)",
       "Bash(node -c:*)",
       "Bash(vercel logs:*)",
-      "Bash(vercel inspect:*)"
+      "Bash(vercel inspect:*)",
+      "Bash(TZ=America/New_York date:*)",
+      "Bash(pgrep:*)"
     ]
   }
 }
