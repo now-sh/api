@@ -1,72 +1,93 @@
-// Enhanced Theme Management
+/**
+ * Theme Toggle - Dark/Light mode switcher
+ * Persists preference in localStorage
+ */
 (function() {
+  'use strict';
+
   const THEME_KEY = 'api-theme';
-  let themeToggle, sunIcon, moonIcon;
-  
-  // Initialize elements (called when DOM is ready)
-  const initElements = () => {
-    themeToggle = document.querySelector('.theme-toggle');
-    sunIcon = document.querySelector('.sun-icon');
-    moonIcon = document.querySelector('.moon-icon');
-  };
-  
-  // Get stored theme or default to dark
-  const getTheme = () => localStorage.getItem(THEME_KEY) || 'dark';
-  
-  // Set theme
-  const setTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem(THEME_KEY, theme);
-    updateIcons(theme);
-    console.log('Theme set to:', theme);
-  };
-  
-  // Update toggle icons (inverted - show sun for light theme, moon for dark theme)
-  const updateIcons = (theme) => {
-    if (!sunIcon || !moonIcon) return;
-    
-    if (theme === 'light') {
-      sunIcon.style.display = 'block';
-      moonIcon.style.display = 'none';
+  const DARK_THEME = 'dark';
+  const LIGHT_THEME = 'light';
+
+  // Get saved theme or detect from system preference
+  function getSavedTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === LIGHT_THEME || saved === DARK_THEME) {
+      return saved;
+    }
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return LIGHT_THEME;
+    }
+    return DARK_THEME;
+  }
+
+  // Apply theme to document
+  function applyTheme(theme) {
+    if (theme === LIGHT_THEME) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body?.setAttribute('data-theme', 'light');
     } else {
-      sunIcon.style.display = 'none';
-      moonIcon.style.display = 'block';
+      document.documentElement.removeAttribute('data-theme');
+      document.body?.removeAttribute('data-theme');
     }
-  };
-  
-  // Toggle theme
-  const toggleTheme = () => {
-    const currentTheme = getTheme();
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-  };
-  
-  // Initialize theme system
-  const init = () => {
-    initElements();
-    setTheme(getTheme());
-    
-    // Add click event
-    if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
+    updateIcon(theme);
+  }
+
+  // Update the toggle button icon
+  function updateIcon(theme) {
+    const icon = document.getElementById('themeIcon');
+    if (!icon) return;
+
+    if (theme === LIGHT_THEME) {
+      // Light theme: show sun icon (click to go dark)
+      icon.classList.remove('bi-moon-fill');
+      icon.classList.add('bi-sun-fill');
+    } else {
+      // Dark theme: show moon icon (click to go light)
+      icon.classList.remove('bi-sun-fill');
+      icon.classList.add('bi-moon-fill');
     }
-    
-    // Watch for system preference changes
-    if (window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', (e) => {
-        if (!localStorage.getItem(THEME_KEY)) {
-          setTheme(e.matches ? 'dark' : 'light');
-        }
-      });
+  }
+
+  // Toggle between themes
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const newTheme = current === 'light' ? DARK_THEME : LIGHT_THEME;
+    localStorage.setItem(THEME_KEY, newTheme);
+    applyTheme(newTheme);
+  }
+
+  // Apply saved theme immediately (before DOM is fully ready)
+  // This prevents flash of wrong theme
+  (function() {
+    const savedTheme = getSavedTheme();
+    applyTheme(savedTheme);
+  })();
+
+  // Set up toggle button when DOM is ready
+  function initToggle() {
+    const toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', toggleTheme);
     }
-  };
-  
-  // Initialize when DOM is ready
+    // Update icon after DOM is ready
+    updateIcon(getSavedTheme());
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initToggle);
   } else {
-    init();
+    initToggle();
+  }
+
+  // Listen for system theme changes
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+      // Only auto-switch if user hasn't manually set a preference
+      if (!localStorage.getItem(THEME_KEY)) {
+        applyTheme(e.matches ? LIGHT_THEME : DARK_THEME);
+      }
+    });
   }
 })();
