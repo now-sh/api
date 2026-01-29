@@ -21,6 +21,9 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="/css/main.css">
 
+    <!-- Theme script - load early to prevent flash of wrong theme -->
+    <script src="/js/theme.js"></script>
+
     <title><%= locals.title || 'Backend API' %></title>
 
     <!-- Custom Page CSS -->
@@ -130,6 +133,12 @@
           </ul>
 
           <ul class="navbar-nav">
+            <li class="nav-item">
+              <button class="nav-link btn btn-link theme-toggle" id="themeToggle"
+                      type="button" aria-label="Toggle dark/light theme" title="Toggle theme">
+                <i class="bi bi-moon-fill" aria-hidden="true" id="themeIcon"></i>
+              </button>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="/version">
                 <i class="bi bi-info-circle" aria-hidden="true"></i> API Info
