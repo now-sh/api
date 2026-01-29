@@ -6,12 +6,30 @@ This API provides a comprehensive set of endpoints organized into categories, wi
 
 ## Base URL
 
-- Development: `http://localhost:1919`
 - Production: `https://api.casjay.coffee`
+- Development: `http://localhost:2000`
 
 ## API Version
 
 All endpoints are prefixed with `/api/v1`
+
+## API Root Endpoint
+
+The `/api` endpoint returns comprehensive help with all available routes organized by category:
+
+```bash
+curl -q -LSsf https://api.casjay.coffee/api
+```
+
+Response includes:
+- **Tools**: Base64, Hash, UUID, JWT, QR Code, Color, Lorem, Password, Commit, Markdown, Cron, Regex, Diff, Dictionary
+- **Me**: Blog, Domains, Info
+- **Data**: Todos, Notes, URLs
+- **Fun**: Jokes, Facts, Trivia, Anime
+- **Social**: Blogs, GitHub, Reddit
+- **World**: Covid, Disease, Closings, Timezones, USA, NYS, ArcGIS
+- **Auth**: Login, Register, Profile
+- **Server**: Version, Health, Cache, Docs, Debug
 
 ## Response Formats
 
@@ -137,8 +155,10 @@ Data storage and retrieval endpoints.
 
 #### Blogs
 - `GET /api/v1/data/blogs` - Get all blog posts
-- `GET /api/v1/data/blogs/text` - Get blog posts (text)
-- `GET /api/v1/data/blogs/:id` - Get specific blog post
+- `GET /api/v1/data/blogs/list` - Get all blog posts (with full metadata)
+- `GET /api/v1/data/blogs/post/:slug` - Get single blog post with HTML content
+- `GET /api/v1/data/blogs/post/:slug/text` - Get blog post as plain text
+- `GET /api/v1/data/blogs/search?q=query` - Search blog posts
 - `GET /api/v1/data/blogs/help` - Get help information
 
 #### Todos (Authenticated)
@@ -223,7 +243,17 @@ User authentication and management.
 - `POST /api/v1/auth/refresh` - Refresh auth token
 - `GET /api/v1/auth` - Get help information
 
-### 9. Legacy Git Routes (`/api/v1/git`)
+### 9. Server (`/api/v1`)
+
+Server information and health endpoints.
+
+- `GET /api/v1/version` - Get server version and status information
+- `GET /api/healthz` - Health check endpoint (always returns 200, status in body)
+- `GET /api/v1/cache` - Cache management
+- `GET /api/v1/docs` - Swagger documentation
+- `GET /api/v1/debug` - Debug information (development only)
+
+### 10. Legacy Git Routes (`/api/v1/git`)
 
 Maintained for backward compatibility with casjay.coffee frontend.
 
@@ -255,7 +285,8 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 - `/data/domains` - Domain list (displays domains and subdomains in separate sections with copy functionality)
 - `/data/timezones` - World timezones
 - `/data/closings` - School closings
-- `/data/blogs` - Blog posts
+- `/data/blogs` - Blog posts list
+- `/data/blogs/:slug` - Single blog post (renders markdown as HTML)
 - `/personal/todos` - Todo manager (requires auth)
 - `/personal/notes` - Note manager (requires auth)
 - `/services/url` - URL shortener (requires auth)
@@ -263,7 +294,8 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 
 ### Frontend Features
 - Consistent layout with navigation menu
-- Dark theme (Bootswatch Darkly)
+- Dark/Light theme toggle with localStorage persistence
+- Dark theme default (Bootswatch Darkly)
 - Form-based interactions for all tools
 - Real-time results display
 - Copy-to-clipboard functionality with fallback
@@ -277,6 +309,7 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
   - `formatDate()` - Consistent date formatting
   - `showLoading()`, `showError()`, `showSuccess()` - State management
 - Page-specific JavaScript files:
+  - `theme.js` - Dark/light theme toggle with localStorage
   - `utility-forms-v2.js` - Handles utility form submissions
   - `data-forms.js` - Handles data viewing forms
   - `base64.js` - Base64 specific functionality
@@ -360,7 +393,7 @@ npm run dev
 ### Environment Variables
 See `.env.sample` for complete list. Key variables:
 
-- `PORT` - Server port (default: 1919)
+- `PORT` - Server port (default: 2000)
 - `HOSTNAME` - Server hostname (default: localhost)
 - `VERSION` - API version (default: 1.9.4)
 - `TIMEZONE` - Server timezone (default: America/New_York)
@@ -473,6 +506,37 @@ try {
 ```
 
 ## Recent Updates
+
+### January 2026 - Server Terminology and Theme Toggle
+
+1. **Server Terminology**:
+   - Changed "System" to "Server" throughout (we are a server, not a system/OS)
+   - Changed "Hostname" to "FQDN" (Fully Qualified Domain Name)
+   - Updated version page, API responses, and documentation
+
+2. **Dark/Light Theme Toggle**:
+   - Added theme toggle button in navbar (moon/sun icon)
+   - Persists preference in localStorage
+   - Respects system `prefers-color-scheme` preference
+   - Light theme CSS variables for all components
+   - No flash of wrong theme on page load
+
+3. **API Root Endpoint**:
+   - `/api` now returns comprehensive help with all available routes
+   - Routes organized by category: Tools, Me, Data, Fun, Social, World, Auth, Server
+   - Fixed route ordering so `/api` works before mainRoute catch-all
+
+4. **Health Endpoint**:
+   - Health endpoint always returns HTTP 200
+   - Health status (healthy/degraded) returned in response body
+   - Allows monitoring tools to parse status from body
+
+5. **Blog Posts Frontend**:
+   - `/data/blogs/:slug` now renders blog posts as HTML pages
+   - Markdown converted to HTML using `marked` library
+   - "Read Post" links to frontend instead of GitHub
+   - API endpoint `/api/v1/data/blogs/post/:slug` returns `contentHtml`
+   - Full blog post view with breadcrumbs, metadata, and styling
 
 ### December 2024 - Data Source Fixes and Frontend Enhancements
 
