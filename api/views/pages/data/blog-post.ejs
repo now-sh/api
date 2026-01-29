@@ -1,0 +1,282 @@
+<div class="hero fade-in">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/data/blogs">Blog Posts</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><%= typeof post !== 'undefined' && post ? post.title : 'Post' %></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <% if (typeof post !== 'undefined' && post) { %>
+            <article class="blog-post-full card">
+                <header class="blog-header">
+                    <h1 class="blog-title"><%= post.title %></h1>
+                    <div class="blog-meta">
+                        <span class="blog-date"><i class="bi bi-calendar3"></i> <%= post.dateFormatted || post.date %></span>
+                        <% if (post.dateRelative) { %>
+                            <span class="blog-relative text-muted">(<%= post.dateRelative %>)</span>
+                        <% } %>
+                        <% if (post.author) { %>
+                            <span class="blog-author"><i class="bi bi-person"></i> <%= post.author %></span>
+                        <% } %>
+                    </div>
+                    <% if (post.categories && post.categories !== 'null' && post.categories !== '[blog, ]') { %>
+                        <div class="blog-categories mt-2">
+                            <i class="bi bi-folder"></i>
+                            <span class="badge bg-secondary"><%= post.categories %></span>
+                        </div>
+                    <% } %>
+                    <% if (post.tags && post.tags !== 'null') { %>
+                        <div class="blog-tags mt-2">
+                            <i class="bi bi-tags"></i>
+                            <% const tags = Array.isArray(post.tags) ? post.tags : post.tags.split(','); %>
+                            <% tags.forEach(tag => { %>
+                                <span class="badge bg-info"><%= tag.trim() %></span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </header>
+
+                <hr class="my-4">
+
+                <div class="blog-content">
+                    <%- post.contentHtml || post.content %>
+                </div>
+
+                <hr class="my-4">
+
+                <footer class="blog-footer">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <a href="/data/blogs" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Posts
+                        </a>
+                        <div class="btn-group">
+                            <a href="<%= post.html_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                                <i class="bi bi-github"></i> View on GitHub
+                            </a>
+                            <a href="<%= post.download_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info">
+                                <i class="bi bi-file-text"></i> Raw Markdown
+                            </a>
+                        </div>
+                    </div>
+                </footer>
+            </article>
+
+            <!-- API Info -->
+            <div class="card mt-4">
+                <h5 class="card-title">API Access</h5>
+                <p class="text-muted">Access this post via the API:</p>
+                <div class="code-block">
+                    <pre>curl -q -LSsf <%= baseUrl %>/api/v1/data/blogs/post/<%= post.slug %></pre>
+                </div>
+            </div>
+        <% } else if (typeof error !== 'undefined' && error) { %>
+            <div class="card">
+                <div class="alert alert-danger mb-0">
+                    <h4><i class="bi bi-exclamation-triangle"></i> Post Not Found</h4>
+                    <p><%= error %></p>
+                    <a href="/data/blogs" class="btn btn-primary mt-3">
+                        <i class="bi bi-arrow-left"></i> Back to Posts
+                    </a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="card">
+                <div class="loading-state text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading blog post...</p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+.blog-post-full {
+    padding: 2.5rem;
+}
+
+.blog-post-full .blog-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.blog-post-full .blog-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.blog-post-full .blog-meta i {
+    margin-right: 0.5rem;
+    color: var(--cyan);
+}
+
+.blog-post-full .blog-categories,
+.blog-post-full .blog-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.blog-post-full .blog-categories i,
+.blog-post-full .blog-tags i {
+    color: var(--cyan);
+}
+
+.blog-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+    color: var(--purple);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.blog-content h1 { font-size: 2rem; }
+.blog-content h2 { font-size: 1.75rem; }
+.blog-content h3 { font-size: 1.5rem; }
+.blog-content h4 { font-size: 1.25rem; }
+
+.blog-content p {
+    margin-bottom: 1.5rem;
+}
+
+.blog-content a {
+    color: var(--cyan);
+    text-decoration: none;
+}
+
+.blog-content a:hover {
+    color: var(--purple);
+    text-decoration: underline;
+}
+
+.blog-content code {
+    background-color: var(--bg-secondary);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
+    color: var(--pink);
+}
+
+.blog-content pre {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+.blog-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--text-primary);
+}
+
+.blog-content blockquote {
+    border-left: 4px solid var(--purple);
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.blog-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: 1.5rem 0;
+}
+
+.blog-content ul,
+.blog-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.blog-content li {
+    margin-bottom: 0.5rem;
+}
+
+.blog-content table {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-collapse: collapse;
+}
+
+.blog-content th,
+.blog-content td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+.blog-content th {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+}
+
+.blog-content hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 2rem 0;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item a {
+    color: var(--cyan);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--purple);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .blog-post-full {
+        padding: 1.5rem;
+    }
+
+    .blog-post-full .blog-title {
+        font-size: 1.75rem;
+    }
+
+    .blog-post-full .blog-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .blog-content {
+        font-size: 1rem;
+    }
+}
+</style>
