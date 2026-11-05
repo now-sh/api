@@ -160,9 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Auto-convert color on page load
-    colorForm.dispatchEvent(new Event('submit'));
-
     // Color conversion form
     colorForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -221,6 +218,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('Error: ' + error.message);
         }
     });
+
+    colorForm.requestSubmit();
     
     // Palette generator form
     paletteForm.addEventListener('submit', async (e) => {

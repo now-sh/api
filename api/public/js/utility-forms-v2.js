@@ -23,7 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show error
     function showError(resultDiv, message) {
         const resultOutput = resultDiv.querySelector('.result-output');
-        resultOutput.innerHTML = `<div class="error">Error: ${message}</div>`;
+        const error = document.createElement('div');
+        error.className = 'error';
+        error.textContent = `Error: ${message}`;
+        resultOutput.replaceChildren(error);
         resultDiv.style.display = 'block';
     }
 
@@ -61,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle form submission
     async function handleFormSubmit(form, config) {
         const formData = new FormData(form);
-        const resultDiv = document.getElementById(form.id + '-result');
+        const resultDiv = document.getElementById(form.dataset.resultId || form.id + '-result');
         
         if (!resultDiv) {
             console.error('Result div not found for', form.id);
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Build request based on form type
-            const request = await buildRequest(form.id, formData, config);
+            const request = await buildRequest(form, formData, config);
             
             // Skip if form is handled elsewhere
             if (!request) return;
@@ -110,7 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Build request based on form type
-    async function buildRequest(formId, formData, config) {
+    async function buildRequest(form, formData, config) {
+        const formId = form.id;
         const data = Object.fromEntries(formData.entries());
         
         // Default to JSON POST
@@ -125,6 +129,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Special handling for different form types
         switch (formId) {
+            case 'batchForm':
+                url = '/api/v1/tools/uuid/generate';
+                options.body = JSON.stringify({
+                    count: Number(data.count),
+                    uppercase: data.uppercase === 'on'
+                });
+                break;
+
+            case 'validateForm':
+                url = '/api/v1/tools/uuid/validate';
+                options.body = JSON.stringify({ uuid: data.uuid });
+                break;
+
             case 'hashForm': {
                 const algorithm = data.algorithm || 'sha256';
                 url = `/api/v1/tools/hash/${algorithm}`;
@@ -208,6 +225,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Format response based on form type
     function formatResponse(formId, data) {
         switch (formId) {
+            case 'batchForm':
+                return Array.isArray(data.uuids) ? data.uuids.join('\n') : '';
+
+            case 'validateForm':
+                return data.valid ? 'Valid UUID' : 'Invalid UUID';
+
             case 'hashForm':
                 return `${data.algorithm.toUpperCase()}: ${data.hash}`;
                 
@@ -238,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Find all utility forms and attach handlers
-    const forms = document.querySelectorAll('form[id$="Form"]');
+    const forms = document.querySelectorAll('form[data-utility-form]');
     forms.forEach(form => {
         // Get endpoint from data attribute or derive from form
         const endpoint = form.dataset.endpoint || deriveEndpoint(form.id);

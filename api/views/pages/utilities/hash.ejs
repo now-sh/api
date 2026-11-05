@@ -93,9 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hash form
     const hashForm = document.getElementById('hashForm');
     if (hashForm) {
-        // Auto-generate hash on page load
-        hashForm.dispatchEvent(new Event('submit'));
-
         hashForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -149,6 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultOutput.innerHTML = `<div class="error">Error: ${error.message}</div>`;
             }
         });
+
+        hashForm.requestSubmit();
     }
     
     // Password check form

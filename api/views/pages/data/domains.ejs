@@ -43,7 +43,7 @@
     <div id="domainsList" class="domains-grid">
         <% if (typeof domainsData !== 'undefined' && domainsData && domainsData.domains) { %>
             <% domainsData.domains.forEach(domain => { %>
-                <div class="domain-item" onclick="copyDomain(this, '<%= domain %>')">
+                <div class="domain-item" data-domain="<%= domain %>" onclick="copyDomain(this, this.dataset.domain)">
                     <div class="domain-name"><%= domain %></div>
                     <div class="domain-status status-taken">Domain</div>
                     <div class="domain-details">Click to copy</div>
@@ -71,7 +71,7 @@
     <div id="subdomainsList" class="domains-grid">
         <% if (typeof domainsData !== 'undefined' && domainsData && filteredSubdomains.length > 0) { %>
             <% filteredSubdomains.forEach(subdomain => { %>
-                <div class="domain-item" onclick="copyDomain(this, '<%= subdomain %>')">
+                <div class="domain-item" data-domain="<%= subdomain %>" onclick="copyDomain(this, this.dataset.domain)">
                     <div class="domain-name"><%= subdomain %></div>
                     <div class="domain-status status-available">Subdomain</div>
                     <div class="domain-details">Click to copy</div>
@@ -331,4 +331,3 @@ function copyDomain(element, domain) {
     }
 }
 </script>
-

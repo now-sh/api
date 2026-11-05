@@ -126,9 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentQRData = null;
     let currentFormat = null;
 
-    // Auto-generate QR code on page load
-    form.dispatchEvent(new Event('submit'));
-
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -173,6 +170,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('Error: ' + error.message);
         }
     });
+
+    form.requestSubmit();
     
     function displayQRCode(data, format) {
         // Handle different API response field names
@@ -196,7 +195,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (format === 'ascii') {
             // Display ASCII art
             currentQRData = typeof data === 'string' ? data : qrData;
-            qrDisplay.innerHTML = `<pre class="qr-ascii">${currentQRData}</pre>`;
+            const pre = document.createElement('pre');
+            pre.className = 'qr-ascii';
+            pre.textContent = currentQRData;
+            qrDisplay.replaceChildren(pre);
             downloadBtn.style.display = 'none';
             copyBtn.onclick = () => copyToClipboard(currentQRData, 'ASCII QR code');
         }
@@ -245,7 +247,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showError(message) {
-        qrDisplay.innerHTML = `<div class="error">${message}</div>`;
+        const error = document.createElement('div');
+        error.className = 'error';
+        error.textContent = message;
+        qrDisplay.replaceChildren(error);
     }
 });
 
