@@ -155,9 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         lengthRange.value = this.value;
     });
     
-    // Auto-generate password on page load
-    form.dispatchEvent(new Event('submit'));
-
     // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -181,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         await generatePasswords(length, count, options);
     });
+
+    form.requestSubmit();
     
     async function generatePasswords(length, count, options) {
         passwordList.innerHTML = '<div class="loading">Generating passwords...</div>';
@@ -217,27 +216,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
-                passwordList.innerHTML = `<div class="error">Error: ${data.error || 'Failed to generate passwords'}</div>`;
+                showError(`Error: ${data.error || 'Failed to generate passwords'}`);
             }
         } catch (error) {
-            passwordList.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            showError(`Error: ${error.message}`);
         }
     }
     
     function displayPasswords(passwords) {
-        passwordList.innerHTML = passwords.map((password, index) => `
-            <div class="password-item">
-                <span class="password-text" onclick="selectPassword(this)">${password}</span>
-                <div class="password-actions">
-                    <button class="btn btn-sm copy-password" onclick="copyPassword('${password}', this)">
-                        <i class="bi bi-clipboard"></i> Copy
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="checkStrength('${password}')">
-                        <i class="bi bi-shield-check"></i> Check
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        passwordList.replaceChildren(...passwords.map(password => createPasswordItem(password)));
         
         // Check strength of first password
         if (passwords.length > 0) {
@@ -266,6 +253,39 @@ function selectPassword(element) {
     range.selectNodeContents(element);
     selection.removeAllRanges();
     selection.addRange(range);
+}
+
+function createPasswordItem(password, includeStrengthCheck = true) {
+    const item = document.createElement('div');
+    item.className = 'password-item';
+
+    const passwordText = document.createElement('span');
+    passwordText.className = 'password-text';
+    passwordText.textContent = password;
+    passwordText.addEventListener('click', () => selectPassword(passwordText));
+
+    const actions = document.createElement('div');
+    actions.className = 'password-actions';
+
+    const copyButton = document.createElement('button');
+    copyButton.type = 'button';
+    copyButton.className = 'btn btn-sm copy-password';
+    copyButton.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+    copyButton.addEventListener('click', () => copyPassword(password, copyButton));
+
+    actions.appendChild(copyButton);
+
+    if (includeStrengthCheck) {
+        const checkButton = document.createElement('button');
+        checkButton.type = 'button';
+        checkButton.className = 'btn btn-sm btn-secondary';
+        checkButton.innerHTML = '<i class="bi bi-shield-check"></i> Check';
+        checkButton.addEventListener('click', () => checkStrength(password));
+        actions.appendChild(checkButton);
+    }
+
+    item.append(passwordText, actions);
+    return item;
 }
 
 function copyPassword(password, button) {
@@ -329,7 +349,7 @@ function quickPassword(length, includeSymbols) {
     document.querySelector('[name="numbers"]').checked = true;
     document.querySelector('[name="symbols"]').checked = includeSymbols;
     document.getElementById('count').value = 1;
-    // Auto-generate will be triggered by the initial dispatch on line 162
+    document.getElementById('passwordForm').requestSubmit();
 }
 
 async function generatePassphrase() {
@@ -364,28 +384,23 @@ async function generatePassphrase() {
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join('-') + Math.floor(Math.random() * 100);
             
-            passwordList.innerHTML = `
-                <div class="password-item">
-                    <span class="password-text" onclick="selectPassword(this)">${passphrase}</span>
-                    <div class="password-actions">
-                        <button class="btn btn-sm copy-password" onclick="copyPassword('${passphrase}', this)">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                <p class="text-muted mt-2">Passphrase generated from random words</p>
-            `;
+            const description = document.createElement('p');
+            description.className = 'text-muted mt-2';
+            description.textContent = 'Passphrase generated from random words';
+            passwordList.replaceChildren(createPasswordItem(passphrase, false), description);
             
             document.getElementById('plural').style.display = 'none';
         }
     } catch (error) {
-        passwordList.innerHTML = `<div class="error">Error generating passphrase</div>`;
+        showError('Error generating passphrase');
     }
 }
 
 function showError(message) {
-    const passwordList = document.querySelector('.password-list');
-    passwordList.innerHTML = `<div class="error">${message}</div>`;
+    const error = document.createElement('div');
+    error.className = 'error';
+    error.textContent = message;
+    document.querySelector('.password-list').replaceChildren(error);
     document.getElementById('passwordResult').style.display = 'block';
 }
 </script>
