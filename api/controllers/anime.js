@@ -4,7 +4,7 @@ const { getJson } = require('../utils/httpClient');
 // External API sources
 const ANIME_APIS = [
   'https://katanime.vercel.app/api/getrandom',
-  'https://raw.githubusercontent.com/apimgr/anime-quotes/refs/heads/main/dataset.json'
+  'https://raw.githubusercontent.com/apimgr/anime/main/src/data/dataset.json'
   // Removed dead APIs:
   // - api.quotable.io (no anime tag support)
   // - animechan.vercel.app (dead)
@@ -33,7 +33,7 @@ function parseQuoteResponse(data, apiUrl) {
         anime: quote.anime
       };
     }
-  } else if (apiUrl.includes('apimgr/anime-quotes')) {
+  } else if (apiUrl.includes('apimgr/anime')) {
     // apimgr dataset is an array of quotes
     if (Array.isArray(data) && data.length > 0) {
       // Pick a random quote from the dataset
@@ -85,7 +85,7 @@ async function getRandomQuote() {
       const data = await fetchWithCache(api);
       
       // For the dataset API, pick a random quote
-      if (api.includes('apimgr/anime-quotes') && Array.isArray(data)) {
+      if (api.includes('apimgr/anime') && Array.isArray(data)) {
         const randomIndex = Math.floor(Math.random() * data.length);
         quote = {
           quote: data[randomIndex].quote,
@@ -120,5 +120,6 @@ async function getRandomQuote() {
 }
 
 module.exports = {
-  getRandomQuote
+  getRandomQuote,
+  parseQuoteResponse
 };

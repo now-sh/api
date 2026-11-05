@@ -1,13 +1,13 @@
 const { getJson } = require('../utils/httpClient');
 
-const arcgisurl = process.env.ARGIS_URL || '';
+const arcgisUrl = process.env.ARCGIS_URL || process.env.ARGIS_URL || '';
 
 async function arcgisData() {
-  if (!arcgisurl) {
-    throw new Error('ARGIS_URL not configured');
+  if (!arcgisUrl) {
+    throw new Error('ARCGIS_URL not configured');
   }
   
-  return await getJson(arcgisurl);
+  return await getJson(arcgisUrl);
 }
 
 module.exports = arcgisData;

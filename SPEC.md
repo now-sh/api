@@ -346,7 +346,7 @@ All personal data is fetched from GitHub repositories. **Important**: Frontend p
 - Resume PDF: `https://raw.githubusercontent.com/casjay/public/main/Resume-Tech.pdf`
 - Resume JSON: `https://raw.githubusercontent.com/casjay/public/main/resume.json`
 - Blogs: `https://api.github.com/repos/malaks-us/jason/contents/_posts` (196 markdown files)
-- Git Messages: `https://raw.githubusercontent.com/apimgr/gitmessages/main/src/data/messages.json`
+- Git Messages: `https://raw.githubusercontent.com/apimgr/gitmessages/main/src/messages/data/messages.json`
 - Timezones: `https://raw.githubusercontent.com/apimgr/timezones/main/src/data/timezones.json`
 - Countries: `https://raw.githubusercontent.com/apimgr/countries/main/countries.json`
 
@@ -548,7 +548,7 @@ try {
    - Documented in `/api/public/js/README.md`
 
 2. **Fixed Broken External Data URLs**:
-   - Updated Git Messages URL: `gitmessages/main/src/data/messages.json` (repo renamed from Commitmessages)
+   - Updated Git Messages URL to `gitmessages/main/src/messages/data/messages.json` after the data file moved
    - Fixed Timezone URL: Removed invalid `refs/heads/main` path segment
    - Fixed Countries URL: Updated to use correct raw.githubusercontent.com format
    - **Important**: Always use `raw.githubusercontent.com` format, NOT `github.com/repo/raw`

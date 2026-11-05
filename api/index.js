@@ -63,7 +63,7 @@ app.get('/version', (req, res) => {
 
     // External Data Sources (showing actual values/defaults used)
     DataSources: {
-      GitMessages: process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/gitmessages/main/src/data/messages.json',
+      GitMessages: process.env.GIT_MESSAGE_URL || 'https://raw.githubusercontent.com/apimgr/gitmessages/main/src/messages/data/messages.json',
       Timezones: process.env.TIMEZONE_URL || 'https://raw.githubusercontent.com/apimgr/timezones/main/src/data/timezones.json',
       Countries: process.env.COUNTRIES_URL || 'https://raw.githubusercontent.com/apimgr/countries/main/countries.json',
       Domains: process.env.DOMAINS_URL || 'https://raw.githubusercontent.com/casjay/public/main/domains.json',

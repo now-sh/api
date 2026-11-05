@@ -9,6 +9,7 @@
     "dev": "nodemon api/index.js",
     "deploy": "gitcommit deploy; vercel && vercel --prod",
     "commit": "gitcommit all",
+    "test": "node --test",
     "lint": "eslint --color api/"
   },
   "keywords": [

@@ -15,7 +15,7 @@ arcgisRoute.get(['/', '/help'], cors(), async (req, res) => {
         title: 'ArcGIS COVID-19 Data API',
         endpoint: `${host}/api/v1/arcgis`,
         description: 'Get COVID-19 data from ArcGIS Feature Server',
-        data_source: process.env.ARGIS_URL || 'ArcGIS Feature Server',
+        data_source: process.env.ARCGIS_URL || process.env.ARGIS_URL || 'ArcGIS Feature Server',
         cli_example: `curl ${host}/api/v1/arcgis`,
         bash_function: `arcgis_data() { curl -s "${host}/api/v1/arcgis" | jq '.arcgis.features[]'; }`
       };

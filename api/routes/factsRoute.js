@@ -41,7 +41,7 @@ factsRoute.get('/random', cors(), async (req, res) => {
       case 'any':
       default: {
         // Randomly pick a source
-        const sources = [getUselessFact, getCatFact, getDogFact, getNumberFact];
+        const sources = [getUselessFact, getCatFact, getDogFact];
         const randomSource = sources[Math.floor(Math.random() * sources.length)];
         fact = await randomSource();
         break;
@@ -212,37 +212,24 @@ async function getCatFact() {
 
 async function getDogFact() {
   try {
-    // Try dog-facts API
-    const response = await axios.get('https://dog-facts-api.herokuapp.com/api/v1/resources/dogs?number=1');
-    
-    if (response.data && response.data.length > 0) {
+    const response = await axios.get('https://dog-api.kinduff.com/api/facts');
+
+    if (response.data.facts && response.data.facts.length > 0) {
       return {
-        fact: response.data[0].fact,
-        source: 'dog-facts-api',
+        fact: response.data.facts[0],
+        source: 'dog-api.kinduff.com',
         type: 'dog'
       };
     }
-  } catch (error) {
-    // Fallback to dog API
-    try {
-      const response = await axios.get('https://dog-api.kinduff.com/api/facts');
-      
-      if (response.data.facts && response.data.facts.length > 0) {
-        return {
-          fact: response.data.facts[0],
-          source: 'dog-api.kinduff.com',
-          type: 'dog'
-        };
-      }
-    } catch (e) {
-      // If both fail, return a static dog fact
-      return {
-        fact: "Dogs have been human companions for over 15,000 years.",
-        source: 'static',
-        type: 'dog'
-      };
-    }
+  } catch {
+    // Use a local fallback when the remote source is unavailable.
   }
+
+  return {
+    fact: 'Dogs have been human companions for over 15,000 years.',
+    source: 'static',
+    type: 'dog'
+  };
 }
 
 async function getNumberFact(number = 'random') {
@@ -367,7 +354,7 @@ factsRoute.get('/help', cors(), (req, res) => {
     sources: {
       useless: 'uselessfacts.jsph.pl - Random useless facts',
       cats: 'catfact.ninja - Cat facts',
-      dogs: 'dog-facts-api - Dog facts',
+      dogs: 'dog-api.kinduff.com - Dog facts',
       numbers: 'numbersapi.com - Number, year, and date facts'
     },
     parameters: {
