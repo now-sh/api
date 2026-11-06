@@ -64,14 +64,16 @@ body {
   line-height: 1.6;
 }
 
-/* Hero section */
-.hero {
+/* Shared page heading */
+.hero,
+.page-header {
   text-align: center;
   padding: 2rem 0;
   margin-bottom: 3rem;
 }
 
-.hero h1 {
+.hero h1,
+.page-header .page-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -81,9 +83,22 @@ body {
   background-clip: text;
 }
 
-.hero .lead {
+.page-header .page-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hero .lead,
+.page-header .lead {
   font-size: 1.25rem;
   color: var(--text-secondary);
+}
+
+.page-header-extra {
+  margin-top: -1.5rem;
 }
 
 /* Cards */
@@ -388,7 +403,8 @@ select.form-control {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .hero h1 {
+  .hero h1,
+  .page-header .page-title {
     font-size: 2rem;
   }
   

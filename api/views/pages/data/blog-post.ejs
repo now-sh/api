@@ -1,19 +1,20 @@
-<div class="hero fade-in">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/data/blogs">Blog Posts</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><%= typeof post !== 'undefined' && post ? post.title : 'Post' %></li>
-        </ol>
-    </nav>
-</div>
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/data/blogs">Blog Posts</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><%= typeof post !== 'undefined' && post ? post.title : 'Post' %></li>
+    </ol>
+</nav>
+
+<% if (typeof post !== 'undefined' && post) { %>
+    <%- include('../../partials/page-header', { title: post.title }) %>
+<% } %>
 
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <% if (typeof post !== 'undefined' && post) { %>
             <article class="blog-post-full card">
                 <header class="blog-header">
-                    <h1 class="blog-title"><%= post.title %></h1>
                     <div class="blog-meta">
                         <span class="blog-date"><i class="bi bi-calendar3"></i> <%= post.dateFormatted || post.date %></span>
                         <% if (post.dateRelative) { %>

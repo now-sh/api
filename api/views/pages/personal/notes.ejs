@@ -1,7 +1,4 @@
-<div class="hero fade-in">
-    <h1>Notes Manager</h1>
-    <p class="lead">Create, edit, and organize your personal notes</p>
-</div>
+<%- include('../../partials/page-header', { title: "Notes Manager", description: "Create, edit, and organize your personal notes" }) %>
 
 <div class="grid grid-sidebar">
     <!-- Sidebar with notes list -->
@@ -319,4 +316,3 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString();
 }
 </script>
-

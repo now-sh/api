@@ -225,6 +225,12 @@ POST   /api/v1/auth/revoke  # Revoke token(s)
 
 ## Features
 
+### Web Frontend
+
+- Server-rendered with EJS through a shared layout.
+- Reusable navbar, footer, theme-toggle, and page-header partials keep page structure consistent.
+- Bootstrap 5 and the shared stylesheet provide responsive layouts and theme support.
+
 ### Todos API
 
 - **Public by default** (can be made private)

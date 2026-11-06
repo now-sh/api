@@ -1,0 +1,9 @@
+<header class="page-header hero fade-in">
+    <h1 class="page-title">
+        <% if (typeof icon !== 'undefined' && icon) { %><i class="<%= icon %>" aria-hidden="true"></i><% } %>
+        <%= title %>
+    </h1>
+    <% if (typeof description !== 'undefined' && description) { %>
+        <p class="lead"><%= description %></p>
+    <% } %>
+</header>

@@ -1,7 +1,4 @@
-<div class="hero fade-in">
-    <h1>Authentication Service</h1>
-    <p class="lead">Secure user authentication with JWT tokens</p>
-</div>
+<%- include('../../partials/page-header', { title: "Authentication Service", description: "Secure user authentication with JWT tokens" }) %>
 
 <div class="auth-container">
     <!-- Login Form -->
@@ -352,4 +349,3 @@ fetch('/api/v1/protected-endpoint', {
 </style>
 
 <%- locals.customScripts = '<script src="/js/auth.js"></script>' %>
-

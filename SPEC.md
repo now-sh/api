@@ -294,6 +294,8 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 
 ### Frontend Features
 - Consistent layout with navigation menu
+- EJS pages use the shared `layouts/main.ejs` shell and reusable navbar, footer, theme-toggle, and page-header partials
+- Page headings use the `partials/page-header.ejs` component for consistent title and description hierarchy
 - Dark/Light theme toggle with localStorage persistence
 - Dark theme default (Bootswatch Darkly)
 - Form-based interactions for all tools

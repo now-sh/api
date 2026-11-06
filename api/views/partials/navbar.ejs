@@ -1,138 +1,115 @@
-<nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="container">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <a href="/" class="navbar-logo" aria-label="Backend API Home">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                    <span>Backend API</span>
-                </a>
-                <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-                    <span class="hamburger"></span>
-                </button>
-            </div>
-            
-            <div class="navbar-menu" id="navbarMenu">
-                <div class="navbar-start">
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            Developer Tools
-                        </a>
-                        <div class="navbar-dropdown" aria-label="Developer Tools submenu">
-                            <a class="navbar-dropdown-item" href="/utilities/base64">Base64 Encoder/Decoder</a>
-                            <a class="navbar-dropdown-item" href="/utilities/hash">Hash Generator</a>
-                            <a class="navbar-dropdown-item" href="/utilities/uuid">UUID Generator</a>
-                            <a class="navbar-dropdown-item" href="/utilities/jwt">JWT Decoder</a>
-                            <a class="navbar-dropdown-item" href="/utilities/qr">QR Code Generator</a>
-                            <a class="navbar-dropdown-item" href="/utilities/color">Color Converter</a>
-                            <a class="navbar-dropdown-item" href="/utilities/lorem">Lorem Ipsum</a>
-                            <a class="navbar-dropdown-item" href="/utilities/passwd">Password Generator</a>
-                            <hr class="dropdown-divider">
-                            <a class="navbar-dropdown-item" href="/tools/markdown">Markdown Converter</a>
-                            <a class="navbar-dropdown-item" href="/tools/cron">Cron Parser</a>
-                            <a class="navbar-dropdown-item" href="/tools/regex">Regex Tester</a>
-                            <a class="navbar-dropdown-item" href="/tools/diff">Text Diff</a>
-                            <a class="navbar-dropdown-item" href="/tools/dictionary">Dictionary</a>
-                            <a class="navbar-dropdown-item" href="/tools/commit">Git Commit Messages</a>
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            My Data
-                        </a>
-                        <div class="navbar-dropdown" aria-label="My Data submenu">
-                            <a class="navbar-dropdown-item" href="/data/git">My GitHub Data</a>
-                            <a class="navbar-dropdown-item" href="/data/reddit">My Reddit Activity</a>
-                            <a class="navbar-dropdown-item" href="/data/blogs">My Blog Posts</a>
-                            <a class="navbar-dropdown-item" href="/data/domains">My Domains</a>
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            Personal Tools
-                        </a>
-                        <div class="navbar-dropdown" aria-label="Personal Tools submenu">
-                            <a class="navbar-dropdown-item" href="/personal/todos">Todo Manager</a>
-                            <a class="navbar-dropdown-item" href="/personal/notes">Note Manager</a>
-                            <a class="navbar-dropdown-item" href="/services/url">URL Shortener</a>
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            Fun
-                        </a>
-                        <div class="navbar-dropdown" aria-label="Fun submenu">
-                            <a class="navbar-dropdown-item" href="/fun/anime">Anime Quotes</a>
-                            <a class="navbar-dropdown-item" href="/fun/jokes">Jokes</a>
-                            <a class="navbar-dropdown-item" href="/fun/facts">Fun Facts</a>
-                            <a class="navbar-dropdown-item" href="/fun/trivia">Trivia Quiz</a>
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            World
-                        </a>
-                        <div class="navbar-dropdown" aria-label="World submenu">
-                            <a class="navbar-dropdown-item" href="/world/disease">Disease Tracker</a>
-                            <a class="navbar-dropdown-item" href="/world/usa">USA Information</a>
-                            <a class="navbar-dropdown-item" href="/world/nys">New York State</a>
-                            <a class="navbar-dropdown-item" href="/world/arcgis">ArcGIS Maps</a>
-                            <a class="navbar-dropdown-item" href="/world/closings">School Closings</a>
-                            <hr class="dropdown-divider">
-                            <a class="navbar-dropdown-item" href="/world/covid">COVID-19 Statistics</a>
-                            <a class="navbar-dropdown-item" href="/world/timezones">World Time Zones</a>
-                        </div>
-                    </div>
-                    
-                    <div class="navbar-item has-dropdown">
-                        <a class="navbar-link" href="#" aria-haspopup="true" aria-expanded="false">
-                            Social
-                        </a>
-                        <div class="navbar-dropdown" aria-label="Social submenu">
-                            <a class="navbar-dropdown-item" href="/social/blogs">Blog Explorer</a>
-                            <a class="navbar-dropdown-item" href="/social/github">GitHub Explorer</a>
-                            <a class="navbar-dropdown-item" href="/social/reddit">Reddit Browser</a>
-                        </div>
-                    </div>
-                    
-                    <a class="navbar-item" href="/auth">
-                        Account
-                    </a>
-                    
-                    <a class="navbar-item" href="/api/docs">
-                        API Docs
-                    </a>
-                </div>
-                
-                <div class="navbar-end">
-                    <a class="navbar-item" href="/api/health/healthz" aria-label="System Status">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                        </svg>
-                        <span class="navbar-text-mobile">Status</span>
-                    </a>
-                    <a class="navbar-item" href="https://github.com/now-sh/api" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-                        </svg>
-                        <span class="navbar-text-mobile">GitHub</span>
-                    </a>
-                    <button class="navbar-item theme-toggle" aria-label="Toggle theme">
-                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M12 17.5C9.5 17.5 7.5 15.5 7.5 13S9.5 8.5 12 8.5 16.5 10.5 16.5 13 14.5 17.5 12 17.5zM12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-                        </svg>
-                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display: none;">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                        </svg>
-                        <span class="navbar-text-mobile">Theme</span>
-                    </button>
-                </div>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top" aria-label="Main navigation">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-api" aria-hidden="true"></i> Backend API
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="bi bi-house" aria-hidden="true"></i> Home
+              </a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="myDataDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle" aria-hidden="true"></i> My Data
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="myDataDropdown">
+                <li><a class="dropdown-item" href="/data/git"><i class="bi bi-github" aria-hidden="true"></i> My GitHub Data</a></li>
+                <li><a class="dropdown-item" href="/data/reddit"><i class="bi bi-reddit" aria-hidden="true"></i> My Reddit Data</a></li>
+                <li><a class="dropdown-item" href="/data/domains"><i class="bi bi-globe" aria-hidden="true"></i> My Domains</a></li>
+                <li><a class="dropdown-item" href="/data/blogs"><i class="bi bi-journal-richtext" aria-hidden="true"></i> My Blog Posts</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="devToolsDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-code-slash" aria-hidden="true"></i> Developer Tools
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="devToolsDropdown">
+                <li><a class="dropdown-item" href="/utilities/base64"><i class="bi bi-code" aria-hidden="true"></i> Base64 Encoder/Decoder</a></li>
+                <li><a class="dropdown-item" href="/utilities/hash"><i class="bi bi-shield-lock" aria-hidden="true"></i> Hash Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/uuid"><i class="bi bi-dice-6" aria-hidden="true"></i> UUID Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/jwt"><i class="bi bi-key" aria-hidden="true"></i> JWT Decoder</a></li>
+                <li><a class="dropdown-item" href="/utilities/qr"><i class="bi bi-qr-code" aria-hidden="true"></i> QR Code Generator</a></li>
+                <li><a class="dropdown-item" href="/utilities/color"><i class="bi bi-palette" aria-hidden="true"></i> Color Converter</a></li>
+                <li><a class="dropdown-item" href="/utilities/lorem"><i class="bi bi-text-paragraph" aria-hidden="true"></i> Lorem Ipsum</a></li>
+                <li><a class="dropdown-item" href="/utilities/passwd"><i class="bi bi-shield-check" aria-hidden="true"></i> Password Generator</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/tools/commit"><i class="bi bi-git" aria-hidden="true"></i> Git Commit Messages</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="personalToolsDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tools" aria-hidden="true"></i> Personal Tools
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="personalToolsDropdown">
+                <li><a class="dropdown-item" href="/personal/todos"><i class="bi bi-check-square" aria-hidden="true"></i> Todo Manager</a></li>
+                <li><a class="dropdown-item" href="/personal/notes"><i class="bi bi-journal-text" aria-hidden="true"></i> Note Manager</a></li>
+                <li><a class="dropdown-item" href="/services/url"><i class="bi bi-link" aria-hidden="true"></i> URL Shortener</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="funDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-emoji-smile" aria-hidden="true"></i> Fun
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="funDropdown">
+                <li><a class="dropdown-item" href="/fun/jokes"><i class="bi bi-emoji-laughing" aria-hidden="true"></i> Joke Generator</a></li>
+                <li><a class="dropdown-item" href="/fun/anime"><i class="bi bi-chat-quote" aria-hidden="true"></i> Anime Quotes</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="informationDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-info-circle" aria-hidden="true"></i> Information
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="informationDropdown">
+                <li><h6 class="dropdown-header">Statistics & Data</h6></li>
+                <li><a class="dropdown-item" href="/data/covid"><i class="bi bi-virus" aria-hidden="true"></i> COVID-19 Statistics</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Local Information</h6></li>
+                <li><a class="dropdown-item" href="/data/closings"><i class="bi bi-building" aria-hidden="true"></i> School Closings</a></li>
+                <li><a class="dropdown-item" href="/data/timezones"><i class="bi bi-clock" aria-hidden="true"></i> World Time Zones</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/auth">
+                <i class="bi bi-person-lock" aria-hidden="true"></i> Account
+              </a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <%- include('theme-toggle') %>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/version">
+                <i class="bi bi-info-circle" aria-hidden="true"></i> API Info
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://github.com/now-sh/api" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-github" aria-hidden="true"></i> GitHub
+                <span class="visually-hidden">(opens in new tab)</span>
+              </a>
+            </li>
+          </ul>
         </div>
-    </div>
-</nav>
+      </div>
+    </nav>

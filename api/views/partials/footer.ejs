@@ -1,50 +1,52 @@
-<footer class="footer" role="contentinfo">
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4 id="footer-about">About</h4>
-                <p>Copyright 1999 - <%= new Date().getFullYear() %></p>
-                <p><a href="https://casjay.pro" target="_blank" rel="noopener noreferrer">Casjays Developments</a> and
-                   <a href="https://malaks-us.github.io/jason" target="_blank" rel="noopener noreferrer">Jason M. Hempstead-Malak</a></p>
-                <p>Hosting by <a href="https://casjay.pro/hosting" target="_blank" rel="noopener noreferrer">Casjays Developments: Hosting</a></p>
-                <p>Powered by <a href="https://casjaysdev.pro" target="_blank" rel="noopener noreferrer">CasjaysDev.pro</a></p>
-            </div>
-            
-            <div class="footer-section">
-                <h4 id="footer-support">Support</h4>
-                <nav aria-labelledby="footer-support">
-                    <ul>
-                        <li><a href="https://help.casjay.pro" target="_blank" rel="noopener noreferrer">Get Support</a></li>
-                        <li><a href="https://bugs.casjay.pro" target="_blank" rel="noopener noreferrer">Report Bugs</a></li>
-                        <li><a href="https://uptime.servicestat.us" target="_blank" rel="noopener noreferrer">System Status</a></li>
-                        <li><a href="https://services.servicestat.us" target="_blank" rel="noopener noreferrer">Service Status</a></li>
-                    </ul>
-                </nav>
-            </div>
-            
-            <div class="footer-section">
-                <h4 id="footer-legal">Legal</h4>
-                <nav aria-labelledby="footer-legal">
-                    <ul>
-                        <li><a href="https://casjaysdev.pro/policy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></li>
-                        <li><a href="https://casjaysdev.pro/domains.html" target="_blank" rel="noopener noreferrer">Our Domains</a></li>
-                    </ul>
-                </nav>
-                <div class="footer-social mt-3" aria-label="Support us">
-                    <a href="https://www.patreon.com/casjay" target="_blank" rel="noopener noreferrer" aria-label="Support on Patreon">
-                        <img src="/images/patreon.svg" alt="Patreon" width="80" height="20" loading="lazy">
-                    </a>
-                    <a href="https://www.paypal.me/casjaysdev" target="_blank" rel="noopener noreferrer" aria-label="Donate via PayPal">
-                        <img src="/images/paypal.svg" alt="PayPal" width="80" height="20" loading="lazy">
-                    </a>
-                </div>
-            </div>
+<footer class="footer bg-dark text-light py-5 mt-5">
+      <div class="container text-center">
+        <!-- Social Links -->
+        <div class="mb-4">
+          <a href="https://github.com/now-sh/api" target="_blank" rel="noopener noreferrer"
+             class="text-light text-decoration-none" aria-label="GitHub Profile">
+            <img alt="GitHub" src="/images/github.png" width="32" height="32" loading="lazy">
+          </a>
         </div>
-        
-        <div class="footer-bottom">
-            <p>Made with <span aria-label="love" class="text-purple">💜💜💜💜💜💜</span> by 
-               <a href="http://github.com/casjay" target="_blank" rel="noopener noreferrer">Jason M. Hempstead (Casjay)</a></p>
-            <p>This site is powered by an <a href="https://github.com/casjay-templates" target="_blank" rel="noopener noreferrer">open source</a> theme</p>
+
+        <!-- Copyright -->
+        <p class="mb-3">
+          Copyright 1999 - <%= new Date().getFullYear() %><br>
+          <a href="https://casjay.pro" target="_blank" rel="noopener noreferrer" class="text-info">Casjays Developments</a>
+          and
+          <a href="https://malaks-us.github.io/jason" target="_blank" rel="noopener noreferrer" class="text-info">Jason M. Hempstead-Malak</a>
+        </p>
+
+        <p class="mb-3">
+          Hosting by <a href="https://casjay.pro/hosting" target="_blank" rel="noopener noreferrer" class="text-info">Casjays Developments: Hosting</a><br>
+          Powered by <a href="https://casjaysdev.pro" target="_blank" rel="noopener noreferrer" class="text-info">CasjaysDev.pro</a>
+        </p>
+
+        <!-- Support Links -->
+        <div class="mb-4">
+          <a href="https://www.patreon.com/casjay" target="_blank" rel="noopener noreferrer" class="me-2">
+            <img src="/images/patreon.svg" alt="Support on Patreon" width="100" height="24" loading="lazy">
+          </a>
+          <a href="https://www.paypal.me/casjaysdev" target="_blank" rel="noopener noreferrer">
+            <img src="/images/paypal.svg" alt="Donate via PayPal" width="100" height="24" loading="lazy">
+          </a>
         </div>
-    </div>
-</footer>
+
+        <!-- Links -->
+        <nav aria-label="Footer navigation" class="mb-4">
+          <a href="https://help.casjay.pro" target="_blank" rel="noopener noreferrer" class="text-info">Support</a>
+          <span class="mx-2">|</span>
+          <a href="https://bugs.casjay.pro" target="_blank" rel="noopener noreferrer" class="text-info">Bugs</a>
+          <span class="mx-2">|</span>
+          <a href="https://uptime.servicestat.us" target="_blank" rel="noopener noreferrer" class="text-info">Status</a>
+        </nav>
+
+        <p class="small text-muted mb-3">
+          <a href="https://casjaysdev.pro/policy/" target="_blank" rel="noopener noreferrer" class="text-muted">Privacy Policy</a>
+        </p>
+
+        <p class="small text-muted">
+          Made with <span aria-label="love">💜</span> by
+          <a href="https://github.com/casjay" target="_blank" rel="noopener noreferrer" class="text-muted">Jason M. Hempstead (Casjay)</a>
+        </p>
+      </div>
+    </footer>
