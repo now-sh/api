@@ -333,18 +333,6 @@ app.get('/fun/jokes', (req, res) => res.render('pages/fun/jokes', { baseUrl: `${
 app.get('/fun/facts', (req, res) => res.render('pages/fun/facts', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 
-// Social pages  
-app.get('/social/reddit', (req, res) => {
-  const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
-  const host = req.get('host');
-  const isLocalHost = /^(localhost|127(?:\.\d{1,3}){3})(?::\d+)?$/i.test(host);
-  const protocol = forwardedProtocol === 'https' || !isLocalHost ? 'https' : req.protocol;
-  const baseUrl = `${protocol}://${host}`;
-  res.render('pages/social/reddit', { baseUrl });
-});
-app.get('/social/github', (req, res) => res.render('pages/social/github'));
-app.get('/social/blogs', (req, res) => res.render('pages/social/blogs'));
-
 // Tool pages
 app.get('/tools/markdown', (req, res) => res.render('pages/tools/markdown'));
 app.get('/tools/cron', (req, res) => res.render('pages/tools/cron'));

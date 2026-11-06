@@ -450,12 +450,16 @@ defaultRoute.get('/social/:platform', cors(), (req, res) => {
   try {
     const { platform } = req.params;
     const pageTitle = platform.charAt(0).toUpperCase() + platform.slice(1).replace('-', ' ');
+    const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
+    const host = req.get('host');
+    const isLocalHost = /^(localhost|127(?:\.\d{1,3}){3})(?::\d+)?$/i.test(host);
+    const protocol = forwardedProtocol === 'https' || !isLocalHost ? 'https' : req.protocol;
     
     res.render(`pages/social/${platform}`, {
       title: `${pageTitle} - Backend API`,
       description: `${pageTitle} social platform`,
       activePage: 'social',
-      baseUrl: `${req.protocol}://${req.get('host')}`
+      baseUrl: `${protocol}://${host}`
     });
   } catch (error) {
     res.status(404).json({
