@@ -207,7 +207,7 @@ POST   /api/v1/auth/revoke  # Revoke token(s)
 ### Social (`/api/v1/social/`)
 
 - **GitHub** integration (`/social/github`)
-- **Reddit** subreddit browsing, trending posts, and username lookup (`/social/reddit`)
+- **Reddit Explorer** username lookup, popular communities, sorted subreddit posts, and trending posts (`/social/reddit`)
 - **Blogs** (`/social/blogs`)
 
 ### Fun (`/api/v1/fun/`)

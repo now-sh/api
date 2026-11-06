@@ -334,7 +334,12 @@ app.get('/fun/facts', (req, res) => res.render('pages/fun/facts', { baseUrl: `${
 app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia', { baseUrl: `${req.protocol}://${req.get('host')}` }));
 
 // Social pages  
-app.get('/social/reddit', (req, res) => res.render('pages/social/reddit'));
+app.get('/social/reddit', (req, res) => {
+  const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
+  const protocol = forwardedProtocol === 'https' ? 'https' : req.protocol;
+  const baseUrl = `${protocol}://${req.get('host')}`;
+  res.render('pages/social/reddit', { baseUrl });
+});
 app.get('/social/github', (req, res) => res.render('pages/social/github'));
 app.get('/social/blogs', (req, res) => res.render('pages/social/blogs'));
 

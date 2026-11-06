@@ -280,6 +280,7 @@ The API includes a full frontend interface using EJS templating with Bootstrap 5
 - `/tools/commit` - Git commit message generator
 - `/data/git` - GitHub data viewer
 - `/data/reddit` - Reddit activity viewer
+- `/social/reddit` - Reddit Explorer with username lookup, popular communities, subreddit browsing, and trending posts
 - `/data/covid` - COVID-19 statistics
 - `/fun/anime` - Anime quotes
 - `/data/domains` - Domain list (displays domains and subdomains in separate sections with copy functionality)

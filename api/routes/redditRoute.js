@@ -110,7 +110,12 @@ redditRoute.get('/r/:id',
   async (req, res) => {
     try {
       const limit = parseInt(req.query.limit) || 25;
-      const data = await fetchRedditData(null, req.params.id, limit);
+      const sort = String(req.query.sort || 'hot').toLowerCase();
+      if (!['hot', 'new', 'top', 'rising'].includes(sort)) {
+        res.status(400).json({ error: 'Invalid sort order', allowed: ['hot', 'new', 'top', 'rising'] });
+        return;
+      }
+      const data = await fetchRedditData(null, req.params.id, limit, sort);
       
       if (data && data.data && data.data.children) {
         // Return the posts
@@ -150,7 +155,12 @@ redditRoute.get('/:id',
   validateRequest,
   async (req, res) => {
     try {
-      const data = await fetchRedditData(null, req.params.id, 25);
+      const sort = String(req.query.sort || 'hot').toLowerCase();
+      if (!['hot', 'new', 'top', 'rising'].includes(sort)) {
+        res.status(400).json({ error: 'Invalid sort order', allowed: ['hot', 'new', 'top', 'rising'] });
+        return;
+      }
+      const data = await fetchRedditData(null, req.params.id, 25, sort);
       
       if (data && data.data && data.data.children) {
         // Remove first 3 posts if we have enough

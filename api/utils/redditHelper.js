@@ -80,13 +80,13 @@ async function getOAuthToken() {
 /**
  * Try to fetch data using OAuth API
  */
-async function fetchWithOAuth(username, subreddit, limit) {
+async function fetchWithOAuth(username, subreddit, limit, sort = 'hot') {
   const token = await getOAuthToken();
   if (!token) return null;
 
   try {
     const url = subreddit
-      ? `${REDDIT_OAUTH_BASE}/r/${subreddit}/hot.json?limit=${limit}`
+      ? `${REDDIT_OAUTH_BASE}/r/${subreddit}/${sort}.json?limit=${limit}`
       : `${REDDIT_OAUTH_BASE}/user/${username}.json?limit=${limit}`;
 
     const response = await axios.get(url, {
@@ -114,13 +114,13 @@ async function fetchWithOAuth(username, subreddit, limit) {
 /**
  * Main function to fetch Reddit data
  */
-async function fetchRedditData(username, subreddit = null, limit = 25) {
-  console.log(`Fetching Reddit data - ${subreddit ? `subreddit: ${subreddit}` : `user: ${username}`}`);
+async function fetchRedditData(username, subreddit = null, limit = 25, sort = 'hot') {
+  console.log(`Fetching Reddit data - ${subreddit ? `subreddit: ${subreddit} (${sort})` : `user: ${username}`}`);
   
   // First try OAuth if configured
   const skipOAuth = process.env.REDDIT_SKIP_OAUTH === 'true';
   if (!skipOAuth && REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET) {
-    const oauthData = await fetchWithOAuth(username, subreddit, limit);
+    const oauthData = await fetchWithOAuth(username, subreddit, limit, sort);
     if (oauthData) {
       console.log('✅ Using Reddit OAuth API data');
       oauthData.source = 'oauth';
@@ -130,7 +130,7 @@ async function fetchRedditData(username, subreddit = null, limit = 25) {
 
   // Try direct JSON endpoints with old.reddit.com and reddit.com
   console.log('Trying direct JSON endpoints...');
-  const jsonResult = await tryDirectJSONEndpoints(username, subreddit, limit);
+  const jsonResult = await tryDirectJSONEndpoints(username, subreddit, limit, sort);
   if (jsonResult) {
     console.log('✅ Direct JSON endpoint successful');
     jsonResult.source = 'json';
@@ -140,7 +140,7 @@ async function fetchRedditData(username, subreddit = null, limit = 25) {
   // Fallback to RSS approach
   console.log('Using RSS fallback for Reddit data');
   try {
-    const result = await fetchViaRSSFeed(username, subreddit, limit);
+    const result = await fetchViaRSSFeed(username, subreddit, limit, sort);
     if (result && result.data && result.data.children && result.data.children.length > 0) {
       console.log(`✅ RSS fetch successful - got ${result.data.children.length} posts`);
       result.source = 'rss';
@@ -153,7 +153,7 @@ async function fetchRedditData(username, subreddit = null, limit = 25) {
   // Final fallback: Try multiple JSON approaches (likely to fail but worth trying)
   console.log('RSS failed, trying JSON fallback methods...');
   try {
-    const result = await fetchWithMultipleMethods(username, subreddit, limit);
+    const result = await fetchWithMultipleMethods(username, subreddit, limit, sort);
     result.source = 'fallback';
     return result;
   } catch (error) {
@@ -165,26 +165,27 @@ async function fetchRedditData(username, subreddit = null, limit = 25) {
 /**
  * Primary fallback method: Fetch via RSS/Atom feeds (works reliably)
  */
-async function fetchViaRSSFeed(username, subreddit, limit = 25) {
+async function fetchViaRSSFeed(username, subreddit, limit = 25, sort = 'hot') {
+  const sortPath = subreddit && sort !== 'hot' ? `/${sort}` : '';
   const endpoints = [
     // RSS endpoints (XML format)
     {
       url: subreddit 
-        ? `${REDDIT_BASE}/r/${subreddit}.rss?limit=${limit}`
+        ? `${REDDIT_BASE}/r/${subreddit}${sortPath}.rss?limit=${limit}`
         : `${REDDIT_BASE}/user/${username}.rss?limit=${limit}`,
       format: 'rss'
     },
     // Atom endpoints  
     {
       url: subreddit
-        ? `${REDDIT_BASE}/r/${subreddit}/.rss`
+        ? `${REDDIT_BASE}/r/${subreddit}${sortPath}/.rss`
         : `${REDDIT_BASE}/user/${username}/.rss`,
       format: 'atom'
     },
     // XML endpoints
     {
       url: subreddit
-        ? `${REDDIT_BASE}/r/${subreddit}.xml?limit=${limit}`
+        ? `${REDDIT_BASE}/r/${subreddit}${sortPath}.xml?limit=${limit}`
         : `${REDDIT_BASE}/user/${username}.xml?limit=${limit}`,
       format: 'xml'
     }
@@ -260,8 +261,8 @@ function parseRedditFeed(feedData, subreddit) {
                 permalink: linkUrl.replace('https://www.reddit.com', ''),
                 subreddit: subreddit || 'unknown',
                 created_utc: updated ? Math.floor(new Date(updated[1]).getTime() / 1000) : Date.now() / 1000,
-                score: 1, // RSS doesn't provide score
-                num_comments: 0, // RSS doesn't provide comment count
+                score: null,
+                num_comments: null,
                 is_self: linkUrl.includes('/comments/'),
                 selftext: content ? decodeHTMLEntities(content[1]).substring(0, 500) : ''
               }
@@ -304,8 +305,8 @@ function parseRedditFeed(feedData, subreddit) {
                 permalink: linkUrl.replace('https://www.reddit.com', ''),
                 subreddit: subreddit || 'unknown',
                 created_utc: pubDate ? Math.floor(new Date(pubDate[1]).getTime() / 1000) : Date.now() / 1000,
-                score: 1,
-                num_comments: 0,
+                score: null,
+                num_comments: null,
                 is_self: linkUrl.includes('/comments/'),
                 selftext: description ? decodeHTMLEntities(description[1]).substring(0, 500) : ''
               }
@@ -348,7 +349,7 @@ function decodeHTMLEntities(text) {
 /**
  * Try direct JSON endpoints with different Reddit domains and user agents
  */
-async function tryDirectJSONEndpoints(username, subreddit, limit) {
+async function tryDirectJSONEndpoints(username, subreddit, limit, sort = 'hot') {
   const domains = ['reddit.com', 'www.reddit.com', 'old.reddit.com'];
   
   // Try each domain with each user agent
@@ -356,7 +357,7 @@ async function tryDirectJSONEndpoints(username, subreddit, limit) {
     for (const userAgent of USER_AGENTS) {
       try {
         const url = subreddit
-          ? `https://${domain}/r/${subreddit}.json?limit=${limit}`
+          ? `https://${domain}/r/${subreddit}/${sort}.json?limit=${limit}`
           : `https://${domain}/user/${username}.json?limit=${limit}`;
         
         console.log(`[Reddit] Trying ${domain} with ${userAgent.substring(0, 30)}...`);
@@ -415,12 +416,12 @@ async function tryDirectJSONEndpoints(username, subreddit, limit) {
 /**
  * Fallback: Try multiple JSON methods (these typically fail due to blocking)
  */
-async function fetchWithMultipleMethods(username, subreddit, limit) {
+async function fetchWithMultipleMethods(username, subreddit, limit, sort = 'hot') {
   const methods = [
     // Method 1: node-fetch with browser headers
     async () => {
       const url = subreddit
-        ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
+        ? `${REDDIT_BASE}/r/${subreddit}/${sort}.json?limit=${limit}`
         : `${REDDIT_BASE}/user/${username}.json?limit=${limit}`;
       
       const response = await fetch(url, {
@@ -444,7 +445,7 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
     // Method 2: axios with minimal headers
     async () => {
       const url = subreddit
-        ? `${REDDIT_BASE}/r/${subreddit}.json?limit=${limit}`
+        ? `${REDDIT_BASE}/r/${subreddit}/${sort}.json?limit=${limit}`
         : `${REDDIT_BASE}/user/${username}.json?limit=${limit}`;
         
       const response = await axios.get(url, {
@@ -461,7 +462,7 @@ async function fetchWithMultipleMethods(username, subreddit, limit) {
     async () => {
       return new Promise((resolve, reject) => {
         const url = subreddit 
-          ? `/r/${subreddit}.json?limit=${limit}`
+          ? `/r/${subreddit}/${sort}.json?limit=${limit}`
           : `/user/${username}/about.json`;
           
         const options = {

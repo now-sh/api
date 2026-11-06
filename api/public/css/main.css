@@ -109,12 +109,7 @@ body {
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s ease;
 }
 
 .card-title {
@@ -477,8 +472,6 @@ select.form-control {
 
 /* Footer */
 .footer {
-  margin-top: 50px;
-  padding: 20px 0;
   color: var(--text-secondary);
 }
 
@@ -803,10 +796,6 @@ button:focus-visible,
 /* Light theme cards */
 [data-theme="light"] .card {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* Light theme dropdown */

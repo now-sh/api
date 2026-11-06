@@ -2,24 +2,54 @@
 
 <div class="row">
     <div class="col-lg-10 mx-auto">
-        <div class="card">
-            <h2 class="card-title">Subreddit Browser</h2>
-            <form id="subredditForm" class="api-form">
-                <div class="form-group">
-                    <label for="subreddit" class="form-label">Subreddit Name</label>
+        <section class="card reddit-section" aria-labelledby="userLookupTitle">
+            <h2 id="userLookupTitle" class="card-title">Look up a Reddit user</h2>
+            <p class="card-text">View a profile’s public account details and karma.</p>
+            <form id="userForm" class="row g-3 reddit-form">
+                <div class="col-md-8">
+                    <label for="redditUser" class="form-label">Username</label>
                     <div class="input-group">
-                        <span class="input-prefix">r/</span>
-                        <input 
-                            type="text" 
-                            id="subreddit" 
-                            class="form-control" 
-                            placeholder="javascript"
-                            required
-                        >
+                        <span class="input-prefix" aria-hidden="true">u/</span>
+                        <input type="text" id="redditUser" class="form-control" placeholder="spez" autocomplete="off" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="sortBy" class="form-label">Sort By</label>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-person-circle" aria-hidden="true"></i> Look up user
+                    </button>
+                </div>
+            </form>
+            <div id="userResult" class="result-container mt-4" style="display: none;" aria-live="polite"></div>
+        </section>
+
+        <section class="card reddit-section" aria-labelledby="popularTitle">
+            <h2 id="popularTitle" class="card-title">Popular communities</h2>
+            <p class="card-text">Choose a community to load its posts below.</p>
+            <div class="popular-grid">
+                <button type="button" class="popular-item" data-subreddit="programming"><i class="bi bi-code-slash" aria-hidden="true"></i><span>r/programming</span></button>
+                <button type="button" class="popular-item" data-subreddit="webdev"><i class="bi bi-globe" aria-hidden="true"></i><span>r/webdev</span></button>
+                <button type="button" class="popular-item" data-subreddit="javascript"><i class="bi bi-braces" aria-hidden="true"></i><span>r/javascript</span></button>
+                <button type="button" class="popular-item" data-subreddit="technology"><i class="bi bi-cpu" aria-hidden="true"></i><span>r/technology</span></button>
+                <button type="button" class="popular-item" data-subreddit="science"><i class="bi bi-lightning" aria-hidden="true"></i><span>r/science</span></button>
+                <button type="button" class="popular-item" data-subreddit="dataisbeautiful"><i class="bi bi-graph-up" aria-hidden="true"></i><span>r/dataisbeautiful</span></button>
+                <button type="button" class="popular-item" data-subreddit="gaming"><i class="bi bi-controller" aria-hidden="true"></i><span>r/gaming</span></button>
+                <button type="button" class="popular-item" data-subreddit="news"><i class="bi bi-newspaper" aria-hidden="true"></i><span>r/news</span></button>
+            </div>
+        </section>
+
+        <section id="subredditBrowser" class="card reddit-section" aria-labelledby="subredditBrowserTitle">
+            <h2 id="subredditBrowserTitle" class="card-title">Browse a subreddit</h2>
+            <p class="card-text">Enter a community name or choose one above, then select how to sort the posts.</p>
+            <form id="subredditForm" class="row g-3 reddit-form">
+                <div class="col-md-6">
+                    <label for="subreddit" class="form-label">Subreddit</label>
+                    <div class="input-group">
+                        <span class="input-prefix" aria-hidden="true">r/</span>
+                        <input type="text" id="subreddit" class="form-control" placeholder="javascript" autocomplete="off" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label">Sort posts</label>
                     <select id="sortBy" class="form-control">
                         <option value="hot">Hot</option>
                         <option value="new">New</option>
@@ -27,100 +57,35 @@
                         <option value="rising">Rising</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-reddit"></i> Browse Subreddit
-                </button>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-reddit" aria-hidden="true"></i> Browse posts
+                    </button>
+                </div>
             </form>
-            
-            <div id="subredditResult" class="result-container mt-4" style="display: none;"></div>
-        </div>
+            <div id="subredditResult" class="result-container mt-4" style="display: none;" aria-live="polite"></div>
+        </section>
 
-        <div class="card mt-4">
-            <h3 class="card-title">User Lookup</h3>
-            <form id="userForm" class="api-form">
-                <div class="form-group">
-                    <label for="redditUser" class="form-label">Reddit Username</label>
-                    <div class="input-group">
-                        <span class="input-prefix">u/</span>
-                        <input 
-                            type="text" 
-                            id="redditUser" 
-                            class="form-control" 
-                            placeholder="spez"
-                            required
-                        >
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-person-circle"></i> Lookup User
-                </button>
-            </form>
-            
-            <div id="userResult" class="result-container mt-4" style="display: none;"></div>
-        </div>
-
-        <div class="card mt-4">
-            <h3 class="card-title">Popular Subreddits</h3>
-            <div class="popular-grid">
-                <div class="popular-item" onclick="browseSubreddit('programming')">
-                    <i class="bi bi-code-slash"></i>
-                    <span>r/programming</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('webdev')">
-                    <i class="bi bi-globe"></i>
-                    <span>r/webdev</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('javascript')">
-                    <i class="bi bi-braces"></i>
-                    <span>r/javascript</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('technology')">
-                    <i class="bi bi-cpu"></i>
-                    <span>r/technology</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('science')">
-                    <i class="bi bi-lightning"></i>
-                    <span>r/science</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('dataisbeautiful')">
-                    <i class="bi bi-graph-up"></i>
-                    <span>r/dataisbeautiful</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('gaming')">
-                    <i class="bi bi-controller"></i>
-                    <span>r/gaming</span>
-                </div>
-                <div class="popular-item" onclick="browseSubreddit('news')">
-                    <i class="bi bi-newspaper"></i>
-                    <span>r/news</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mt-4">
-            <h3 class="card-title">Trending Posts</h3>
-            <div id="trendingPosts" class="trending-posts">
+        <section class="card reddit-section" aria-labelledby="trendingTitle">
+            <h2 id="trendingTitle" class="card-title">Trending posts</h2>
+            <div id="trendingPosts" class="trending-posts" aria-live="polite">
                 <div class="loading">Loading trending posts...</div>
             </div>
-        </div>
+        </section>
 
-        <div class="card mt-4">
-            <h3 class="card-title">API Usage</h3>
-            <div class="code-block">
-                <h4>Get subreddit posts:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/r/javascript</code></pre>
+        <details class="api-details">
+            <summary>API examples</summary>
+            <div class="api-details-content">
+                <div class="code-block">
+                    <h3>Get subreddit posts</h3>
+                    <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/r/javascript</code></pre>
+                </div>
+                <div class="code-block">
+                    <h3>Get user info</h3>
+                    <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/u/spez</code></pre>
+                </div>
             </div>
-            
-            <div class="code-block">
-                <h4>Get user info:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/u/spez</code></pre>
-            </div>
-            
-            <div class="code-block">
-                <h4>Search posts:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/search?q=web+development</code></pre>
-            </div>
-        </div>
+        </details>
     </div>
 </div>
 
@@ -128,31 +93,59 @@
 document.addEventListener('DOMContentLoaded', function() {
     const subredditForm = document.getElementById('subredditForm');
     const userForm = document.getElementById('userForm');
-    
+
+    document.querySelectorAll('.popular-item[data-subreddit]').forEach(button => {
+        button.addEventListener('click', () => browseSubreddit(button.dataset.subreddit));
+    });
+
     // Load trending posts
     loadTrendingPosts();
     
     subredditForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const subreddit = document.getElementById('subreddit').value.trim();
+        const subredditInput = document.getElementById('subreddit');
+        const subreddit = normalizeRedditName(subredditInput.value, 'r');
+        subredditInput.value = subreddit;
+        if (!subreddit) {
+            subredditInput.setCustomValidity('Enter a subreddit name.');
+            subredditInput.reportValidity();
+            return;
+        }
+        subredditInput.setCustomValidity('');
         const sortBy = document.getElementById('sortBy').value;
         await fetchSubreddit(subreddit, sortBy);
     });
     
     userForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const username = document.getElementById('redditUser').value.trim();
+        const usernameInput = document.getElementById('redditUser');
+        const username = normalizeRedditName(usernameInput.value, 'u');
+        usernameInput.value = username;
+        if (!username) {
+            usernameInput.setCustomValidity('Enter a Reddit username.');
+            usernameInput.reportValidity();
+            return;
+        }
+        usernameInput.setCustomValidity('');
         await fetchUser(username);
     });
 });
 
+function normalizeRedditName(value, prefix) {
+    const name = String(value || '').trim();
+    const prefixWithSlash = `${prefix}/`;
+    return name.toLowerCase().startsWith(prefixWithSlash) ? name.slice(prefixWithSlash.length) : name;
+}
+
 async function fetchSubreddit(subreddit, sort = 'hot') {
     const resultDiv = document.getElementById('subredditResult');
+    const form = document.getElementById('subredditForm');
+    setFormBusy(form, true);
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = '<div class="loading">Loading subreddit...</div>';
     
     try {
-        const response = await fetch(`/api/v1/social/reddit/r/${subreddit}?sort=${sort}`);
+        const response = await fetch(`/api/v1/social/reddit/r/${encodeURIComponent(subreddit)}?sort=${encodeURIComponent(sort)}`);
         const data = await response.json();
         
         if (response.ok) {
@@ -162,57 +155,12 @@ async function fetchSubreddit(subreddit, sort = 'hot') {
         }
     } catch (error) {
         resultDiv.innerHTML = '<div class="error">Failed to load subreddit posts</div>';
+    } finally {
+        setFormBusy(form, false);
     }
 }
 
-/* Removed mock functions
-function displayMockSubredditPosts(subreddit) {
-    const mockPosts = [
-        {
-            title: 'Welcome to r/' + subreddit + '!',
-            author: 'AutoModerator',
-            score: 1,
-            num_comments: 0,
-            created_utc: Date.now() / 1000,
-            permalink: '/r/' + subreddit + '/welcome',
-            is_self: true,
-            selftext: 'This is a sample post for demonstration purposes.'
-        },
-        {
-            title: 'Check out this amazing ' + subreddit + ' project!',
-            author: 'demo_user',
-            score: 42,
-            num_comments: 15,
-            created_utc: (Date.now() - 3600000) / 1000,
-            permalink: '/r/' + subreddit + '/amazing_project',
-            url: 'https://example.com',
-            is_self: false
-        },
-        {
-            title: 'Question about ' + subreddit,
-            author: 'curious_redditor',
-            score: 8,
-            num_comments: 23,
-            created_utc: (Date.now() - 7200000) / 1000,
-            permalink: '/r/' + subreddit + '/question',
-            is_self: true,
-            selftext: 'I have a question about this topic...'
-        }
-    ];
-    
-    displaySubredditPosts(subreddit, mockPosts);
-}
 
-function displayMockUserInfo(username) { // commented out
-    return;
-}
-
-function displayMockTrendingPosts() { // commented out
-    return;
-}
-*/
-
-// Real functions continue below
 
 function displaySubredditPosts(subreddit, posts) {
     const resultDiv = document.getElementById('subredditResult');
@@ -224,8 +172,8 @@ function displaySubredditPosts(subreddit, posts) {
     
     const html = `
         <div class="subreddit-header">
-            <h4>r/${subreddit}</h4>
-            <a href="https://reddit.com/r/${subreddit}" target="_blank" class="btn btn-sm btn-info">
+            <h3>r/${escapeRedditHtml(subreddit)}</h3>
+            <a href="https://reddit.com/r/${encodeURIComponent(subreddit)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-info">
                 <i class="bi bi-box-arrow-up-right"></i> View on Reddit
             </a>
         </div>
@@ -239,28 +187,40 @@ function displaySubredditPosts(subreddit, posts) {
 
 function createPostCard(post) {
     const timeAgo = formatTimeAgo(post.created_utc);
-    const postUrl = post.url || `https://reddit.com${post.permalink}`;
+    const permalink = post.permalink || '';
+    const fallbackPostUrl = permalink.startsWith('/') ? `https://www.reddit.com${permalink}` : 'https://www.reddit.com';
+    const postUrl = safeExternalUrl(post.url || fallbackPostUrl);
+    const commentsUrl = safeExternalUrl(permalink, 'https://www.reddit.com');
+    const title = escapeRedditHtml(post.title || 'Untitled post');
+    const author = escapeRedditHtml(post.author || 'unknown');
+    const subreddit = escapeRedditHtml(post.subreddit || '');
+    const postText = escapeRedditHtml(truncateText(String(post.selftext || ''), 200));
+    const score = post.score !== null && post.score !== undefined && Number.isFinite(Number(post.score))
+        ? formatNumber(Number(post.score))
+        : '—';
+    const comments = post.num_comments !== null && post.num_comments !== undefined && Number.isFinite(Number(post.num_comments))
+        ? `${formatNumber(Number(post.num_comments))} comments`
+        : 'Comments';
     
     return `
         <div class="post-card">
             <div class="post-votes">
                 <i class="bi bi-arrow-up"></i>
-                <span class="vote-count">${formatNumber(post.score)}</span>
-                <i class="bi bi-arrow-down"></i>
+                <span class="vote-count">${score}</span>
             </div>
             <div class="post-content">
                 <h5 class="post-title">
-                    <a href="${postUrl}" target="_blank">${post.title}</a>
+                    <a href="${escapeRedditHtml(postUrl)}" target="_blank" rel="noopener noreferrer">${title}</a>
                     ${post.is_self ? '' : '<i class="bi bi-box-arrow-up-right external-link"></i>'}
                 </h5>
-                ${post.selftext ? `<p class="post-text">${truncateText(post.selftext, 200)}</p>` : ''}
+                ${post.selftext ? `<p class="post-text">${postText}</p>` : ''}
                 <div class="post-meta">
-                    <span class="post-author">by u/${post.author || 'unknown'}</span>
-                    <span class="post-time">${timeAgo}</span>
-                    <a href="https://reddit.com${post.permalink}" target="_blank" class="post-comments">
-                        <i class="bi bi-chat-left-text"></i> ${post.num_comments} comments
+                    <span class="post-author">by u/${author}</span>
+                    <span class="post-time">${escapeRedditHtml(timeAgo)}</span>
+                    <a href="${escapeRedditHtml(commentsUrl)}" target="_blank" rel="noopener noreferrer" class="post-comments">
+                        <i class="bi bi-chat-left-text"></i> ${comments}
                     </a>
-                    ${post.subreddit ? `<span class="post-subreddit">r/${post.subreddit}</span>` : ''}
+                    ${subreddit ? `<span class="post-subreddit">r/${subreddit}</span>` : ''}
                 </div>
             </div>
         </div>
@@ -269,6 +229,8 @@ function createPostCard(post) {
 
 async function fetchUser(username) {
     const resultDiv = document.getElementById('userResult');
+    const form = document.getElementById('userForm');
+    setFormBusy(form, true);
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = '<div class="loading">Loading user data...</div>';
     
@@ -283,43 +245,22 @@ async function fetchUser(username) {
         }
     } catch (error) {
         resultDiv.innerHTML = '<div class="error">Failed to load user data</div>';
+    } finally {
+        setFormBusy(form, false);
     }
 }
 
-/* 
-function displayMockUserInfo(username) {
-    const mockUser = {
-        user: {
-            data: {
-                name: username,
-                created_utc: 1451606400,
-                link_karma: 12345,
-                comment_karma: 54321,
-                is_gold: true,
-                is_mod: true,
-                has_verified_email: true
-            }
-        },
-        posts: [
-            {
-                title: 'My latest project',
-                score: 156,
-                subreddit: 'programming',
-                created_utc: (Date.now() - 86400000) / 1000,
-                num_comments: 42,
-                permalink: '/r/programming/latest_project'
-            }
-        ]
-    };
-    
-    displayUserInfo(mockUser);
+function setFormBusy(form, isBusy) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = isBusy;
+    submitButton.setAttribute('aria-busy', String(isBusy));
 }
-*/
 
 function displayUserInfo(data, requestedUsername = '') {
     const resultDiv = document.getElementById('userResult');
     const user = data.user?.data || data.user || data.data || data;
     const username = user.name || user.display_name || requestedUsername || 'Unknown user';
+    const displayUsername = escapeRedditHtml(username);
     
     const accountAge = user.created_utc ? formatAccountAge(user.created_utc) : 'Unknown';
     const totalKarma = (user.link_karma || 0) + (user.comment_karma || 0);
@@ -331,7 +272,7 @@ function displayUserInfo(data, requestedUsername = '') {
                     <i class="bi bi-person-circle"></i>
                 </div>
                 <div class="user-info">
-                    <h4>u/${username}</h4>
+                    <h3>u/${displayUsername}</h3>
                     <div class="user-stats">
                         <span><i class="bi bi-award"></i> ${formatNumber(totalKarma)} karma</span>
                         <span><i class="bi bi-calendar3"></i> ${accountAge}</span>
@@ -382,42 +323,6 @@ async function loadTrendingPosts() {
     }
 }
 
-/*
-function displayMockTrendingPosts() {
-    const mockPosts = [
-        {
-            title: 'Amazing discovery in quantum computing',
-            author: 'science_enthusiast',
-            score: 15234,
-            num_comments: 892,
-            subreddit: 'science',
-            created_utc: (Date.now() - 3600000) / 1000,
-            permalink: '/r/science/quantum_discovery'
-        },
-        {
-            title: 'I built a weather station with Raspberry Pi',
-            author: 'diy_maker',
-            score: 8921,
-            num_comments: 234,
-            subreddit: 'raspberry_pi',
-            created_utc: (Date.now() - 7200000) / 1000,
-            permalink: '/r/raspberry_pi/weather_station'
-        },
-        {
-            title: 'New JavaScript framework announcement',
-            author: 'js_dev',
-            score: 5432,
-            num_comments: 456,
-            subreddit: 'javascript',
-            created_utc: (Date.now() - 14400000) / 1000,
-            permalink: '/r/javascript/new_framework'
-        }
-    ];
-    
-    displayTrendingPosts(mockPosts);
-}
-*/
-
 function displayTrendingPosts(posts) {
     const container = document.getElementById('trendingPosts');
     
@@ -432,11 +337,29 @@ function displayTrendingPosts(posts) {
 
 function browseSubreddit(subreddit) {
     document.getElementById('subreddit').value = subreddit;
-    document.getElementById('subredditForm').dispatchEvent(new Event('submit'));
+    document.getElementById('subredditBrowser').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('subredditForm').requestSubmit();
+}
+
+function escapeRedditHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = String(value ?? '');
+    return element.innerHTML;
+}
+
+function safeExternalUrl(value, fallback = 'https://www.reddit.com') {
+    try {
+        const url = new URL(value, 'https://www.reddit.com');
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : fallback;
+    } catch {
+        return fallback;
+    }
 }
 
 function formatTimeAgo(timestamp) {
-    const seconds = Math.floor(Date.now() / 1000 - timestamp);
+    const timestampValue = Number(timestamp);
+    if (!Number.isFinite(timestampValue) || timestampValue <= 0) return 'Unknown time';
+    const seconds = Math.max(0, Math.floor(Date.now() / 1000 - timestampValue));
     
     if (seconds < 60) return 'just now';
     if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
@@ -489,28 +412,52 @@ function truncateText(text, maxLength) {
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
+.reddit-form {
+    align-items: end;
+}
+
+.reddit-form .form-label {
+    margin-bottom: 0.5rem;
+}
+
+.reddit-section .card-title {
+    margin-bottom: 0.5rem;
+}
+
+.reddit-section .card-text {
+    margin-bottom: 1.25rem;
+}
+
 .popular-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
     gap: 1rem;
 }
 
 .popular-item {
+    width: 100%;
     background-color: var(--bg-secondary);
-    padding: 1.25rem;
+    padding: 1rem 1.25rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 0.75rem;
     cursor: pointer;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
     transition: all 0.2s ease;
 }
 
 .popular-item:hover {
     background-color: var(--bg-primary);
     border-color: var(--purple);
-    transform: translateY(-2px);
+}
+
+.popular-item:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 2px;
 }
 
 .popular-item i {
@@ -525,7 +472,7 @@ function truncateText(text, maxLength) {
     margin-bottom: 1.5rem;
 }
 
-.subreddit-header h4 {
+.subreddit-header h3 {
     color: var(--purple);
     margin: 0;
 }
@@ -556,19 +503,6 @@ function truncateText(text, maxLength) {
     gap: 0.25rem;
     color: var(--text-secondary);
     min-width: 50px;
-}
-
-.post-votes i {
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.post-votes i:first-child:hover {
-    color: var(--orange);
-}
-
-.post-votes i:last-child:hover {
-    color: var(--cyan);
 }
 
 .vote-count {
@@ -646,7 +580,7 @@ function truncateText(text, maxLength) {
     color: var(--purple);
 }
 
-.user-info h4 {
+.user-info h3 {
     color: var(--purple);
     margin-bottom: 0.5rem;
 }
@@ -690,8 +624,29 @@ function truncateText(text, maxLength) {
 }
 
 .trending-posts {
-    max-height: 600px;
-    overflow-y: auto;
+    min-width: 0;
+}
+
+.api-details {
+    margin: 0 0 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.api-details summary {
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.api-details summary:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+.api-details-content {
+    padding: 0 1.25rem 1rem;
 }
 
 .loading {
@@ -716,6 +671,7 @@ function truncateText(text, maxLength) {
 
     .post-card {
         flex-direction: column;
+        gap: 0.75rem;
     }
     
     .post-votes {
