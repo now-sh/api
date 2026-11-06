@@ -336,9 +336,10 @@ app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia', { baseUrl: `
 // Social pages  
 app.get('/social/reddit', (req, res) => {
   const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
-  const isVercel = process.env.VERCEL || process.env.NOW_REGION;
-  const protocol = isVercel || forwardedProtocol === 'https' ? 'https' : req.protocol;
-  const baseUrl = `${protocol}://${req.get('host')}`;
+  const host = req.get('host');
+  const isLocalHost = /^(localhost|127(?:\.\d{1,3}){3})(?::\d+)?$/i.test(host);
+  const protocol = forwardedProtocol === 'https' || !isLocalHost ? 'https' : req.protocol;
+  const baseUrl = `${protocol}://${host}`;
   res.render('pages/social/reddit', { baseUrl });
 });
 app.get('/social/github', (req, res) => res.render('pages/social/github'));
