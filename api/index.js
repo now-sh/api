@@ -336,7 +336,8 @@ app.get('/fun/trivia', (req, res) => res.render('pages/fun/trivia', { baseUrl: `
 // Social pages  
 app.get('/social/reddit', (req, res) => {
   const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
-  const protocol = process.env.VERCEL === '1' || forwardedProtocol === 'https' ? 'https' : req.protocol;
+  const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+  const protocol = isVercel || forwardedProtocol === 'https' ? 'https' : req.protocol;
   const baseUrl = `${protocol}://${req.get('host')}`;
   res.render('pages/social/reddit', { baseUrl });
 });
