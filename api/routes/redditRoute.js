@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const { param, validationResult } = require('express-validator');
-const { fetchRedditData } = require('../utils/redditHelper');
+const { fetchRedditData, fetchRedditUserProfile } = require('../utils/redditHelper');
 const { formatSuccess, formatError, sendJSON } = require('../controllers/responseFormatter');
 const { formatValidationErrors } = require('../utils/validationHelper');
 const { getCacheStats } = require('../utils/cache');
@@ -73,12 +73,13 @@ redditRoute.get('/u/:id',
   validateRequest,
   async (req, res) => {
     try {
-      const data = await fetchRedditData(req.params.id);
+      const data = await fetchRedditUserProfile(req.params.id);
       
       // Return legacy format for existing site compatibility
       if (data && data.data) {
         res.json({
           user: data.data,
+          source: data.source,
           message: "User info retrieved"
         });
       } else {

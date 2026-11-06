@@ -258,7 +258,7 @@ function createPostCard(post) {
                 </h5>
                 ${post.selftext ? `<p class="post-text">${truncateText(post.selftext, 200)}</p>` : ''}
                 <div class="post-meta">
-                    <span class="post-author">by u/${post.author}</span>
+                    <span class="post-author">by u/${post.author || 'unknown'}</span>
                     <span class="post-time">${timeAgo}</span>
                     <a href="https://reddit.com${post.permalink}" target="_blank" class="post-comments">
                         <i class="bi bi-chat-left-text"></i> ${post.num_comments} comments
@@ -276,11 +276,11 @@ async function fetchUser(username) {
     resultDiv.innerHTML = '<div class="loading">Loading user data...</div>';
     
     try {
-        const response = await fetch(`/api/v1/social/reddit/u/${username}`);
+        const response = await fetch(`/api/v1/social/reddit/u/${encodeURIComponent(username)}`);
         const data = await response.json();
         
         if (response.ok) {
-            displayUserInfo(data);
+            displayUserInfo(data, username);
         } else {
             resultDiv.innerHTML = '<div class="error">User not found</div>';
         }
@@ -319,9 +319,10 @@ function displayMockUserInfo(username) {
 }
 */
 
-function displayUserInfo(data) {
+function displayUserInfo(data, requestedUsername = '') {
     const resultDiv = document.getElementById('userResult');
-    const user = data.user?.data || data;
+    const user = data.user?.data || data.user || data.data || data;
+    const username = user.name || user.display_name || requestedUsername || 'Unknown user';
     
     const accountAge = user.created_utc ? formatAccountAge(user.created_utc) : 'Unknown';
     const totalKarma = (user.link_karma || 0) + (user.comment_karma || 0);
@@ -333,7 +334,7 @@ function displayUserInfo(data) {
                     <i class="bi bi-person-circle"></i>
                 </div>
                 <div class="user-info">
-                    <h4>u/${user.name}</h4>
+                    <h4>u/${username}</h4>
                     <div class="user-stats">
                         <span><i class="bi bi-award"></i> ${formatNumber(totalKarma)} karma</span>
                         <span><i class="bi bi-calendar3"></i> ${accountAge}</span>
@@ -348,7 +349,7 @@ function displayUserInfo(data) {
             </div>
             
             <div class="user-actions">
-                <a href="https://reddit.com/u/${user.name}" target="_blank" class="btn btn-primary">
+                <a href="https://reddit.com/u/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                     <i class="bi bi-reddit"></i> View on Reddit
                 </a>
             </div>
@@ -709,6 +710,13 @@ function truncateText(text, maxLength) {
 }
 
 @media (max-width: 768px) {
+    .subreddit-header,
+    .user-header,
+    .user-stats,
+    .karma-breakdown {
+        flex-wrap: wrap;
+    }
+
     .post-card {
         flex-direction: column;
     }
