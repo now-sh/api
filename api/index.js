@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const cors = require('cors');
+const { getPageApiExamples } = require('./utils/pageApiExamples');
 
 const app = express();
 
@@ -11,6 +12,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
+app.use((req, res, next) => {
+  const requestedHost = req.get('host') || '';
+  const host = /^[a-z0-9.-]+(?::\d+)?$/i.test(requestedHost) ? requestedHost : 'api.casjay.coffee';
+  const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase();
+  const isLocalHost = /^(localhost|127(?:\.\d{1,3}){3})(?::\d+)?$/i.test(host);
+  const protocol = forwardedProtocol === 'https' || !isLocalHost ? 'https' : req.protocol;
+
+  res.locals.apiBaseUrl = `${protocol}://${host}`;
+  res.locals.apiExamples = getPageApiExamples(req.path);
+  next();
+});
 
 const { connectToDatabase } = require('./db/connection');
 

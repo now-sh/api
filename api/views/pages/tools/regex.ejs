@@ -111,19 +111,7 @@ Date: 2024-01-15</textarea>
             </div>
         </div>
 
-        <div class="card mt-4">
-            <h3 class="card-title">API Usage</h3>
-            <div class="code-block">
-                <h4>Test regex pattern:</h4>
-                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/regex/test \
-  -H "Content-Type: application/json" \
-  -d '{
-    "pattern": "\\\\d{3}-\\\\d{3}-\\\\d{4}",
-    "text": "Call me at 555-123-4567",
-    "flags": "g"
-  }'</code></pre>
-            </div>
-        </div>
+
     </div>
 </div>
 

@@ -40,6 +40,7 @@
     <!-- Main Content -->
     <main id="main-content" class="container py-5">
       <%- body %>
+      <%- include('../partials/api-examples', { apiBaseUrl, apiExamples }) %>
     </main>
 
     <%- include('../partials/footer') %>

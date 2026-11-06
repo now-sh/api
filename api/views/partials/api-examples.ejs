@@ -1,0 +1,17 @@
+<% if (Array.isArray(apiExamples) && apiExamples.length) { %>
+  <section class="card page-api-examples mt-5" aria-labelledby="pageApiExamplesTitle">
+    <h2 id="pageApiExamplesTitle" class="card-title">API commands for this page</h2>
+    <p class="card-text">Run these examples from a terminal. Replace sample values and add your bearer token where required.</p>
+    <div class="page-api-examples-list">
+      <% apiExamples.forEach((example, index) => { %>
+        <div class="page-api-example">
+          <div class="page-api-example-heading">
+            <h3><%= example.label %></h3>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('#page-api-command-<%= index %>')">Copy command</button>
+          </div>
+          <pre><code id="page-api-command-<%= index %>"><% if (example.command) { %><%= example.command.replaceAll('{baseUrl}', apiBaseUrl) %><% } else { %>curl -q -LSsf<% if (example.method !== 'GET') { %> -X <%= example.method %><% } %><% if (example.body) { %> -H 'Content-Type: application/json' --data-raw '<%= example.body %>'<% } %><% if (example.token) { %> -H 'Authorization: Bearer YOUR_TOKEN'<% } %> '<%= apiBaseUrl %><%= example.path %>'<% } %></code></pre>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+<% } %>

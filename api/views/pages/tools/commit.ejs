@@ -30,30 +30,6 @@
     </div>
 </div>
 
-<div class="card mt-6">
-    <h3>CLI Usage</h3>
-    <p>You can use this API directly from your terminal:</p>
-    
-    <div class="code-block">
-        <h4>Get a random commit message:</h4>
-        <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/commit/text</code></pre>
-    </div>
-    
-    <div class="code-block">
-        <h4>Create a git alias:</h4>
-        <pre><code>git config --global alias.random-commit '!f() { git commit -m "$(curl -q -LSsf <%= baseUrl %>/api/v1/tools/commit/text)"; }; f'</code></pre>
-        <p class="text-secondary">Then use: <code>git random-commit</code></p>
-    </div>
-    
-    <div class="code-block">
-        <h4>Bash function:</h4>
-        <pre><code>commit_random() {
-    git commit -m "$(curl -q -LSsf <%= baseUrl %>/api/v1/tools/commit/text)" "$@"
-}</code></pre>
-        <p class="text-secondary">Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code></p>
-    </div>
-</div>
-
 <style>
 .message-display {
     position: relative;

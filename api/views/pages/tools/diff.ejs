@@ -93,22 +93,7 @@ A new line was added here.</textarea>
             </div>
         </div>
 
-        <div class="card mt-4">
-            <h3 class="card-title">API Usage</h3>
-            <div class="code-block">
-                <h4>Compare texts:</h4>
-                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/diff/lines \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text1": "Original text here",
-    "text2": "Modified text here",
-    "options": {
-      "ignoreCase": false,
-      "ignoreWhitespace": false
-    }
-  }'</code></pre>
-            </div>
-        </div>
+
     </div>
 </div>
 

@@ -73,19 +73,6 @@
             </div>
         </section>
 
-        <details class="api-details">
-            <summary>API examples</summary>
-            <div class="api-details-content">
-                <div class="code-block">
-                    <h3>Get subreddit posts</h3>
-                    <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/r/javascript</code></pre>
-                </div>
-                <div class="code-block">
-                    <h3>Get user info</h3>
-                    <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/social/reddit/u/spez</code></pre>
-                </div>
-            </div>
-        </details>
     </div>
 </div>
 
@@ -625,28 +612,6 @@ function truncateText(text, maxLength) {
 
 .trending-posts {
     min-width: 0;
-}
-
-.api-details {
-    margin: 0 0 2rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: var(--bg-primary);
-}
-
-.api-details summary {
-    padding: 1rem 1.25rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-
-.api-details summary:focus-visible {
-    outline: 3px solid var(--cyan);
-    outline-offset: 2px;
-}
-
-.api-details-content {
-    padding: 0 1.25rem 1rem;
 }
 
 .loading {

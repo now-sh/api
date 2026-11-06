@@ -49,23 +49,7 @@
             </div>
         </div>
 
-        <div class="card mt-4">
-            <h3 class="card-title">API Usage</h3>
-            <div class="code-block">
-                <h4>Look up a word:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/dictionary/define/serendipity</code></pre>
-            </div>
-            
-            <div class="code-block">
-                <h4>Get synonyms:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/dictionary/synonyms/happy</code></pre>
-            </div>
-            
-            <div class="code-block">
-                <h4>Get antonyms:</h4>
-                <pre><code>curl -q -LSsf <%= baseUrl %>/api/v1/tools/dictionary/antonyms/happy</code></pre>
-            </div>
-        </div>
+
     </div>
 </div>
 
@@ -98,11 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('wordExtras').innerHTML = '';
         
         try {
-            const response = await fetch(`/api/v1/tools/dictionary/define/${encodeURIComponent(word)}`);
+            const response = await fetch(`/api/v1/tools/dictionary/word/${encodeURIComponent(word)}`);
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                displayResults(word, data.data);
+            if (response.ok && (data.success || data.word)) {
+                displayResults(word, data.data || data);
                 addToRecent(word);
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {

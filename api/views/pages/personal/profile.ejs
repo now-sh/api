@@ -422,7 +422,7 @@ async function loadStats(token) {
 async function loadRecentUrls(token) {
     const container = document.getElementById('recentUrls');
     try {
-        const response = await fetch('/api/v1/services/url/list', {
+        const response = await fetch('/api/v1/data/urls/list', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 

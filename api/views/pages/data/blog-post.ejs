@@ -66,14 +66,6 @@
                 </footer>
             </article>
 
-            <!-- API Info -->
-            <div class="card mt-4">
-                <h5 class="card-title">API Access</h5>
-                <p class="text-muted">Access this post via the API:</p>
-                <div class="code-block">
-                    <pre>curl -q -LSsf <%= baseUrl %>/api/v1/data/blogs/post/<%= post.slug %></pre>
-                </div>
-            </div>
         <% } else if (typeof error !== 'undefined' && error) { %>
             <div class="card">
                 <div class="alert alert-danger mb-0">

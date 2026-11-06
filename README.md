@@ -229,6 +229,7 @@ POST   /api/v1/auth/revoke  # Revoke token(s)
 
 - Server-rendered with EJS through a shared layout.
 - Reusable navbar, footer, theme-toggle, and page-header partials keep page structure consistent.
+- Every frontend page lists its related API `curl -q -LSsf` commands above the footer, with copy buttons and request details.
 - Bootstrap 5 and the shared stylesheet provide responsive layouts and theme support.
 
 ### Todos API

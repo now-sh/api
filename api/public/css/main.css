@@ -802,3 +802,37 @@ button:focus-visible,
 [data-theme="light"] .dropdown-menu {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+.page-api-examples .card-text {
+  color: var(--text-secondary);
+}
+
+.page-api-example + .page-api-example {
+  margin-top: 1.25rem;
+}
+
+.page-api-example h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.page-api-example-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-api-example pre {
+  margin-bottom: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

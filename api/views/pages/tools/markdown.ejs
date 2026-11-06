@@ -76,30 +76,7 @@ This is a **bold** text and this is *italic*.
             </div>
         </div>
 
-        <div class="card mt-4">
-            <h3 class="card-title">API Usage</h3>
-            <div class="code-block">
-                <h4>Convert Markdown to HTML:</h4>
-                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/markdown/convert \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "# Hello World\n\nThis is **bold** text.",
-    "from": "markdown",
-    "to": "html"
-  }'</code></pre>
-            </div>
-            
-            <div class="code-block">
-                <h4>Convert HTML to Markdown:</h4>
-                <pre><code>curl -q -LSsf -X POST <%= baseUrl %>/api/v1/tools/markdown/convert \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "<h1>Hello World</h1><p>This is <strong>bold</strong> text.</p>",
-    "from": "html",
-    "to": "markdown"
-  }'</code></pre>
-            </div>
-        </div>
+
     </div>
 </div>
 
@@ -185,29 +162,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch('/api/v1/tools/markdown/convert', {
+            const markdownToHtml = currentDirection === 'markdown-to-html';
+            const response = await fetch(`/api/v1/tools/markdown/${markdownToHtml ? 'to-html' : 'to-markdown'}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    text: text,
-                    from: currentDirection === 'markdown-to-html' ? 'markdown' : 'html',
-                    to: currentDirection === 'markdown-to-html' ? 'html' : 'markdown',
-                    sanitize: document.getElementById('sanitizeHtml').checked,
-                    gfm: document.getElementById('gfm').checked
-                })
+                body: JSON.stringify(markdownToHtml
+                    ? { markdown: text, sanitize: document.getElementById('sanitizeHtml').checked }
+                    : { html: text })
             });
             
             const data = await response.json();
             
-            if (response.ok && data.success) {
-                outputText.value = data.data.converted;
+            const converted = markdownToHtml ? data.html : data.markdown;
+            if (response.ok && converted) {
+                outputText.value = converted;
                 copyBtn.disabled = false;
                 
                 // Update preview
                 if (currentDirection === 'markdown-to-html') {
-                    previewArea.innerHTML = data.data.converted;
+                    previewArea.innerHTML = converted;
                 } else {
                     // For HTML to Markdown, show the original HTML rendered
                     previewArea.innerHTML = text;
